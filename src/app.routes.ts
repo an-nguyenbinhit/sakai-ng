@@ -9,6 +9,10 @@ export const appRoutes: Routes = [
             {
                 path: '',
                 loadComponent: () => import('./app/pages/home/home').then((m) => m.Home)
+            },
+            {
+                path: 'file-compare',
+                loadComponent: () => import('./app/pages/file-compare/file-compare').then((m) => m.FileCompare)
             }
         ]
     },
