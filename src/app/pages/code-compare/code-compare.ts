@@ -1,8 +1,5 @@
 import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ButtonModule } from 'primeng/button';
-import { DividerModule } from 'primeng/divider';
-import { CardModule } from 'primeng/card';
 import { CodeCompareState } from './services/code-compare-state.service';
 import { CodeInput } from './components/code-input/code-input';
 import { DiffToolbar } from './components/diff-toolbar/diff-toolbar';
@@ -16,7 +13,6 @@ import { ExportPanel } from './components/export-panel/export-panel';
     standalone: true,
     imports: [
         CommonModule,
-        ButtonModule, DividerModule, CardModule,
         CodeInput, DiffToolbar, DiffSummary,
         DiffViewer, DiffMinimap, ExportPanel
     ],

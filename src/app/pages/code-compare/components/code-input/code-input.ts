@@ -1,4 +1,4 @@
-import { Component, input, signal, inject, ElementRef, viewChild } from '@angular/core';
+import { Component, input, signal, computed, inject, ElementRef, viewChild, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -34,25 +34,76 @@ export class CodeInput {
 
     fileInputRef = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
-    mode = signal<'drop' | 'paste'>('drop');
+    text = signal('');
+    fileName = signal<string | null>(null);
+    detectedLanguage = signal('plaintext');
     isDragOver = signal(false);
-    pasteText = signal('');
     isLoading = signal(false);
     errorMessage = signal<string | null>(null);
 
+    lineCount = computed(() => {
+        const t = this.text();
+        return t ? t.split('\n').length : 0;
+    });
+
     readonly supportedExtensions = SUPPORTED_EXTENSIONS.join(',');
 
-    currentFile() {
-        return this.side() === 'left' ? this.state.leftFile() : this.state.rightFile();
+    private debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    private skipNextSync = false;
+
+    constructor() {
+        // Sync FROM state → text (handles session restore, sample load, swap)
+        effect(() => {
+            const file = this.side() === 'left' ? this.state.leftFile() : this.state.rightFile();
+            const stateContent = file?.content ?? '';
+            if (untracked(() => this.text()) !== stateContent) {
+                this.skipNextSync = true;
+                this.text.set(stateContent);
+                this.fileName.set(file?.name ?? null);
+                this.detectedLanguage.set(file?.language ?? 'plaintext');
+            }
+        });
+
+        // Sync FROM text → state (debounced, user edits)
+        effect(() => {
+            const t = this.text();
+            if (this.skipNextSync) {
+                this.skipNextSync = false;
+                if (this.debounceTimer) {
+                    clearTimeout(this.debounceTimer);
+                    this.debounceTimer = null;
+                }
+                return;
+            }
+            if (this.debounceTimer) clearTimeout(this.debounceTimer);
+            this.debounceTimer = setTimeout(() => this.syncToState(t), 400);
+        });
     }
 
-    clearFile(): void {
-        this.state.clearFile(this.side());
+    private syncToState(text: string): void {
+        if (!text.trim()) {
+            this.state.clearFile(this.side());
+            return;
+        }
+        this.state.setFile(this.side(), {
+            name: this.fileName() ?? 'untitled',
+            content: text,
+            encoding: 'UTF-8',
+            language: this.detectedLanguage(),
+            size: text.length
+        });
+    }
+
+    clear(): void {
+        this.text.set('');
+        this.fileName.set(null);
+        this.detectedLanguage.set('plaintext');
         this.errorMessage.set(null);
+        this.state.clearFile(this.side());
     }
 
-    loadSample(): void {
-        this.state.loadSampleData();
+    triggerFileInput(): void {
+        this.fileInputRef()?.nativeElement.click();
     }
 
     onDragOver(event: DragEvent): void {
@@ -70,7 +121,6 @@ export class CodeInput {
         event.preventDefault();
         event.stopPropagation();
         this.isDragOver.set(false);
-
         const file = event.dataTransfer?.files?.[0];
         if (file) this.processFile(file);
     }
@@ -79,22 +129,7 @@ export class CodeInput {
         const input = event.target as HTMLInputElement;
         const file = input.files?.[0];
         if (file) this.processFile(file);
-        input.value = ''; // reset so same file can be re-selected
-    }
-
-    usePasteText(): void {
-        const text = this.pasteText();
-        if (!text) return;
-
-        const fileContent: FileContent = {
-            name: 'untitled',
-            content: text,
-            encoding: 'UTF-8',
-            language: 'plaintext',
-            size: text.length
-        };
-        this.state.setFile(this.side(), fileContent);
-        this.errorMessage.set(null);
+        input.value = '';
     }
 
     private processFile(file: File): void {
@@ -113,7 +148,6 @@ export class CodeInput {
 
         this.isLoading.set(true);
 
-        // First read as ArrayBuffer to detect encoding
         const arrayReader = new FileReader();
         arrayReader.onload = (e) => {
             const buffer = e.target?.result as ArrayBuffer;
@@ -124,7 +158,7 @@ export class CodeInput {
             this.isLoading.set(false);
             this.errorMessage.set('Failed to read file.');
         };
-        arrayReader.readAsArrayBuffer(file.slice(0, 4)); // Only need first few bytes for BOM
+        arrayReader.readAsArrayBuffer(file.slice(0, 4));
     }
 
     private readAsText(file: File, encoding: string): void {
@@ -133,20 +167,19 @@ export class CodeInput {
             this.isLoading.set(false);
             const content = e.target?.result as string;
 
-            // Check for binary content (null bytes)
             if (content.includes('\0')) {
                 this.errorMessage.set('Binary file detected. Only text files are supported.');
                 return;
             }
 
             const language = this.syntaxHighlight.detectLanguage(file.name);
-            const fileContent: FileContent = {
-                name: file.name,
-                content,
-                encoding,
-                language,
-                size: file.size
-            };
+            const fileContent: FileContent = { name: file.name, content, encoding, language, size: file.size };
+
+            // Immediately sync to state (no debounce) — skip the text→state effect
+            this.skipNextSync = true;
+            this.text.set(content);
+            this.fileName.set(file.name);
+            this.detectedLanguage.set(language);
             this.state.setFile(this.side(), fileContent);
             this.errorMessage.set(null);
         };
@@ -159,14 +192,9 @@ export class CodeInput {
 
     private detectEncoding(buffer: ArrayBuffer): string {
         const bytes = new Uint8Array(buffer);
-
-        // UTF-8 BOM: EF BB BF
         if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) return 'UTF-8';
-        // UTF-16 LE BOM: FF FE
         if (bytes[0] === 0xFF && bytes[1] === 0xFE) return 'UTF-16LE';
-        // UTF-16 BE BOM: FE FF
         if (bytes[0] === 0xFE && bytes[1] === 0xFF) return 'UTF-16BE';
-
         return 'UTF-8';
     }
 
