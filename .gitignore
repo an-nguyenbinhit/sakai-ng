@@ -44,3 +44,6 @@ Thumbs.db
 
 # Claude Code - ignore personal memory, keep commands (shared team skills)
 .claude/memory/
+
+# Playwright MCP screenshots (generated during dev sessions)
+.playwright-mcp/
