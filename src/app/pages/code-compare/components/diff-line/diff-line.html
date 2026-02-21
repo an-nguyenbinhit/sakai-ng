@@ -1,0 +1,40 @@
+<div
+    class="flex min-h-6 font-mono text-sm leading-6 select-text group"
+    [ngClass]="rowClass()"
+>
+    <!-- Line number gutter -->
+    <div
+        class="w-10 shrink-0 text-right pr-2 text-xs text-surface-400 dark:text-surface-500 select-none border-r border-surface-200 dark:border-surface-700 py-0.5"
+        [ngClass]="gutterClass()"
+    >
+        @if (line().type === 'fold') {
+            <span>···</span>
+        } @else {
+            {{ line().lineNumber ?? '' }}
+        }
+    </div>
+
+    <!-- Diff marker -->
+    <div class="w-5 shrink-0 text-center text-xs font-bold py-0.5 select-none" [ngClass]="markerClass()">
+        {{ marker() }}
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 px-2 py-0.5 overflow-x-auto">
+        @if (line().type === 'fold') {
+            <span class="text-surface-500 dark:text-surface-400 italic text-xs">
+                ... {{ line().foldedCount }} unchanged lines ...
+            </span>
+        } @else if (hasTokens()) {
+            <!-- Word/char diff tokens -->
+            @for (token of line().tokens; track $index) {
+                <span [ngClass]="tokenClass(token)">{{ token.text }}</span>
+            }
+        } @else if (line().highlightedHtml) {
+            <!-- Syntax highlighted or plain escaped HTML -->
+            <span [innerHTML]="highlightedContent()"></span>
+        } @else {
+            <span>&nbsp;</span>
+        }
+    </div>
+</div>

@@ -8,11 +8,7 @@ export const appRoutes: Routes = [
         children: [
             {
                 path: '',
-                loadComponent: () => import('./app/pages/home/home').then((m) => m.Home)
-            },
-            {
-                path: 'file-compare',
-                loadComponent: () => import('./app/pages/file-compare/file-compare').then((m) => m.FileCompare)
+                loadComponent: () => import('./app/pages/code-compare/code-compare').then((m) => m.CodeCompare)
             }
         ]
     },

@@ -1,0 +1,119 @@
+<div class="flex flex-col gap-3 h-full">
+    <!-- Panel header -->
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <span class="font-semibold text-surface-700 dark:text-surface-200">
+                {{ side() === 'left' ? 'Code A (Original)' : 'Code B (Modified)' }}
+            </span>
+            @if (state.leftFile() && side() === 'left' || state.rightFile() && side() === 'right') {
+                <p-tag [value]="currentFile()?.language ?? ''" severity="secondary" styleClass="text-xs" />
+                <p-tag [value]="currentFile()?.encoding ?? ''" severity="secondary" styleClass="text-xs" />
+            }
+        </div>
+        @if (currentFile()) {
+            <p-button
+                icon="pi pi-times"
+                severity="secondary"
+                [rounded]="true"
+                [text]="true"
+                size="small"
+                (onClick)="clearFile()"
+                pTooltip="Clear"
+            />
+        }
+    </div>
+
+    @if (currentFile()) {
+        <!-- File loaded state -->
+        <div class="flex items-center gap-2 p-3 rounded-border bg-surface-100 dark:bg-surface-800">
+            <i class="pi pi-file text-primary"></i>
+            <span class="text-sm font-medium truncate flex-1">{{ currentFile()?.name }}</span>
+            <span class="text-xs text-surface-400">{{ formatSize(currentFile()?.size ?? 0) }}</span>
+        </div>
+    } @else {
+        <!-- Mode toggle -->
+        <div class="flex gap-2">
+            <p-button
+                label="Upload"
+                icon="pi pi-upload"
+                [outlined]="mode() !== 'drop'"
+                size="small"
+                (onClick)="mode.set('drop')"
+            />
+            <p-button
+                label="Paste"
+                icon="pi pi-pencil"
+                [outlined]="mode() !== 'paste'"
+                size="small"
+                (onClick)="mode.set('paste')"
+            />
+            <p-button
+                label="Sample"
+                icon="pi pi-star"
+                [outlined]="true"
+                severity="secondary"
+                size="small"
+                (onClick)="loadSample()"
+                pTooltip="Load sample data for both panels"
+            />
+        </div>
+
+        @if (mode() === 'drop') {
+            <!-- Drop zone -->
+            <div
+                class="flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-border p-8 cursor-pointer transition-colors"
+                [class.border-primary]="isDragOver()"
+                [class.bg-primary-50]="isDragOver()"
+                [class.dark:bg-primary-950]="isDragOver()"
+                [class.border-surface-300]="!isDragOver()"
+                [class.dark:border-surface-600]="!isDragOver()"
+                [class.hover:border-primary]="!isDragOver()"
+                (click)="fileInputRef()!.nativeElement.click()"
+                (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave($event)"
+                (drop)="onDrop($event)"
+            >
+                <i class="pi pi-cloud-upload text-4xl text-surface-400"></i>
+                <div class="text-center">
+                    <p class="font-medium text-surface-600 dark:text-surface-300">Drop file here or click to browse</p>
+                    <p class="text-sm text-surface-400 mt-1">Max 10MB · Text files only</p>
+                </div>
+                <input
+                    #fileInput
+                    type="file"
+                    class="hidden"
+                    [accept]="supportedExtensions"
+                    (change)="onFileSelected($event)"
+                />
+            </div>
+        } @else {
+            <!-- Paste mode -->
+            <div class="flex flex-col gap-2 flex-1">
+                <textarea
+                    pTextarea
+                    [rows]="10"
+                    placeholder="Paste your code here..."
+                    [(ngModel)]="pasteText"
+                    class="font-mono text-sm w-full resize-none flex-1"
+                ></textarea>
+                <p-button
+                    label="Use this code"
+                    icon="pi pi-check"
+                    [disabled]="!pasteText()"
+                    (onClick)="usePasteText()"
+                />
+            </div>
+        }
+    }
+
+    @if (isLoading()) {
+        <div class="flex items-center gap-2 text-sm text-surface-500">
+            <i class="pi pi-spin pi-spinner"></i>
+            <span>Reading file...</span>
+        </div>
+    }
+
+    @if (errorMessage()) {
+        <p-message severity="error" [text]="errorMessage()!" styleClass="w-full" />
+    }
+</div>
