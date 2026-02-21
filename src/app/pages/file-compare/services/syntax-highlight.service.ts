@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
 
-declare const Prism: any;
-
 const EXTENSION_MAP: Record<string, string> = {
     '.ts': 'typescript',
     '.tsx': 'tsx',
@@ -114,7 +112,7 @@ export class SyntaxHighlight {
             };
 
             if (langMap[language]) {
-                await import(`prismjs/components/prism-${langMap[language]}`);
+                await import(/* @vite-ignore */ `prismjs/components/prism-${langMap[language]}`);
             }
             this.loadedLanguages.add(language);
         } catch {
