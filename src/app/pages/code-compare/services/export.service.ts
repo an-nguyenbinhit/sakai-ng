@@ -3,79 +3,150 @@ import { DiffResult, FileContent } from '../models/diff.models';
 
 @Injectable({ providedIn: 'root' })
 export class ExportService {
-    async copyUnifiedDiff(result: DiffResult, leftName: string, rightName: string): Promise<void> {
-        const text = this.buildUnifiedDiff(result, leftName, rightName);
-        await navigator.clipboard.writeText(text);
-    }
-
     exportHtml(result: DiffResult, leftFile: FileContent, rightFile: FileContent): void {
         const html = this.buildHtmlExport(result, leftFile, rightFile);
         this.downloadFile(`diff-${Date.now()}.html`, html, 'text/html;charset=utf-8');
     }
 
-    exportPatch(result: DiffResult, leftFile: FileContent, rightFile: FileContent): void {
-        const text = this.buildUnifiedDiff(result, leftFile.name, rightFile.name);
-        this.downloadFile(`${leftFile.name}.diff`, text, 'text/plain;charset=utf-8');
-    }
-
-    private buildUnifiedDiff(result: DiffResult, leftName: string, rightName: string): string {
-        const lines: string[] = [];
-        lines.push(`--- a/${leftName}`);
-        lines.push(`+++ b/${rightName}`);
-
-        let leftLine = 1;
-        let rightLine = 1;
+    exportImage(result: DiffResult, leftFile: FileContent, rightFile: FileContent): void {
+        const fontSize = 12;
+        const lineHeight = 18;
+        const numColWidth = 44;
+        const contentPadding = 6;
+        const headerHeight = 56;
+        const canvasWidth = 1200;
 
         const rows = result.sideBySideRows;
-        let i = 0;
+        const canvas = document.createElement('canvas');
+        canvas.width = canvasWidth;
+        canvas.height = headerHeight + rows.length * lineHeight + 4;
 
-        while (i < rows.length) {
-            if (rows[i].left.type === 'fold') {
-                const count = rows[i].left.foldedCount ?? 0;
-                leftLine += count;
-                rightLine += count;
-                i++;
-                continue;
+        const ctx = canvas.getContext('2d')!;
+        const halfWidth = (canvasWidth - numColWidth * 2) / 2;
+        const monoFont = `${fontSize}px "Courier New", Consolas, monospace`;
+        const uiFont = (size: number, bold = false) =>
+            `${bold ? 'bold ' : ''}${size}px system-ui, -apple-system, sans-serif`;
+
+        // White background
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Header: file names
+        ctx.fillStyle = '#f8f9fa';
+        ctx.fillRect(0, 0, canvasWidth, 36);
+        ctx.fillStyle = '#212529';
+        ctx.font = uiFont(13, true);
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'left';
+        ctx.fillText(`${leftFile.name}  ↔  ${rightFile.name}`, 12, 18);
+
+        // Stats row
+        ctx.fillStyle = '#fcfcfc';
+        ctx.fillRect(0, 36, canvasWidth, 20);
+        ctx.font = uiFont(11);
+        ctx.textBaseline = 'middle';
+
+        const drawBadge = (text: string, fg: string, bg: string, x: number): number => {
+            const w = ctx.measureText(text).width + 12;
+            ctx.fillStyle = bg;
+            ctx.fillRect(x, 40, w, 13);
+            ctx.fillStyle = fg;
+            ctx.fillText(text, x + 6, 47);
+            return x + w + 8;
+        };
+
+        let sx = 12;
+        sx = drawBadge(`+${result.totalAdded} added`, '#155724', '#d4edda', sx);
+        sx = drawBadge(`-${result.totalRemoved} removed`, '#721c24', '#f8d7da', sx);
+        sx = drawBadge(`~${result.totalModified} modified`, '#856404', '#fff3cd', sx);
+        drawBadge(`${result.similarityPercent}% similar`, '#444444', '#e9ecef', sx);
+
+        // Separator line
+        ctx.fillStyle = '#dee2e6';
+        ctx.fillRect(0, 55, canvasWidth, 1);
+
+        // Content rows
+        rows.forEach((row, i) => {
+            const y = headerHeight + i * lineHeight;
+
+            if (row.left.type === 'fold') {
+                ctx.fillStyle = '#e9ecef';
+                ctx.fillRect(0, y, canvasWidth, lineHeight);
+                ctx.fillStyle = '#868e96';
+                ctx.font = `italic ${fontSize - 1}px system-ui, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(
+                    `··· ${row.left.foldedCount ?? 0} unchanged lines ···`,
+                    canvasWidth / 2,
+                    y + lineHeight / 2
+                );
+                ctx.textAlign = 'left';
+                return;
             }
 
-            const hunkLines: string[] = [];
-            let leftStart = leftLine;
-            let rightStart = rightLine;
-            let leftCount = 0;
-            let rightCount = 0;
-
-            while (i < rows.length && rows[i].left.type !== 'fold') {
-                const row = rows[i];
-                const leftType = row.left.type;
-                const rightType = row.right.type;
-
-                if (leftType === 'removed' || leftType === 'modified') {
-                    hunkLines.push(`-${this.unescapeHtml(row.left.raw)}`);
-                    leftCount++;
-                    leftLine++;
+            const drawSide = (
+                lineNum: number | null,
+                raw: string,
+                type: string,
+                offsetX: number
+            ): void => {
+                // Line number column
+                ctx.fillStyle = '#f8f9fa';
+                ctx.fillRect(offsetX, y, numColWidth, lineHeight);
+                ctx.fillStyle = '#adb5bd';
+                ctx.font = monoFont;
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                if (lineNum != null) {
+                    ctx.fillText(String(lineNum), offsetX + numColWidth - 5, y + lineHeight / 2);
                 }
-                if (rightType === 'added' || rightType === 'modified') {
-                    hunkLines.push(`+${this.unescapeHtml(row.right.raw)}`);
-                    rightCount++;
-                    rightLine++;
-                }
-                if (leftType === 'unchanged') {
-                    hunkLines.push(` ${this.unescapeHtml(row.left.raw)}`);
-                    leftCount++;
-                    rightCount++;
-                    leftLine++;
-                    rightLine++;
-                }
-                i++;
-            }
 
-            if (hunkLines.length > 0) {
-                lines.push(`@@ -${leftStart},${leftCount} +${rightStart},${rightCount} @@`);
-                lines.push(...hunkLines);
-            }
-        }
+                // Content column
+                const bg = this.getBgColor(type);
+                ctx.fillStyle = bg === 'transparent' ? '#ffffff' : bg;
+                ctx.fillRect(offsetX + numColWidth, y, halfWidth, lineHeight);
+                ctx.fillStyle = '#212529';
+                ctx.textAlign = 'left';
+                ctx.font = monoFont;
+                const text = this.unescapeHtml(raw ?? '');
+                ctx.fillText(
+                    text,
+                    offsetX + numColWidth + contentPadding,
+                    y + lineHeight / 2,
+                    halfWidth - contentPadding * 2
+                );
+            };
 
-        return lines.join('\n') + '\n';
+            drawSide(row.left.lineNumber, row.left.raw, row.left.type, 0);
+            drawSide(
+                row.right.lineNumber,
+                row.right.raw,
+                row.right.type,
+                numColWidth + halfWidth
+            );
+
+            // Row separator
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fillRect(0, y + lineHeight - 1, canvasWidth, 1);
+
+            // Center divider
+            ctx.fillStyle = '#dee2e6';
+            ctx.fillRect(numColWidth + halfWidth - 1, y, 2, lineHeight);
+        });
+
+        canvas.toBlob(blob => {
+            if (!blob) return;
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `diff-${Date.now()}.png`;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }, 'image/png');
     }
 
     private buildHtmlExport(result: DiffResult, leftFile: FileContent, rightFile: FileContent): string {

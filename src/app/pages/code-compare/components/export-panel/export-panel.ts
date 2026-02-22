@@ -20,44 +20,9 @@ export class ExportPanel {
     private exportService = inject(ExportService);
     private messageService = inject(MessageService);
 
-    copyStatus = signal<'idle' | 'copying' | 'copied' | 'error'>('idle');
+    imageStatus = signal<'idle' | 'exporting' | 'done'>('idle');
 
-    copyLabel = computed(() => {
-        switch (this.copyStatus()) {
-            case 'copied': return 'Copied!';
-            case 'error': return 'Failed';
-            default: return 'Copy Diff';
-        }
-    });
-
-    async onCopy(): Promise<void> {
-        const result = this.state.diffResult();
-        const leftFile = this.state.leftFile();
-        const rightFile = this.state.rightFile();
-        if (!result || !leftFile || !rightFile) return;
-
-        this.copyStatus.set('copying');
-        try {
-            await this.exportService.copyUnifiedDiff(result, leftFile.name, rightFile.name);
-            this.copyStatus.set('copied');
-            this.messageService.add({
-                severity: 'success',
-                summary: 'Copied',
-                detail: 'Unified diff copied to clipboard',
-                life: 2000
-            });
-            setTimeout(() => this.copyStatus.set('idle'), 2000);
-        } catch {
-            this.copyStatus.set('error');
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Copy failed',
-                detail: 'Could not access clipboard',
-                life: 3000
-            });
-            setTimeout(() => this.copyStatus.set('idle'), 3000);
-        }
-    }
+    imageLabel = computed(() => (this.imageStatus() === 'done' ? 'Saved!' : 'Export Image'));
 
     onExportHtml(): void {
         const result = this.state.diffResult();
@@ -74,18 +39,31 @@ export class ExportPanel {
         });
     }
 
-    onExportPatch(): void {
+    onExportImage(): void {
         const result = this.state.diffResult();
         const leftFile = this.state.leftFile();
         const rightFile = this.state.rightFile();
         if (!result || !leftFile || !rightFile) return;
 
-        this.exportService.exportPatch(result, leftFile, rightFile);
-        this.messageService.add({
-            severity: 'success',
-            summary: 'Downloaded',
-            detail: '.diff patch file downloaded',
-            life: 2000
-        });
+        this.imageStatus.set('exporting');
+        try {
+            this.exportService.exportImage(result, leftFile, rightFile);
+            this.imageStatus.set('done');
+            this.messageService.add({
+                severity: 'success',
+                summary: 'Exported',
+                detail: 'Diff image downloaded as PNG',
+                life: 2000
+            });
+            setTimeout(() => this.imageStatus.set('idle'), 2000);
+        } catch {
+            this.imageStatus.set('idle');
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Export failed',
+                detail: 'Could not generate image',
+                life: 3000
+            });
+        }
     }
 }

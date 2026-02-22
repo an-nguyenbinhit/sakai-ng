@@ -4,19 +4,6 @@
     <span class="text-sm font-medium text-surface-600 dark:text-surface-300 mr-2">Export:</span>
 
     <p-button
-        icon="pi pi-copy"
-        [label]="copyLabel()"
-        severity="secondary"
-        [outlined]="true"
-        size="small"
-        (onClick)="onCopy()"
-        [loading]="copyStatus() === 'copying'"
-        pTooltip="Copy unified diff to clipboard"
-        tooltipPosition="top"
-        aria-label="Copy unified diff to clipboard"
-    />
-
-    <p-button
         icon="pi pi-file-export"
         label="Export HTML"
         severity="secondary"
@@ -29,14 +16,15 @@
     />
 
     <p-button
-        icon="pi pi-download"
-        label="Download .diff"
+        icon="pi pi-image"
+        [label]="imageLabel()"
         severity="secondary"
         [outlined]="true"
         size="small"
-        (onClick)="onExportPatch()"
-        pTooltip="Download unified diff patch file (.diff)"
+        (onClick)="onExportImage()"
+        [loading]="imageStatus() === 'exporting'"
+        pTooltip="Download diff as PNG image"
         tooltipPosition="top"
-        aria-label="Download .diff patch file"
+        aria-label="Export diff as PNG image"
     />
 </div>
