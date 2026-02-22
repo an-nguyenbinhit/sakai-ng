@@ -1,0 +1,40 @@
+<div class="flex h-full border border-surface-200 dark:border-surface-700 rounded-border overflow-hidden">
+    <!-- Left panel -->
+    <div class="flex-1 flex flex-col min-w-0 border-r border-surface-200 dark:border-surface-700">
+        <div class="px-3 py-1.5 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 text-xs font-medium text-surface-600 dark:text-surface-300 truncate">
+            {{ leftName() }}
+        </div>
+        <cdk-virtual-scroll-viewport
+            #leftViewport
+            [itemSize]="lineHeight"
+            class="flex-1 overflow-auto"
+            (scrolledIndexChange)="onLeftScroll($event)"
+        >
+            <p-diff-line
+                *cdkVirtualFor="let row of rows(); trackBy: trackRow"
+                [line]="row.left"
+                [searchQuery]="searchQuery()"
+                (click)="onFoldClick(row)"
+            />
+        </cdk-virtual-scroll-viewport>
+    </div>
+
+    <!-- Right panel -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <div class="px-3 py-1.5 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 text-xs font-medium text-surface-600 dark:text-surface-300 truncate">
+            {{ rightName() }}
+        </div>
+        <cdk-virtual-scroll-viewport
+            #rightViewport
+            [itemSize]="lineHeight"
+            class="flex-1 overflow-auto"
+        >
+            <p-diff-line
+                *cdkVirtualFor="let row of rows(); trackBy: trackRow"
+                [line]="row.right"
+                [searchQuery]="searchQuery()"
+                (click)="onFoldClick(row)"
+            />
+        </cdk-virtual-scroll-viewport>
+    </div>
+</div>

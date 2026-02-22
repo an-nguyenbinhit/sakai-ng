@@ -1,0 +1,90 @@
+<div class="flex flex-col gap-2">
+    <!-- Header -->
+    <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+            <span class="font-semibold text-sm text-surface-700 dark:text-surface-200 shrink-0">
+                {{ side() === 'left' ? 'Code A' : 'Code B' }}
+            </span>
+            @if (fileName()) {
+                <p-tag [value]="fileName()!" severity="secondary" styleClass="text-xs truncate max-w-36" />
+            }
+            @if (detectedLanguage() !== 'plaintext' && fileName()) {
+                <p-tag [value]="detectedLanguage()" severity="secondary" styleClass="text-xs" />
+            }
+        </div>
+        <div class="flex items-center gap-1">
+            <p-button
+                label="Attach file"
+                icon="pi pi-paperclip"
+                severity="secondary"
+                [outlined]="true"
+                size="small"
+                (onClick)="triggerFileInput()"
+            />
+            @if (text()) {
+                <p-button
+                    icon="pi pi-times"
+                    severity="secondary"
+                    [rounded]="true"
+                    [text]="true"
+                    size="small"
+                    (onClick)="clear()"
+                    pTooltip="Clear"
+                />
+            }
+        </div>
+    </div>
+
+    <!-- Textarea with drag-and-drop -->
+    <div
+        class="relative"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+    >
+        <textarea
+            pTextarea
+            [rows]="11"
+            [placeholder]="side() === 'left' ? 'Paste or type original code here...' : 'Paste or type modified code here...'"
+            [(ngModel)]="text"
+            class="font-mono text-sm w-full resize-y"
+            [class.!border-primary]="isDragOver()"
+        ></textarea>
+        @if (isDragOver()) {
+            <div class="absolute inset-0 flex items-center justify-center bg-primary-50/90 dark:bg-primary-950/90 pointer-events-none border-2 border-primary border-dashed rounded-border">
+                <div class="text-center">
+                    <i class="pi pi-cloud-upload text-2xl text-primary"></i>
+                    <p class="text-primary font-medium text-sm mt-1">Drop file here</p>
+                </div>
+            </div>
+        }
+        <input
+            #fileInput
+            type="file"
+            class="hidden"
+            [accept]="supportedExtensions"
+            (change)="onFileSelected($event)"
+        />
+    </div>
+
+    <!-- Status bar -->
+    <div class="flex items-center justify-between text-xs text-surface-400 px-0.5 min-h-4">
+        @if (errorMessage()) {
+            <p-message severity="error" [text]="errorMessage()!" styleClass="w-full" />
+        } @else {
+            <span>
+                @if (lineCount() > 0) {
+                    {{ lineCount() }} lines
+                } @else {
+                    Drag a file here, or paste / type code above
+                }
+            </span>
+            @if (isLoading()) {
+                <span class="flex items-center gap-1">
+                    <i class="pi pi-spin pi-spinner"></i>
+                    Reading file...
+                </span>
+            }
+        }
+    </div>
+</div>

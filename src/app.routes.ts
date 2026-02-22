@@ -8,7 +8,7 @@ export const appRoutes: Routes = [
         children: [
             {
                 path: '',
-                loadComponent: () => import('./app/pages/home/home').then((m) => m.Home)
+                loadComponent: () => import('./app/pages/code-compare/code-compare').then((m) => m.CodeCompare)
             }
         ]
     },
