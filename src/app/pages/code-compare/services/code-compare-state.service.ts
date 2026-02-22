@@ -68,13 +68,14 @@ export class CodeCompareState {
     viewMode = signal<ViewMode>('side-by-side');
     searchState = signal<SearchState>({ query: '', matchIndices: [], currentMatchIndex: 0 });
     scrollRatio = signal<number>(0);
+    expandedHunks = signal<Set<number>>(new Set());
 
     // Computed diff result
     diffResult = computed<DiffResult | null>(() => {
         const left = this.leftFile();
         const right = this.rightFile();
         if (!left || !right) return null;
-        return this.diffEngine.compute(left.content, right.content, this.options());
+        return this.diffEngine.compute(left.content, right.content, this.options(), this.expandedHunks());
     });
 
     constructor() {
@@ -97,6 +98,7 @@ export class CodeCompareState {
         } else {
             this.rightFile.set(file);
         }
+        this.expandedHunks.set(new Set());
     }
 
     clearFile(side: 'left' | 'right'): void {
@@ -105,12 +107,22 @@ export class CodeCompareState {
         } else {
             this.rightFile.set(null);
         }
+        this.expandedHunks.set(new Set());
     }
 
     clearAll(): void {
         this.leftFile.set(null);
         this.rightFile.set(null);
         this.searchState.set({ query: '', matchIndices: [], currentMatchIndex: 0 });
+        this.expandedHunks.set(new Set());
+    }
+
+    expandFold(hunkIndex: number): void {
+        this.expandedHunks.update(set => {
+            const next = new Set(set);
+            next.add(hunkIndex);
+            return next;
+        });
     }
 
     swapFiles(): void {

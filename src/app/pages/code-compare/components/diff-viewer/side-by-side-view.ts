@@ -61,8 +61,11 @@ export class SideBySideView implements AfterViewInit, OnDestroy {
         this.syncing = false;
     }
 
-    onFoldClick(_row: SideBySideRow): void {
-        // Expand fold: no-op for now (fold expansion handled in state)
+    onFoldClick(row: SideBySideRow): void {
+        const hunkIndex = row.left.hunkIndex ?? row.right.hunkIndex;
+        if (hunkIndex !== undefined) {
+            this.state.expandFold(hunkIndex);
+        }
     }
 
     trackRow(index: number, row: SideBySideRow): number {

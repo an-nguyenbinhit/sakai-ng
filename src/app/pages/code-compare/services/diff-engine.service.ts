@@ -12,7 +12,7 @@ interface PairedLine {
 
 @Injectable({ providedIn: 'root' })
 export class DiffEngine {
-    compute(leftContent: string, rightContent: string, opts: DiffOptions): DiffResult {
+    compute(leftContent: string, rightContent: string, opts: DiffOptions, expandedHunks: Set<number> = new Set()): DiffResult {
         const leftNorm = this.applyIgnoreOptions(leftContent, opts);
         const rightNorm = this.applyIgnoreOptions(rightContent, opts);
 
@@ -21,7 +21,7 @@ export class DiffEngine {
         });
 
         const paired = this.pairLines(changes);
-        const hunks = this.buildHunks(paired, opts.contextLines);
+        const hunks = this.buildHunks(paired, opts.contextLines, expandedHunks);
 
         const flatLeft: DiffLine[] = [];
         const flatRight: DiffLine[] = [];
@@ -234,7 +234,7 @@ export class DiffEngine {
         return result;
     }
 
-    private buildHunks(paired: PairedLine[], contextLines: number): PairedLine[][] {
+    private buildHunks(paired: PairedLine[], contextLines: number, expandedHunks: Set<number>): PairedLine[][] {
         // Find indices of non-unchanged lines
         const changedIndices = new Set<number>();
         paired.forEach((row, idx) => {
@@ -263,17 +263,23 @@ export class DiffEngine {
                         result.push(currentHunk);
                         currentHunk = [];
                     }
-                    // Add fold placeholder
-                    const foldPlaceholder: any = {
-                        type: 'fold',
-                        leftText: null,
-                        rightText: null,
-                        leftLineNum: null,
-                        rightLineNum: null,
-                        foldedCount: foldCount,
-                        hunkIndex: hunkIndex++
-                    };
-                    result.push([foldPlaceholder]);
+                    if (expandedHunks.has(hunkIndex)) {
+                        // Expand: push actual unchanged lines
+                        result.push(paired.slice(i, j));
+                    } else {
+                        // Fold: add placeholder
+                        const foldPlaceholder: any = {
+                            type: 'fold',
+                            leftText: null,
+                            rightText: null,
+                            leftLineNum: null,
+                            rightLineNum: null,
+                            foldedCount: foldCount,
+                            hunkIndex: hunkIndex
+                        };
+                        result.push([foldPlaceholder]);
+                    }
+                    hunkIndex++;
                     i = j - 1;
                 }
             }

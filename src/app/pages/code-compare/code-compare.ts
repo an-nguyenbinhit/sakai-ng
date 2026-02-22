@@ -1,5 +1,6 @@
 import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TooltipModule } from 'primeng/tooltip';
 import { CodeCompareState } from './services/code-compare-state.service';
 import { CodeInput } from './components/code-input/code-input';
 import { DiffToolbar } from './components/diff-toolbar/diff-toolbar';
@@ -12,7 +13,7 @@ import { ExportPanel } from './components/export-panel/export-panel';
     selector: 'p-code-compare',
     standalone: true,
     imports: [
-        CommonModule,
+        CommonModule, TooltipModule,
         CodeInput, DiffToolbar, DiffSummary,
         DiffViewer, DiffMinimap, ExportPanel
     ],

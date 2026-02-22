@@ -72,13 +72,7 @@
         @if (errorMessage()) {
             <p-message severity="error" [text]="errorMessage()!" styleClass="w-full" />
         } @else {
-            <span>
-                @if (lineCount() > 0) {
-                    {{ lineCount() }} lines
-                } @else {
-                    Drag a file here, or paste / type code above
-                }
-            </span>
+            <span>{{ lineCount() > 0 ? lineCount() + ' lines' : '' }}</span>
             @if (isLoading()) {
                 <span class="flex items-center gap-1">
                     <i class="pi pi-spin pi-spinner"></i>
