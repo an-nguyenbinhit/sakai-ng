@@ -7,15 +7,13 @@ import { DiffToolbar } from './components/diff-toolbar/diff-toolbar';
 import { DiffSummary } from './components/diff-summary/diff-summary';
 import { DiffViewer } from './components/diff-viewer/diff-viewer';
 import { DiffMinimap } from './components/diff-minimap/diff-minimap';
-import { ExportPanel } from './components/export-panel/export-panel';
-
 @Component({
     selector: 'p-code-compare',
     standalone: true,
     imports: [
         CommonModule, TooltipModule,
         CodeInput, DiffToolbar, DiffSummary,
-        DiffViewer, DiffMinimap, ExportPanel
+        DiffViewer, DiffMinimap
     ],
     templateUrl: './code-compare.html',
     styleUrl: './code-compare.scss'
