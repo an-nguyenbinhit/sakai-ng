@@ -103,17 +103,7 @@ export class DiffToolbar {
         this.messageService.add({ severity: 'success', summary: 'Exported', detail: 'HTML diff file downloaded', life: 2000 });
     }
 
-    onExportPdf(): void {
-        const result = this.state.diffResult();
-        const leftFile = this.state.leftFile();
-        const rightFile = this.state.rightFile();
-        if (!result || !leftFile || !rightFile) return;
-
-        this.exportService.exportPdf(result, leftFile, rightFile);
-        this.messageService.add({ severity: 'info', summary: 'Print dialog opened', detail: 'Save as PDF from the print dialog', life: 3000 });
-    }
-
-    onExportImage(): void {
+    async onExportImage(): Promise<void> {
         const result = this.state.diffResult();
         const leftFile = this.state.leftFile();
         const rightFile = this.state.rightFile();
@@ -121,13 +111,14 @@ export class DiffToolbar {
 
         this.imageStatus.set('exporting');
         try {
-            this.exportService.exportImage(result, leftFile, rightFile);
+            await this.exportService.exportImage(result, leftFile, rightFile);
             this.imageStatus.set('done');
             this.messageService.add({ severity: 'success', summary: 'Exported', detail: 'Diff image downloaded as PNG', life: 2000 });
             setTimeout(() => this.imageStatus.set('idle'), 2000);
-        } catch {
+        } catch (err) {
             this.imageStatus.set('idle');
-            this.messageService.add({ severity: 'error', summary: 'Export failed', detail: 'Could not generate image', life: 3000 });
+            const detail = err instanceof Error ? err.message : 'Could not generate image';
+            this.messageService.add({ severity: 'error', summary: 'Export failed', detail, life: 4000 });
         }
     }
 
