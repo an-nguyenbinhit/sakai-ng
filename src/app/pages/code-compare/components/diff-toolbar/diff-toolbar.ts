@@ -1,4 +1,4 @@
-import { Component, computed, inject, HostListener, input } from '@angular/core';
+import { Component, computed, inject, HostListener, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -9,7 +9,10 @@ import { TooltipModule } from 'primeng/tooltip';
 import { DividerModule } from 'primeng/divider';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { CodeCompareState } from '../../services/code-compare-state.service';
+import { ExportService } from '../../services/export.service';
 import { DiffViewer } from '../diff-viewer/diff-viewer';
 import { ViewMode } from '../../models/diff.models';
 
@@ -20,13 +23,19 @@ import { ViewMode } from '../../models/diff.models';
         CommonModule, FormsModule,
         ButtonModule, SelectButtonModule, CheckboxModule,
         InputTextModule, TooltipModule, DividerModule,
-        IconFieldModule, InputIconModule
+        IconFieldModule, InputIconModule, ToastModule
     ],
+    providers: [MessageService],
     templateUrl: './diff-toolbar.html',
     styleUrl: './diff-toolbar.scss'
 })
 export class DiffToolbar {
     state = inject(CodeCompareState);
+    private exportService = inject(ExportService);
+    private messageService = inject(MessageService);
+
+    imageStatus = signal<'idle' | 'exporting' | 'done'>('idle');
+    imageLabel = computed(() => (this.imageStatus() === 'done' ? 'Saved!' : 'Export Image'));
 
     diffViewer = input<DiffViewer | null>(null);
 
@@ -82,6 +91,44 @@ export class DiffToolbar {
         this.updateDiffBlocks();
         if (this.diffBlockIndices.length === 0) return;
         this.currentDiffIdx = (this.currentDiffIdx - 1 + this.diffBlockIndices.length) % this.diffBlockIndices.length;
+    }
+
+    onExportHtml(): void {
+        const result = this.state.diffResult();
+        const leftFile = this.state.leftFile();
+        const rightFile = this.state.rightFile();
+        if (!result || !leftFile || !rightFile) return;
+
+        this.exportService.exportHtml(result, leftFile, rightFile);
+        this.messageService.add({ severity: 'success', summary: 'Exported', detail: 'HTML diff file downloaded', life: 2000 });
+    }
+
+    onExportPdf(): void {
+        const result = this.state.diffResult();
+        const leftFile = this.state.leftFile();
+        const rightFile = this.state.rightFile();
+        if (!result || !leftFile || !rightFile) return;
+
+        this.exportService.exportPdf(result, leftFile, rightFile);
+        this.messageService.add({ severity: 'info', summary: 'Print dialog opened', detail: 'Save as PDF from the print dialog', life: 3000 });
+    }
+
+    onExportImage(): void {
+        const result = this.state.diffResult();
+        const leftFile = this.state.leftFile();
+        const rightFile = this.state.rightFile();
+        if (!result || !leftFile || !rightFile) return;
+
+        this.imageStatus.set('exporting');
+        try {
+            this.exportService.exportImage(result, leftFile, rightFile);
+            this.imageStatus.set('done');
+            this.messageService.add({ severity: 'success', summary: 'Exported', detail: 'Diff image downloaded as PNG', life: 2000 });
+            setTimeout(() => this.imageStatus.set('idle'), 2000);
+        } catch {
+            this.imageStatus.set('idle');
+            this.messageService.add({ severity: 'error', summary: 'Export failed', detail: 'Could not generate image', life: 3000 });
+        }
     }
 
     @HostListener('window:keydown', ['$event'])

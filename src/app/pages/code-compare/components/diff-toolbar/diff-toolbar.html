@@ -110,6 +110,39 @@
     }
 
     <div class="ml-auto flex items-center gap-1">
+        <!-- Export -->
+        <p-button
+            icon="pi pi-file-export"
+            label="Export HTML"
+            severity="secondary"
+            [outlined]="true"
+            size="small"
+            (onClick)="onExportHtml()"
+            pTooltip="Download diff as self-contained HTML file"
+            tooltipPosition="top"
+        />
+        <p-button
+            icon="pi pi-file-pdf"
+            label="Export PDF"
+            severity="secondary"
+            [outlined]="true"
+            size="small"
+            (onClick)="onExportPdf()"
+            pTooltip="Open print dialog to save diff as PDF"
+            tooltipPosition="top"
+        />
+        <p-button
+            icon="pi pi-image"
+            [label]="imageLabel()"
+            severity="secondary"
+            [outlined]="true"
+            size="small"
+            (onClick)="onExportImage()"
+            [loading]="imageStatus() === 'exporting'"
+            pTooltip="Download diff as PNG image"
+            tooltipPosition="top"
+        />
+        <p-divider layout="vertical" styleClass="!m-0 !h-6" />
         <!-- Clear -->
         <p-button
             icon="pi pi-times"
@@ -132,3 +165,5 @@
         />
     </div>
 </div>
+
+<p-toast position="bottom-right" />

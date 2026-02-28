@@ -8,6 +8,20 @@ export class ExportService {
         this.downloadFile(`diff-${Date.now()}.html`, html, 'text/html;charset=utf-8');
     }
 
+    exportPdf(result: DiffResult, leftFile: FileContent, rightFile: FileContent): void {
+        const html = this.buildPdfExport(result, leftFile, rightFile);
+        const win = window.open('', '_blank');
+        if (!win) return;
+        win.document.write(html);
+        win.document.close();
+        win.focus();
+        // Give the browser time to render before triggering print
+        setTimeout(() => {
+            win.print();
+            win.close();
+        }, 400);
+    }
+
     exportImage(result: DiffResult, leftFile: FileContent, rightFile: FileContent): void {
         const SCALE = 2; // High-DPI: render at 2x to prevent blurry text
         const fontSize = 14;
@@ -224,6 +238,160 @@ export class ExportService {
             document.body.removeChild(a);
             setTimeout(() => URL.revokeObjectURL(url), 1000);
         }, 'image/png');
+    }
+
+    private buildPdfExport(result: DiffResult, leftFile: FileContent, rightFile: FileContent): string {
+        const rows = result.sideBySideRows
+            .map(row => {
+                if (row.left.type === 'fold') {
+                    const count = row.left.foldedCount ?? 0;
+                    return `<tr class="fold-row"><td colspan="4">··· ${count} unchanged lines ···</td></tr>`;
+                }
+
+                const leftBg = this.getPrintBgColor(row.left.type);
+                const rightBg = this.getPrintBgColor(row.right.type);
+                const leftNum = row.left.lineNumber ?? '';
+                const rightNum = row.right.lineNumber ?? '';
+                const leftContent = this.escapeHtml(this.unescapeHtml(row.left.raw ?? '')) || '&nbsp;';
+                const rightContent = this.escapeHtml(this.unescapeHtml(row.right.raw ?? '')) || '&nbsp;';
+
+                return `<tr>
+  <td class="num">${leftNum}</td>
+  <td class="code" style="background:${leftBg}">${leftContent}</td>
+  <td class="num">${rightNum}</td>
+  <td class="code" style="background:${rightBg}">${rightContent}</td>
+</tr>`;
+            })
+            .join('\n');
+
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Diff: ${this.escapeHtml(leftFile.name)} vs ${this.escapeHtml(rightFile.name)}</title>
+<style>
+  @page { size: A3 landscape; margin: 12mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 13px;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    color: #212529;
+  }
+  .header {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #dee2e6;
+  }
+  .header h1 {
+    font-size: 15px;
+    font-weight: bold;
+    margin: 0 0 6px;
+  }
+  .badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+  .badge-add  { background: #d4edda; color: #155724; }
+  .badge-rem  { background: #f8d7da; color: #721c24; }
+  .badge-mod  { background: #fff3cd; color: #856404; }
+  .badge-sim  { background: #e9ecef; color: #444; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    table-layout: fixed;
+  }
+  thead th {
+    background: #f5f5f5;
+    font-weight: bold;
+    padding: 4px 6px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+    font-size: 11px;
+  }
+  thead th.num-col { width: 42px; }
+  td {
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: top;
+    padding: 1px 0;
+  }
+  td.num {
+    width: 42px;
+    text-align: right;
+    padding: 2px 6px;
+    color: #adb5bd;
+    background: #f8f9fa;
+    font-family: "Courier New", Consolas, monospace;
+    font-size: 11px;
+    border-right: 1px solid #dee2e6;
+    white-space: nowrap;
+    user-select: none;
+  }
+  td.code {
+    font-family: "Courier New", Consolas, monospace;
+    padding: 2px 6px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.5;
+  }
+  tr.fold-row td {
+    background: #e9ecef;
+    text-align: center;
+    font-style: italic;
+    color: #868e96;
+    padding: 3px;
+    font-size: 11px;
+  }
+  tr { page-break-inside: avoid; }
+  .center-divider { border-left: 2px solid #dee2e6; }
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Diff: ${this.escapeHtml(leftFile.name)} &nbsp;↔&nbsp; ${this.escapeHtml(rightFile.name)}</h1>
+  <div class="badges">
+    <span class="badge badge-add">+${result.totalAdded} added</span>
+    <span class="badge badge-rem">−${result.totalRemoved} removed</span>
+    <span class="badge badge-mod">~${result.totalModified} modified</span>
+    <span class="badge badge-sim">${result.similarityPercent}% similar</span>
+  </div>
+</div>
+<table>
+<thead>
+  <tr>
+    <th class="num-col"></th>
+    <th>${this.escapeHtml(leftFile.name)}</th>
+    <th class="num-col center-divider"></th>
+    <th>${this.escapeHtml(rightFile.name)}</th>
+  </tr>
+</thead>
+<tbody>
+${rows}
+</tbody>
+</table>
+</body>
+</html>`;
+    }
+
+    private getPrintBgColor(type: string): string {
+        switch (type) {
+            case 'added': return '#d4edda';
+            case 'removed': return '#f8d7da';
+            case 'modified': return '#fff3cd';
+            default: return 'transparent';
+        }
     }
 
     private buildHtmlExport(result: DiffResult, leftFile: FileContent, rightFile: FileContent): string {
