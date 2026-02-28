@@ -410,10 +410,10 @@ ${rows}
                 }
 
                 return `<tr>
-  <td style="width:40px;text-align:right;padding:0 8px;color:#999;background:#f5f5f5;border-right:1px solid #ddd;user-select:none">${leftNum}</td>
-  <td style="background:${leftBg};padding:0 8px;font-family:monospace;white-space:pre">${leftContent}</td>
-  <td style="width:40px;text-align:right;padding:0 8px;color:#999;background:#f5f5f5;border-right:1px solid #ddd;user-select:none">${rightNum}</td>
-  <td style="background:${rightBg};padding:0 8px;font-family:monospace;white-space:pre">${rightContent}</td>
+  <td style="width:40px;text-align:right;padding:2px 8px;color:#999;background:#f5f5f5;border-right:1px solid #ddd;user-select:none;white-space:nowrap">${leftNum}</td>
+  <td style="background:${leftBg};padding:2px 8px;font-family:monospace;white-space:pre-wrap;word-break:break-all;overflow-wrap:break-word">${leftContent}</td>
+  <td style="width:40px;text-align:right;padding:2px 8px;color:#999;background:#f5f5f5;border-left:1px solid #ddd;border-right:1px solid #ddd;user-select:none;white-space:nowrap">${rightNum}</td>
+  <td style="background:${rightBg};padding:2px 8px;font-family:monospace;white-space:pre-wrap;word-break:break-all;overflow-wrap:break-word">${rightContent}</td>
 </tr>`;
             })
             .join('\n');
