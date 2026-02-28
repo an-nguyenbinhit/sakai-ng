@@ -9,33 +9,114 @@ export class ExportService {
     }
 
     exportImage(result: DiffResult, leftFile: FileContent, rightFile: FileContent): void {
-        const fontSize = 12;
-        const lineHeight = 18;
-        const numColWidth = 44;
-        const contentPadding = 6;
-        const headerHeight = 56;
-        const canvasWidth = 1200;
+        const SCALE = 2; // High-DPI: render at 2x to prevent blurry text
+        const fontSize = 14;
+        const lineHeight = 22;
+        const numColWidth = 52;
+        const padding = 8;
+        const headerHeight = 60;
 
         const rows = result.sideBySideRows;
-        const canvas = document.createElement('canvas');
-        canvas.width = canvasWidth;
-        canvas.height = headerHeight + rows.length * lineHeight + 4;
-
-        const ctx = canvas.getContext('2d')!;
-        const halfWidth = (canvasWidth - numColWidth * 2) / 2;
         const monoFont = `${fontSize}px "Courier New", Consolas, monospace`;
         const uiFont = (size: number, bold = false) =>
             `${bold ? 'bold ' : ''}${size}px system-ui, -apple-system, sans-serif`;
 
+        // Measure text widths with a temporary canvas
+        const measureCanvas = document.createElement('canvas');
+        const mCtx = measureCanvas.getContext('2d')!;
+        mCtx.font = monoFont;
+
+        let maxTextWidth = 300;
+        rows.forEach(row => {
+            if (row.left.type !== 'fold') {
+                maxTextWidth = Math.max(maxTextWidth, mCtx.measureText(this.unescapeHtml(row.left.raw ?? '')).width);
+                maxTextWidth = Math.max(maxTextWidth, mCtx.measureText(this.unescapeHtml(row.right.raw ?? '')).width);
+            }
+        });
+
+        // Dynamic half-width: fits longest line, min 500px, max 1600px per side
+        const halfWidth = Math.max(500, Math.min(maxTextWidth + padding * 2 + 16, 1600));
+        const canvasWidth = numColWidth * 2 + halfWidth * 2;
+        const maxContentWidth = halfWidth - padding * 2;
+
+        // Wrap text character-by-character so no squishing occurs
+        const wrapText = (text: string, maxW: number): string[] => {
+            if (!text) return [''];
+            if (mCtx.measureText(text).width <= maxW) return [text];
+            const lines: string[] = [];
+            let line = '';
+            for (const ch of text) {
+                if (mCtx.measureText(line + ch).width > maxW) {
+                    lines.push(line);
+                    line = ch;
+                } else {
+                    line += ch;
+                }
+            }
+            if (line) lines.push(line);
+            return lines.length > 0 ? lines : [''];
+        };
+
+        // Pre-compute visual rows (each source row may expand to multiple visual lines)
+        interface VisualRow {
+            isFold: boolean;
+            foldCount?: number;
+            leftLines: string[];
+            rightLines: string[];
+            leftType: string;
+            rightType: string;
+            leftNum: number | null;
+            rightNum: number | null;
+            lineCount: number;
+        }
+
+        const visualRows: VisualRow[] = rows.map(row => {
+            if (row.left.type === 'fold') {
+                return {
+                    isFold: true,
+                    foldCount: row.left.foldedCount,
+                    leftLines: [],
+                    rightLines: [],
+                    leftType: 'fold',
+                    rightType: 'fold',
+                    leftNum: null,
+                    rightNum: null,
+                    lineCount: 1
+                };
+            }
+            const leftLines = wrapText(this.unescapeHtml(row.left.raw ?? ''), maxContentWidth);
+            const rightLines = wrapText(this.unescapeHtml(row.right.raw ?? ''), maxContentWidth);
+            return {
+                isFold: false,
+                leftLines,
+                rightLines,
+                leftType: row.left.type,
+                rightType: row.right.type,
+                leftNum: row.left.lineNumber,
+                rightNum: row.right.lineNumber,
+                lineCount: Math.max(leftLines.length, rightLines.length)
+            };
+        });
+
+        const totalVisualLines = visualRows.reduce((sum, vr) => sum + vr.lineCount, 0);
+
+        // Create canvas at 2x resolution for crisp rendering
+        const canvas = document.createElement('canvas');
+        canvas.width = canvasWidth * SCALE;
+        canvas.height = (headerHeight + totalVisualLines * lineHeight + 4) * SCALE;
+
+        const ctx = canvas.getContext('2d')!;
+        ctx.scale(SCALE, SCALE);
+
         // White background
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, canvasWidth, canvas.height / SCALE);
 
         // Header: file names
         ctx.fillStyle = '#f8f9fa';
         ctx.fillRect(0, 0, canvasWidth, 36);
         ctx.fillStyle = '#212529';
-        ctx.font = uiFont(13, true);
+        ctx.font = uiFont(14, true);
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'left';
         ctx.fillText(`${leftFile.name}  ↔  ${rightFile.name}`, 12, 18);
@@ -43,15 +124,15 @@ export class ExportService {
         // Stats row
         ctx.fillStyle = '#fcfcfc';
         ctx.fillRect(0, 36, canvasWidth, 20);
-        ctx.font = uiFont(11);
+        ctx.font = uiFont(12);
         ctx.textBaseline = 'middle';
 
         const drawBadge = (text: string, fg: string, bg: string, x: number): number => {
-            const w = ctx.measureText(text).width + 12;
+            const w = ctx.measureText(text).width + 14;
             ctx.fillStyle = bg;
-            ctx.fillRect(x, 40, w, 13);
+            ctx.fillRect(x, 40, w, 14);
             ctx.fillStyle = fg;
-            ctx.fillText(text, x + 6, 47);
+            ctx.fillText(text, x + 7, 47);
             return x + w + 8;
         };
 
@@ -61,78 +142,74 @@ export class ExportService {
         sx = drawBadge(`~${result.totalModified} modified`, '#856404', '#fff3cd', sx);
         drawBadge(`${result.similarityPercent}% similar`, '#444444', '#e9ecef', sx);
 
-        // Separator line
+        // Separator
         ctx.fillStyle = '#dee2e6';
         ctx.fillRect(0, 55, canvasWidth, 1);
 
-        // Content rows
-        rows.forEach((row, i) => {
-            const y = headerHeight + i * lineHeight;
+        // Draw content rows
+        let currentY = headerHeight;
 
-            if (row.left.type === 'fold') {
+        visualRows.forEach(vr => {
+            const rowH = vr.lineCount * lineHeight;
+            const y = currentY;
+
+            if (vr.isFold) {
                 ctx.fillStyle = '#e9ecef';
                 ctx.fillRect(0, y, canvasWidth, lineHeight);
                 ctx.fillStyle = '#868e96';
                 ctx.font = `italic ${fontSize - 1}px system-ui, sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(
-                    `··· ${row.left.foldedCount ?? 0} unchanged lines ···`,
-                    canvasWidth / 2,
-                    y + lineHeight / 2
-                );
+                ctx.fillText(`··· ${vr.foldCount ?? 0} unchanged lines ···`, canvasWidth / 2, y + lineHeight / 2);
                 ctx.textAlign = 'left';
+                currentY += lineHeight;
                 return;
             }
 
             const drawSide = (
                 lineNum: number | null,
-                raw: string,
+                wrappedLines: string[],
                 type: string,
                 offsetX: number
             ): void => {
-                // Line number column
+                // Line number gutter
                 ctx.fillStyle = '#f8f9fa';
-                ctx.fillRect(offsetX, y, numColWidth, lineHeight);
-                ctx.fillStyle = '#adb5bd';
-                ctx.font = monoFont;
-                ctx.textAlign = 'right';
-                ctx.textBaseline = 'middle';
+                ctx.fillRect(offsetX, y, numColWidth, rowH);
                 if (lineNum != null) {
-                    ctx.fillText(String(lineNum), offsetX + numColWidth - 5, y + lineHeight / 2);
+                    ctx.fillStyle = '#adb5bd';
+                    ctx.font = monoFont;
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(String(lineNum), offsetX + numColWidth - 6, y + lineHeight / 2);
                 }
 
-                // Content column
+                // Content area
                 const bg = this.getBgColor(type);
                 ctx.fillStyle = bg === 'transparent' ? '#ffffff' : bg;
-                ctx.fillRect(offsetX + numColWidth, y, halfWidth, lineHeight);
+                ctx.fillRect(offsetX + numColWidth, y, halfWidth, rowH);
                 ctx.fillStyle = '#212529';
                 ctx.textAlign = 'left';
                 ctx.font = monoFont;
-                const text = this.unescapeHtml(raw ?? '');
-                ctx.fillText(
-                    text,
-                    offsetX + numColWidth + contentPadding,
-                    y + lineHeight / 2,
-                    halfWidth - contentPadding * 2
-                );
+                ctx.textBaseline = 'middle';
+
+                // Draw each wrapped line — no maxWidth squishing
+                wrappedLines.forEach((line, li) => {
+                    ctx.fillText(line, offsetX + numColWidth + padding, y + li * lineHeight + lineHeight / 2);
+                });
             };
 
-            drawSide(row.left.lineNumber, row.left.raw, row.left.type, 0);
-            drawSide(
-                row.right.lineNumber,
-                row.right.raw,
-                row.right.type,
-                numColWidth + halfWidth
-            );
+            drawSide(vr.leftNum, vr.leftLines, vr.leftType, 0);
+            drawSide(vr.rightNum, vr.rightLines, vr.rightType, numColWidth + halfWidth);
 
             // Row separator
             ctx.fillStyle = '#f0f0f0';
-            ctx.fillRect(0, y + lineHeight - 1, canvasWidth, 1);
+            ctx.fillRect(0, y + rowH - 1, canvasWidth, 1);
 
             // Center divider
             ctx.fillStyle = '#dee2e6';
-            ctx.fillRect(numColWidth + halfWidth - 1, y, 2, lineHeight);
+            ctx.fillRect(numColWidth + halfWidth - 1, y, 2, rowH);
+
+            currentY += rowH;
         });
 
         canvas.toBlob(blob => {
