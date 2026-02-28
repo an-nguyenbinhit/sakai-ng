@@ -28,37 +28,40 @@ export class SideBySideView implements AfterViewInit, OnDestroy {
     searchQuery = computed(() => this.state.searchState().query);
 
     private syncing = false;
-    private scrollListener: (() => void) | null = null;
+    private leftScrollListener: (() => void) | null = null;
+    private rightScrollListener: (() => void) | null = null;
 
     ngAfterViewInit(): void {
-        // Sync right viewport scroll offset (not just index) to left
+        const leftEl = this.leftViewport().elementRef.nativeElement;
         const rightEl = this.rightViewport().elementRef.nativeElement;
-        this.scrollListener = () => {
-            if (!this.syncing) {
-                this.syncing = true;
-                const ratio = rightEl.scrollTop / (rightEl.scrollHeight - rightEl.clientHeight || 1);
-                this.state.setScrollRatio(ratio);
-                this.syncing = false;
-            }
+
+        this.leftScrollListener = () => {
+            if (this.syncing) return;
+            this.syncing = true;
+            const ratio = leftEl.scrollTop / (leftEl.scrollHeight - leftEl.clientHeight || 1);
+            rightEl.scrollTop = ratio * (rightEl.scrollHeight - rightEl.clientHeight);
+            this.state.setScrollRatio(ratio);
+            this.syncing = false;
         };
-        rightEl.addEventListener('scroll', this.scrollListener);
+
+        this.rightScrollListener = () => {
+            if (this.syncing) return;
+            this.syncing = true;
+            const ratio = rightEl.scrollTop / (rightEl.scrollHeight - rightEl.clientHeight || 1);
+            leftEl.scrollTop = ratio * (leftEl.scrollHeight - leftEl.clientHeight);
+            this.state.setScrollRatio(ratio);
+            this.syncing = false;
+        };
+
+        leftEl.addEventListener('scroll', this.leftScrollListener);
+        rightEl.addEventListener('scroll', this.rightScrollListener);
     }
 
     ngOnDestroy(): void {
-        if (this.scrollListener) {
-            const rightEl = this.rightViewport().elementRef.nativeElement;
-            rightEl.removeEventListener('scroll', this.scrollListener);
-        }
-    }
-
-    onLeftScroll(index: number): void {
-        if (this.syncing) return;
-        this.syncing = true;
-        this.rightViewport().scrollToIndex(index, 'instant');
         const leftEl = this.leftViewport().elementRef.nativeElement;
-        const ratio = leftEl.scrollTop / (leftEl.scrollHeight - leftEl.clientHeight || 1);
-        this.state.setScrollRatio(ratio);
-        this.syncing = false;
+        const rightEl = this.rightViewport().elementRef.nativeElement;
+        if (this.leftScrollListener) leftEl.removeEventListener('scroll', this.leftScrollListener);
+        if (this.rightScrollListener) rightEl.removeEventListener('scroll', this.rightScrollListener);
     }
 
     onFoldClick(row: SideBySideRow): void {
