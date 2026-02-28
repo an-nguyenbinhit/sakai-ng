@@ -8,7 +8,6 @@
             #leftViewport
             [itemSize]="lineHeight"
             class="flex-1 overflow-auto"
-            (scrolledIndexChange)="onLeftScroll($event)"
         >
             <p-diff-line
                 *cdkVirtualFor="let row of rows(); trackBy: trackRow"
