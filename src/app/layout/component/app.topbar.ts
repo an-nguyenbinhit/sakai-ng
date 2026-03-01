@@ -15,6 +15,15 @@ import { LayoutService } from '@/app/layout/service/layout.service';
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
                 <i class="pi pi-bars"></i>
             </button>
+            <a class="layout-topbar-logo flex items-center gap-3" routerLink="/">
+                <span class="layout-topbar-logo-icon">
+                    <i class="pi pi-wrench"></i>
+                </span>
+                <div class="flex flex-col leading-none gap-0.5">
+                    <span class="font-bold text-surface-800 dark:text-surface-100 text-base tracking-tight">Dev Tools</span>
+                    <span class="text-xs text-surface-400 font-normal hidden sm:block">Developer Utilities</span>
+                </div>
+            </a>
         </div>
 
         <div class="layout-topbar-actions">
