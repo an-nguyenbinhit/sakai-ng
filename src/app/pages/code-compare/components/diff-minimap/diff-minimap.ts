@@ -1,7 +1,7 @@
 import { Component, inject, effect, viewChild, ElementRef, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CodeCompareState } from '../../services/code-compare-state.service';
-import { DiffLineType } from '../../models/diff.models';
+import { DiffLineType, SideBySideRow } from '../../models/diff.models';
 
 const COLOR_MAP: Record<DiffLineType, string> = {
     added: '#86efac',     // green-300
@@ -35,9 +35,9 @@ export class DiffMinimap {
     indicatorHeight = computed(() => {
         const result = this.state.diffResult();
         if (!result) return 1;
-        // Estimate based on viewport vs total lines
-        const totalLines = result.inlineRows.length || 1;
-        const visibleLines = Math.min(40, totalLines); // approx
+        const isSideBySide = this.state.viewMode() === 'side-by-side';
+        const totalLines = (isSideBySide ? result.sideBySideRows.length : result.inlineRows.length) || 1;
+        const visibleLines = Math.min(40, totalLines);
         return Math.min(1, visibleLines / totalLines);
     });
 
@@ -48,8 +48,8 @@ export class DiffMinimap {
 
         effect(() => {
             const result = this.state.diffResult();
+            const _mode = this.state.viewMode(); // redraw when view mode changes
             if (result) {
-                // Use setTimeout to ensure canvas is in DOM
                 setTimeout(() => this.drawMinimap(), 0);
             }
         });
@@ -62,7 +62,13 @@ export class DiffMinimap {
         const result = this.state.diffResult();
         if (!result) return;
 
-        const lines = result.inlineRows;
+        const isSideBySide = this.state.viewMode() === 'side-by-side';
+        const lineTypes: DiffLineType[] = isSideBySide
+            ? result.sideBySideRows.map((row: SideBySideRow) =>
+                  row.left.type !== 'unchanged' ? row.left.type : row.right.type
+              )
+            : result.inlineRows.map(l => l.type);
+
         const containerHeight = canvas.parentElement?.clientHeight ?? 400;
         const containerWidth = canvas.parentElement?.clientWidth ?? 48;
 
@@ -75,10 +81,10 @@ export class DiffMinimap {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         const colorMap = this.isDark ? DARK_COLOR_MAP : COLOR_MAP;
-        const lineH = canvas.height / lines.length;
+        const lineH = canvas.height / lineTypes.length;
 
-        lines.forEach((line, i) => {
-            const color = colorMap[line.type];
+        lineTypes.forEach((type, i) => {
+            const color = colorMap[type];
             if (color === 'transparent') return;
             ctx.fillStyle = color;
             ctx.fillRect(0, i * lineH, canvas.width, Math.max(lineH, 1));
