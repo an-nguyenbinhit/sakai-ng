@@ -16,7 +16,7 @@
     align-items: center;
 
     .layout-topbar-logo-container {
-        width: 20rem;
+        flex-shrink: 0;
         display: flex;
         align-items: center;
     }
@@ -99,6 +99,43 @@
         display: none;
     }
 
+    .layout-topbar-nav {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 0.25rem;
+        padding: 0 1rem;
+
+        .topnav-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.45rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-color-secondary);
+            text-decoration: none;
+            transition: background-color var(--element-transition-duration), color var(--element-transition-duration);
+            white-space: nowrap;
+
+            i {
+                font-size: 0.875rem;
+            }
+
+            &:hover {
+                background-color: var(--surface-hover);
+                color: var(--text-color);
+            }
+
+            &.topnav-active {
+                background-color: var(--primary-color);
+                color: var(--primary-contrast-color);
+            }
+        }
+    }
+
     .layout-topbar-actions {
         margin-left: auto;
         display: flex;
@@ -122,6 +159,10 @@
 
         .layout-topbar-logo-container {
             width: auto;
+        }
+
+        .layout-topbar-nav {
+            display: none;
         }
 
         .layout-menu-button {

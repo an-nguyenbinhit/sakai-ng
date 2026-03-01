@@ -26,6 +26,17 @@ import { LayoutService } from '@/app/layout/service/layout.service';
             </a>
         </div>
 
+        <nav class="layout-topbar-nav">
+            <a routerLink="/" routerLinkActive="topnav-active" [routerLinkActiveOptions]="{ exact: true }" class="topnav-item">
+                <i class="pi pi-home"></i>
+                <span>Home</span>
+            </a>
+            <a routerLink="/code-compare" routerLinkActive="topnav-active" class="topnav-item">
+                <i class="pi pi-code"></i>
+                <span>Code Compare</span>
+            </a>
+        </nav>
+
         <div class="layout-topbar-actions">
             <div class="layout-config-menu">
                 <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
