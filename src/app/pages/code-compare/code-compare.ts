@@ -6,8 +6,6 @@ import { DiffToolbar } from './components/diff-toolbar/diff-toolbar';
 import { DiffSummary } from './components/diff-summary/diff-summary';
 import { DiffViewer } from './components/diff-viewer/diff-viewer';
 import { DiffMinimap } from './components/diff-minimap/diff-minimap';
-import { ButtonModule } from 'primeng/button';
-import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
     selector: 'p-code-compare',
@@ -16,7 +14,6 @@ import { TooltipModule } from 'primeng/tooltip';
         CommonModule,
         CodeInput, DiffToolbar, DiffSummary,
         DiffViewer, DiffMinimap,
-        ButtonModule, TooltipModule
     ],
     templateUrl: './code-compare.html',
     styleUrl: './code-compare.scss'

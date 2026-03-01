@@ -1,49 +1,50 @@
 <div class="flex flex-col">
 
-    <!-- Compact collapsed header: animates in when both files loaded & panel collapsed -->
-    <div
-        class="overflow-hidden transition-[max-height,opacity] duration-500 ease-in-out"
-        [style.max-height]="(hasBothFiles() && inputCollapsed()) ? '56px' : '0px'"
-        [style.opacity]="(hasBothFiles() && inputCollapsed()) ? '1' : '0'"
-        [style.pointer-events]="(hasBothFiles() && inputCollapsed()) ? 'auto' : 'none'"
-    >
-        <div class="flex items-center gap-3 px-4 py-2.5 mb-2 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-border mx-4">
-            <!-- Left file info -->
-            <i class="pi pi-file text-primary text-sm shrink-0"></i>
-            <span class="text-sm font-medium text-surface-700 dark:text-surface-200 truncate" style="max-width: 200px">
-                {{ state.leftFile()?.name ?? 'untitled' }}
-            </span>
-            <span class="text-xs text-surface-400 shrink-0">{{ leftLineCount() }} lines</span>
+    <!-- Input panels section -->
+    @if (hasBothFiles()) {
+        <!-- Unified card: header + collapsible panels -->
+        <div class="mx-4 mb-2 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-border overflow-hidden">
 
-            <i class="pi pi-arrows-h text-surface-300 dark:text-surface-600 shrink-0 mx-2"></i>
+            <!-- Clickable toggle header -->
+            <div
+                class="flex items-center px-4 py-2.5 bg-surface-50 dark:bg-surface-800 cursor-pointer select-none hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
+                (click)="inputCollapsed.set(!inputCollapsed())"
+            >
+                <div class="flex-1 flex items-center justify-center gap-2 min-w-0">
+                    <i class="pi pi-file text-primary text-sm shrink-0"></i>
+                    <span class="text-sm font-medium text-surface-700 dark:text-surface-200 truncate max-w-[200px]">{{ state.leftFile()?.name ?? 'untitled' }}</span>
+                    <span class="text-xs text-surface-400 shrink-0">{{ leftLineCount() }} lines</span>
+                    <i class="pi pi-arrows-h text-surface-300 dark:text-surface-600 shrink-0 mx-2"></i>
+                    <i class="pi pi-file text-primary text-sm shrink-0"></i>
+                    <span class="text-sm font-medium text-surface-700 dark:text-surface-200 truncate max-w-[200px]">{{ state.rightFile()?.name ?? 'untitled' }}</span>
+                    <span class="text-xs text-surface-400 shrink-0">{{ rightLineCount() }} lines</span>
+                </div>
+                <i
+                    class="pi text-surface-400 text-sm shrink-0"
+                    [class.pi-chevron-up]="!inputCollapsed()"
+                    [class.pi-chevron-down]="inputCollapsed()"
+                ></i>
+            </div>
 
-            <!-- Right file info -->
-            <i class="pi pi-file text-primary text-sm shrink-0"></i>
-            <span class="text-sm font-medium text-surface-700 dark:text-surface-200 truncate" style="max-width: 200px">
-                {{ state.rightFile()?.name ?? 'untitled' }}
-            </span>
-            <span class="text-xs text-surface-400 shrink-0">{{ rightLineCount() }} lines</span>
-
-            <!-- Edit button -->
-            <p-button
-                class="ml-auto"
-                icon="pi pi-pencil"
-                label="Edit inputs"
-                severity="primary"
-                [outlined]="true"
-                size="small"
-                pTooltip="Expand input panels to edit"
-                tooltipPosition="left"
-                (onClick)="inputCollapsed.set(false)"
-            />
+            <!-- Collapsible content -->
+            <div
+                class="grid transition-[grid-template-rows] duration-500 ease-in-out"
+                [style.grid-template-rows]="inputCollapsed() ? '0fr' : '1fr'"
+            >
+                <div class="overflow-hidden" (focusout)="onInputPanelBlur($event)">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                        <div class="p-4 border border-surface-200 dark:border-surface-700 rounded-border">
+                            <p-code-input side="left" />
+                        </div>
+                        <div class="p-4 border border-surface-200 dark:border-surface-700 rounded-border">
+                            <p-code-input side="right" />
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-
-    <!-- Input panels: collapse/expand with grid-template-rows animation -->
-    <div
-        class="grid transition-[grid-template-rows] duration-500 ease-in-out"
-        [style.grid-template-rows]="(hasBothFiles() && inputCollapsed()) ? '0fr' : '1fr'"
-    >
+    } @else {
+        <!-- No card wrapper when both files not loaded yet -->
         <div class="overflow-hidden" (focusout)="onInputPanelBlur($event)">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
                 <div class="p-4 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-border">
@@ -53,30 +54,14 @@
                     <p-code-input side="right" />
                 </div>
             </div>
-
-            <!-- Manual collapse button: visible only when both files are loaded -->
-            @if (hasBothFiles()) {
-                <div class="flex justify-center pb-3 -mt-2">
-                    <p-button
-                        icon="pi pi-chevron-up"
-                        label="Collapse panels"
-                        severity="primary"
-                        [outlined]="true"
-                        size="small"
-                        pTooltip="Collapse to see full diff view"
-                        (onClick)="inputCollapsed.set(true)"
-                    />
-                </div>
-            }
-
-            @if (!hasBothFiles() && hasAnyFile()) {
+            @if (hasAnyFile()) {
                 <div class="flex items-center px-4 pb-4 gap-2 text-sm text-surface-400">
                     <i class="pi pi-info-circle"></i>
                     <span>Add code to the {{ state.leftFile() ? 'right (Code B)' : 'left (Code A)' }} panel to start comparing.</span>
                 </div>
             }
         </div>
-    </div>
+    }
 
     <!-- Diff section -->
     @if (hasBothFiles()) {
@@ -84,7 +69,6 @@
             <p-diff-toolbar [diffViewer]="diffViewerRef" />
             <p-diff-summary />
 
-            <!-- Diff viewer: taller when inputs are collapsed -->
             <div
                 class="flex gap-3 transition-[height] duration-500 ease-in-out"
                 [style.height]="inputCollapsed() ? 'calc(100vh - 22rem)' : '65vh'"
