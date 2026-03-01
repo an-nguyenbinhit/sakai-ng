@@ -2,63 +2,63 @@
 
 ## Overview
 
-Code Compare là tính năng trang chủ (`/`) của ứng dụng. Cho phép người dùng so sánh hai đoạn code hoặc file văn bản, hiển thị diff với nhiều chế độ xem, tìm kiếm, lọc, và xuất kết quả.
+Code Compare is the home page feature (`/`) of the application. It allows users to compare two code snippets or text files, displaying diffs with multiple view modes, search, filtering, and export capabilities.
 
 ---
 
-## Mục lục
+## Table of Contents
 
-1. [Nhập liệu](#1-nhập-liệu)
-2. [Chế độ xem diff](#2-chế-độ-xem-diff)
-3. [Tùy chọn lọc](#3-tùy-chọn-lọc)
-4. [Điều hướng & Tìm kiếm](#4-điều-hướng--tìm-kiếm)
+1. [Input](#1-input)
+2. [Diff View Modes](#2-diff-view-modes)
+3. [Filter Options](#3-filter-options)
+4. [Navigation & Search](#4-navigation--search)
 5. [Minimap](#5-minimap)
-6. [Xuất kết quả](#6-xuất-kết-quả)
-7. [Trạng thái phiên](#7-trạng-thái-phiên)
-8. [Kiến trúc kỹ thuật](#8-kiến-trúc-kỹ-thuật)
-9. [Cấu trúc file](#9-cấu-trúc-file)
+6. [Export](#6-export)
+7. [Session State](#7-session-state)
+8. [Technical Architecture](#8-technical-architecture)
+9. [File Structure](#9-file-structure)
 
 ---
 
-## 1. Nhập liệu
+## 1. Input
 
-### Hai phương thức nhập
+### Two Input Methods
 
-| Phương thức | Mô tả |
+| Method | Description |
 |---|---|
-| **Paste / Gõ** | Nhập trực tiếp vào textarea |
-| **Upload file** | Kéo-thả hoặc click để chọn file (tối đa 10 MB) |
+| **Paste / Type** | Enter text directly into the textarea |
+| **Upload File** | Drag-and-drop or click to select a file (max 10 MB) |
 
-### Phát hiện ngôn ngữ
+### Language Detection
 
-Hệ thống tự động phát hiện ngôn ngữ lập trình từ phần mở rộng file. Hỗ trợ 30+ ngôn ngữ:
+The system automatically detects the programming language from the file extension. Supports 30+ languages:
 
-`JavaScript`, `TypeScript`, `Python`, `Java`, `C/C++`, `C#`, `Go`, `Rust`, `PHP`, `Ruby`, `Swift`, `Kotlin`, `HTML`, `CSS`, `SCSS`, `JSON`, `YAML`, `XML`, `SQL`, `Bash`, `PowerShell`, `Dockerfile`, `GraphQL`, `Markdown`, và nhiều ngôn ngữ khác.
+`JavaScript`, `TypeScript`, `Python`, `Java`, `C/C++`, `C#`, `Go`, `Rust`, `PHP`, `Ruby`, `Swift`, `Kotlin`, `HTML`, `CSS`, `SCSS`, `JSON`, `YAML`, `XML`, `SQL`, `Bash`, `PowerShell`, `Dockerfile`, `GraphQL`, `Markdown`, and more.
 
-### Phát hiện encoding
+### Encoding Detection
 
-Tự động nhận diện encoding từ BOM header:
-- `UTF-8` (mặc định)
+Automatically detects encoding from BOM header:
+- `UTF-8` (default)
 - `UTF-16 LE`
 - `UTF-16 BE`
 
-### Giới hạn & Validation
+### Limits & Validation
 
-- File nhị phân (binary): **bị từ chối**
-- File quá lớn (> 10 MB): **bị từ chối kèm thông báo lỗi**
-- Extension không được hỗ trợ: **bị từ chối**
+- Binary files: **rejected**
+- Files exceeding 10 MB: **rejected with an error message**
+- Unsupported extensions: **rejected**
 
-### Panel thu gọn
+### Collapsible Panels
 
-Khi cả hai bên đã có nội dung, panel nhập liệu tự động thu gọn thành thanh tiêu đề hiển thị tên file và số dòng. Click vào để mở rộng lại. Panel cũng tự thu gọn khi người dùng click ra ngoài.
+Once both sides have content, the input panels automatically collapse into a header bar showing the filename and line count. Click to expand again. Panels also auto-collapse when the user clicks outside.
 
 ---
 
-## 2. Chế độ xem diff
+## 2. Diff View Modes
 
-### Side-by-Side (song song)
+### Side-by-Side
 
-Hiển thị hai cột trái-phải đồng bộ scroll. Khi cuộn một bên, bên còn lại tự động cuộn theo tỉ lệ.
+Displays two columns (left and right) with synchronized scrolling. Scrolling one side automatically scrolls the other proportionally.
 
 ```
 | # | Code A          |  | # | Code B          |
@@ -69,118 +69,118 @@ Hiển thị hai cột trái-phải đồng bộ scroll. Khi cuộn một bên, 
 
 ### Inline
 
-Hiển thị tất cả thay đổi trong một cột theo thứ tự tuần tự:
+Displays all changes in a single column in sequential order:
 
 ```
-| # | ± | Nội dung                 |
+| # | ± | Content                  |
 |---|---|--------------------------|
 | 1 |   | function fib(n) {        |
 | 2 | - |   if (n <= 1) return n;  |
 | 2 | + |   if (n < 0) throw ...   |
 ```
 
-Ký hiệu: `-` = dòng bị xóa, `+` = dòng thêm mới, `~` = dòng được sửa.
+Symbols: `-` = removed line, `+` = added line, `~` = modified line.
 
-### Loại thay đổi
+### Change Types
 
-| Loại | Màu nền | Ký hiệu | Ý nghĩa |
+| Type | Background | Symbol | Meaning |
 |---|---|---|---|
-| **Added** | Xanh lá | `+` | Chỉ có ở Code B |
-| **Removed** | Đỏ | `-` | Chỉ có ở Code A |
-| **Modified** | Vàng | `~` | Có ở cả hai nhưng khác nhau |
-| **Unchanged** | Mặc định | — | Giống nhau ở cả hai |
+| **Added** | Green | `+` | Only in Code B |
+| **Removed** | Red | `-` | Only in Code A |
+| **Modified** | Yellow | `~` | Present in both but different |
+| **Unchanged** | Default | — | Identical in both |
 
-### Word/Char diff
+### Word/Char Diff
 
-Với dòng **Modified**, từng từ hoặc ký tự khác nhau được tô sáng:
-- Từ bị xóa: nền **đỏ đậm**
-- Từ được thêm: nền **xanh đậm**
+For **Modified** lines, individual words or characters that differ are highlighted:
+- Removed tokens: **dark red** background
+- Added tokens: **dark green** background
 
 ---
 
-## 3. Tùy chọn lọc
+## 3. Filter Options
 
-Truy cập qua **DiffToolbar**. Mỗi tùy chọn ảnh hưởng trực tiếp đến thuật toán diff.
+Accessible via the **DiffToolbar**. Each option directly affects the diff algorithm.
 
-| Tùy chọn | Mặc định | Mô tả |
+| Option | Default | Description |
 |---|---|---|
-| **Ignore Whitespace** | Tắt | Bỏ qua khoảng trắng cuối dòng |
-| **Ignore Case** | Tắt | So sánh không phân biệt hoa/thường |
-| **Ignore Blank Lines** | Tắt | Bỏ qua dòng trống |
-| **Ignore Comments** | Tắt | Bỏ qua dòng comment (`//`, `#`, `/*`) |
-| **Trim Lines** | Tắt | Cắt khoảng trắng đầu/cuối dòng |
-| **Word Diff** | Bật | Tô sáng từ khác nhau trong dòng Modified |
-| **Char Diff** | Tắt | Tô sáng ký tự khác nhau (chi tiết hơn Word Diff) |
-| **Context Lines** | 3 | Số dòng unchanged hiển thị xung quanh mỗi khối thay đổi |
+| **Ignore Whitespace** | Off | Ignore trailing whitespace |
+| **Ignore Case** | Off | Case-insensitive comparison |
+| **Ignore Blank Lines** | Off | Ignore empty lines |
+| **Ignore Comments** | Off | Ignore comment lines (`//`, `#`, `/*`) |
+| **Trim Lines** | Off | Trim leading/trailing whitespace from each line |
+| **Word Diff** | On | Highlight differing words within Modified lines |
+| **Char Diff** | Off | Highlight differing characters (finer-grained than Word Diff) |
+| **Context Lines** | 3 | Number of unchanged lines shown around each change block |
 
 ---
 
-## 4. Điều hướng & Tìm kiếm
+## 4. Navigation & Search
 
-### Điều hướng giữa các khối diff
+### Navigating Between Diff Blocks
 
-- Nút **Prev / Next** trên toolbar (hoặc phím tắt `Alt+↑` / `Alt+↓`)
-- Hiển thị vị trí hiện tại: `3 / 15`
+- **Prev / Next** buttons on the toolbar (or keyboard shortcuts `Alt+↑` / `Alt+↓`)
+- Shows current position: `3 / 15`
 
 ### Show / Hide Unchanged
 
-Toggle trên **DiffSummary**:
-- **Show All**: Hiển thị toàn bộ dòng unchanged
-- **Hide Unchanged**: Thu gọn các vùng unchanged thành `··· N unchanged lines ···`
+Toggle on the **DiffSummary**:
+- **Show All**: Display all unchanged lines
+- **Hide Unchanged**: Collapse unchanged regions into `··· N unchanged lines ···`
 
-### Tìm kiếm
+### Search
 
-Nhập từ khóa vào ô Search trên toolbar:
-- Tô vàng tất cả kết quả trùng khớp
-- Điều hướng qua lại giữa các kết quả
-- Hiển thị bộ đếm: `2 / 5`
-- Tìm kiếm không phân biệt hoa/thường
+Type a keyword into the Search box on the toolbar:
+- Highlights all matching results in yellow
+- Navigate forward/backward through results
+- Displays a counter: `2 / 5`
+- Case-insensitive search
 
 ---
 
 ## 5. Minimap
 
-Panel dọc bên phải màn hình, hiển thị toàn bộ diff ở dạng thu nhỏ:
+A vertical panel on the right side of the screen that shows the entire diff in miniature:
 
-- Mỗi dòng được vẽ bằng màu tương ứng loại thay đổi
-- **Viewport indicator**: Thanh trắng/xám cho biết vùng đang nhìn
-- **Click** để nhảy đến bất kỳ vị trí nào trong diff
-- Tự động cập nhật khi diff thay đổi
-- Hỗ trợ dark mode
-
----
-
-## 6. Xuất kết quả
-
-### Xuất HTML
-
-Tạo file HTML độc lập (tự chứa CSS):
-
-- **Side-by-side**: Bảng 4 cột (số dòng trái, code trái, số dòng phải, code phải)
-- **Inline**: Bảng 3 cột (số dòng, ký hiệu, nội dung)
-- Bảo toàn màu sắc word/char diff
-- Header chứa: tên file, thống kê, tùy chọn đang bật
-- Vùng fold hiển thị: `... N unchanged lines ...`
-
-### Xuất PNG
-
-Render diff thành ảnh PNG chất lượng cao:
-
-- Font monospace (`Courier New` / `Consolas`)
-- Scale 2x khi kích thước cho phép
-- Header chứa tên file, chế độ xem, thống kê, tùy chọn
-- Màu sắc thay đổi được giữ nguyên
-- Tự động xuống dòng khi code quá dài
-- **Giới hạn**: 65535px chiều cao / 268M pixel diện tích (giới hạn canvas trình duyệt)
-- **Fallback**: Nếu ảnh quá lớn, hiển thị thông báo lỗi — dùng xuất HTML thay thế
+- Each line is drawn with the color corresponding to its change type
+- **Viewport indicator**: A white/gray bar shows the currently visible region
+- **Click** to jump to any position in the diff
+- Automatically updates when the diff changes
+- Supports dark mode
 
 ---
 
-## 7. Trạng thái phiên
+## 6. Export
 
-### Tự động lưu (sessionStorage)
+### HTML Export
 
-Sau mỗi thay đổi, trạng thái được tự động lưu vào `sessionStorage` với key `code-compare-session`:
+Generates a self-contained HTML file (with inline CSS):
+
+- **Side-by-side**: 4-column table (left line numbers, left code, right line numbers, right code)
+- **Inline**: 3-column table (line number, symbol, content)
+- Preserves word/char diff colors
+- Header includes: filenames, statistics, active options
+- Folded regions display: `... N unchanged lines ...`
+
+### PNG Export
+
+Renders the diff as a high-quality PNG image:
+
+- Monospace font (`Courier New` / `Consolas`)
+- 2x scale when dimensions allow
+- Header includes filename, view mode, statistics, and options
+- Change colors are preserved
+- Long lines wrap automatically
+- **Limit**: 65535px height / 268M pixel area (browser canvas limit)
+- **Fallback**: If the image is too large, an error message is shown — use HTML export instead
+
+---
+
+## 7. Session State
+
+### Auto-save (sessionStorage)
+
+After each change, state is automatically saved to `sessionStorage` under the key `code-compare-session`:
 
 ```json
 {
@@ -191,34 +191,34 @@ Sau mỗi thay đổi, trạng thái được tự động lưu vào `sessionSto
 }
 ```
 
-### Phạm vi lưu trữ
+### What Is Persisted
 
-| Dữ liệu | Lưu? |
+| Data | Saved? |
 |---|---|
-| Nội dung file trái/phải | Có |
-| Tùy chọn diff | Có |
-| Chế độ xem | Có |
-| Từ khóa tìm kiếm | Không |
-| Vị trí scroll | Không |
+| Left / right file content | Yes |
+| Diff options | Yes |
+| View mode | Yes |
+| Search keyword | No |
+| Scroll position | No |
 
-Dữ liệu tồn tại khi refresh tab, mất khi đóng trình duyệt.
+Data persists across tab refreshes but is cleared when the browser is closed.
 
 ---
 
-## 8. Kiến trúc kỹ thuật
+## 8. Technical Architecture
 
-### Công nghệ
+### Technology Stack
 
-| Thành phần | Công nghệ |
+| Component | Technology |
 |---|---|
 | Framework | Angular 21, Standalone components |
 | State | Angular Signals (`signal`, `computed`, `effect`) |
 | Diff algorithm | Myers diff (`diff` package — jsdiff) |
-| Syntax highlighting | Prism.js (lazy load theo ngôn ngữ) |
+| Syntax highlighting | Prism.js (lazy-loaded per language) |
 | Virtual scrolling | Angular CDK `ScrollingModule` |
 | Styling | Tailwind CSS v4 + PrimeNG |
 
-### Luồng dữ liệu
+### Data Flow
 
 ```
 User Input (paste / file drop)
@@ -234,46 +234,46 @@ diffResult signal (DiffResult)
 DiffViewer / Minimap / DiffSummary render
 ```
 
-### State service (`CodeCompareState`)
+### State Service (`CodeCompareState`)
 
-Nguồn sự thật duy nhất. Các signal chính:
+Single source of truth. Key signals:
 
-| Signal | Kiểu | Mô tả |
+| Signal | Type | Description |
 |---|---|---|
-| `leftFile` | `FileContent \| null` | Nội dung Code A |
-| `rightFile` | `FileContent \| null` | Nội dung Code B |
-| `options` | `DiffOptions` | Tất cả tùy chọn lọc |
-| `viewMode` | `'side-by-side' \| 'inline'` | Chế độ xem hiện tại |
-| `showAllUnchanged` | `boolean` | Toggle fold |
-| `scrollRatio` | `number` | Đồng bộ scroll giữa 2 panel |
-| `searchState` | `SearchState` | Query + kết quả tìm kiếm |
-| `diffResult` | computed | Kết quả diff (tự tính lại khi input thay đổi) |
+| `leftFile` | `FileContent \| null` | Code A content |
+| `rightFile` | `FileContent \| null` | Code B content |
+| `options` | `DiffOptions` | All filter options |
+| `viewMode` | `'side-by-side' \| 'inline'` | Current view mode |
+| `showAllUnchanged` | `boolean` | Fold toggle |
+| `scrollRatio` | `number` | Synchronized scroll between two panels |
+| `searchState` | `SearchState` | Query + search results |
+| `diffResult` | computed | Diff output (recomputed automatically when inputs change) |
 
-### Thuật toán diff (`DiffEngine`)
+### Diff Algorithm (`DiffEngine`)
 
-1. Áp dụng ignore options lên từng dòng (whitespace, case, blank lines, comments, trim)
-2. Chạy Myers line-level diff (`diffLines`)
-3. Ghép cặp khối removed + added liền kề → **Modified**
-4. Với dòng Modified: tính word/char tokens
-5. Gom thành **hunks** với context lines; gấp các vùng unchanged thừa
-6. Tạo row sets cho side-by-side và inline
-7. Tính thống kê (added, removed, modified, unchanged, similarity %)
+1. Apply ignore options to each line (whitespace, case, blank lines, comments, trim)
+2. Run Myers line-level diff (`diffLines`)
+3. Pair adjacent removed + added blocks → **Modified**
+4. For Modified lines: compute word/char tokens
+5. Group into **hunks** with context lines; fold excess unchanged regions
+6. Build row sets for side-by-side and inline views
+7. Compute statistics (added, removed, modified, unchanged, similarity %)
 
 ### Performance
 
-- **Virtual Scrolling**: Chỉ render ~40–50 dòng hiển thị, không render toàn bộ
-- **Computed signal**: Diff chỉ tính lại khi input thực sự thay đổi
-- **Debounce 400ms**: Tránh diff liên tục khi đang gõ
-- **Lazy Prism**: Load grammar ngôn ngữ theo yêu cầu
-- **Minimap canvas**: Chỉ vẽ lại khi diffResult thay đổi
+- **Virtual Scrolling**: Only renders ~40–50 visible lines at a time, never the full list
+- **Computed signal**: Diff only recalculates when inputs actually change
+- **Debounce 400ms**: Prevents continuous diffing while typing
+- **Lazy Prism**: Language grammars loaded on demand
+- **Minimap canvas**: Only redraws when `diffResult` changes
 
-### Bảo mật
+### Security
 
-Toàn bộ nội dung người dùng được HTML-escape qua `DiffEngine.escapeHtml()` trước khi lưu vào `DiffLine.raw`. Không có XSS risk khi render `[innerHTML]`.
+All user content is HTML-escaped via `DiffEngine.escapeHtml()` before being stored in `DiffLine.raw`. There is no XSS risk when rendering with `[innerHTML]`.
 
 ---
 
-## 9. Cấu trúc file
+## 9. File Structure
 
 ```
 src/app/pages/code-compare/
@@ -282,7 +282,7 @@ src/app/pages/code-compare/
 ├── code-compare.scss
 │
 ├── models/
-│   └── diff.models.ts                      ← Toàn bộ TypeScript interfaces
+│   └── diff.models.ts                      ← All TypeScript interfaces
 │
 ├── services/
 │   ├── code-compare-state.service.ts       ← State management (signals)
@@ -327,8 +327,7 @@ src/app/pages/code-compare/
 
 ## Keyboard Shortcuts
 
-| Phím | Hành động |
+| Key | Action |
 |---|---|
-| `Alt + ↓` | Nhảy đến khối diff tiếp theo |
-| `Alt + ↑` | Nhảy đến khối diff trước đó |
-
+| `Alt + ↓` | Jump to next diff block |
+| `Alt + ↑` | Jump to previous diff block |
