@@ -1,4 +1,4 @@
-import { Component, computed, inject, HostListener, input, signal } from '@angular/core';
+import { Component, computed, inject, HostListener, input, signal, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -50,26 +50,36 @@ export class DiffToolbar {
     searchQuery = computed(() => this.state.searchState().query);
     diffResult = computed(() => this.state.diffResult());
 
-    private currentDiffIdx = 0;
-    private diffBlockIndices: number[] = [];
+    currentDiffIdx = signal(0);
 
-    currentDiffIndex = computed(() => {
-        this.updateDiffBlocks();
-        return this.currentDiffIdx;
-    });
-
-    totalDiffBlocks = computed(() => {
-        this.updateDiffBlocks();
-        return this.diffBlockIndices.length;
-    });
-
-    private updateDiffBlocks(): void {
+    // Compute block starts as { sbIdx, inlineIdx } pairs.
+    // modified rows = 1 side-by-side row but 2 inline rows, so indices diverge.
+    private diffBlocks = computed<{ sbIdx: number; inlineIdx: number }[]>(() => {
         const result = this.state.diffResult();
-        if (!result) { this.diffBlockIndices = []; return; }
-        this.diffBlockIndices = result.inlineRows
-            .map((line, idx) => ({ type: line.type, idx }))
-            .filter(({ type }) => type !== 'unchanged' && type !== 'fold')
-            .map(({ idx }) => idx);
+        if (!result) return [];
+        const blocks: { sbIdx: number; inlineIdx: number }[] = [];
+        let prevChanged = false;
+        let inlineOffset = 0;
+        result.sideBySideRows.forEach((row, sbIdx) => {
+            const isChanged = row.left.type === 'removed' || row.left.type === 'modified' || row.right.type === 'added';
+            if (isChanged && !prevChanged) {
+                blocks.push({ sbIdx, inlineIdx: inlineOffset });
+            }
+            inlineOffset += row.left.type === 'modified' ? 2 : 1;
+            prevChanged = isChanged;
+        });
+        return blocks;
+    });
+
+    totalDiffBlocks = computed(() => this.diffBlocks().length);
+    currentDiffIndex = computed(() => this.currentDiffIdx());
+
+    constructor() {
+        // Reset navigation index when diff changes
+        effect(() => {
+            this.diffBlocks();
+            untracked(() => this.currentDiffIdx.set(0));
+        });
     }
 
     onViewModeChange(mode: ViewMode): void {
@@ -82,15 +92,24 @@ export class DiffToolbar {
     }
 
     nextDiff(): void {
-        this.updateDiffBlocks();
-        if (this.diffBlockIndices.length === 0) return;
-        this.currentDiffIdx = (this.currentDiffIdx + 1) % this.diffBlockIndices.length;
+        const blocks = this.diffBlocks();
+        if (blocks.length === 0) return;
+        const next = (this.currentDiffIdx() + 1) % blocks.length;
+        this.currentDiffIdx.set(next);
+        this.scrollToBlock(blocks[next]);
     }
 
     prevDiff(): void {
-        this.updateDiffBlocks();
-        if (this.diffBlockIndices.length === 0) return;
-        this.currentDiffIdx = (this.currentDiffIdx - 1 + this.diffBlockIndices.length) % this.diffBlockIndices.length;
+        const blocks = this.diffBlocks();
+        if (blocks.length === 0) return;
+        const prev = (this.currentDiffIdx() - 1 + blocks.length) % blocks.length;
+        this.currentDiffIdx.set(prev);
+        this.scrollToBlock(blocks[prev]);
+    }
+
+    private scrollToBlock(block: { sbIdx: number; inlineIdx: number }): void {
+        const idx = this.state.viewMode() === 'side-by-side' ? block.sbIdx : block.inlineIdx;
+        this.diffViewer()?.scrollToIndex(idx);
     }
 
     onExportHtml(): void {
@@ -127,13 +146,9 @@ export class DiffToolbar {
         if (event.altKey && event.key === 'ArrowDown') {
             event.preventDefault();
             this.nextDiff();
-        }
-        if (event.altKey && event.key === 'ArrowUp') {
+        } else if (event.altKey && event.key === 'ArrowUp') {
             event.preventDefault();
             this.prevDiff();
-        }
-        if (event.ctrlKey && event.key === 'f') {
-            // Focus search — let browser handle focus naturally
         }
     }
 }

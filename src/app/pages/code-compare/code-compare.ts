@@ -30,20 +30,21 @@ export class CodeCompare implements OnInit {
     rightLineCount = computed(() => this.state.rightFile()?.content.split('\n').length ?? 0);
 
     inputCollapsed = signal(false);
-    private autoCollapseDone = false;
 
     constructor() {
         effect(() => {
-            const hasBoth = this.hasBothFiles();
-            if (hasBoth && !this.autoCollapseDone) {
-                this.autoCollapseDone = true;
-                setTimeout(() => this.inputCollapsed.set(true), 600);
-            }
-            if (!hasBoth) {
-                this.autoCollapseDone = false;
+            if (!this.hasBothFiles()) {
                 this.inputCollapsed.set(false);
             }
         });
+    }
+
+    onInputPanelBlur(event: FocusEvent): void {
+        const container = event.currentTarget as HTMLElement;
+        const relatedTarget = event.relatedTarget as HTMLElement | null;
+        if (this.hasBothFiles() && (!relatedTarget || !container.contains(relatedTarget))) {
+            this.inputCollapsed.set(true);
+        }
     }
 
     ngOnInit(): void {
