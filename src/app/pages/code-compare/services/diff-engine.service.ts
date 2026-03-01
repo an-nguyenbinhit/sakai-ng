@@ -297,12 +297,12 @@ export class DiffEngine {
 
         for (const change of changes) {
             if (change.added) {
-                rightTokens.push({ text: this.escapeHtml(change.value), type: 'added' });
+                rightTokens.push({ text: change.value, type: 'added' });
             } else if (change.removed) {
-                leftTokens.push({ text: this.escapeHtml(change.value), type: 'removed' });
+                leftTokens.push({ text: change.value, type: 'removed' });
             } else {
-                leftTokens.push({ text: this.escapeHtml(change.value), type: 'equal' });
-                rightTokens.push({ text: this.escapeHtml(change.value), type: 'equal' });
+                leftTokens.push({ text: change.value, type: 'equal' });
+                rightTokens.push({ text: change.value, type: 'equal' });
             }
         }
 
