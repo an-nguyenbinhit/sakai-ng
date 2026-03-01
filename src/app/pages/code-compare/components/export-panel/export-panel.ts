@@ -30,7 +30,7 @@ export class ExportPanel {
         const rightFile = this.state.rightFile();
         if (!result || !leftFile || !rightFile) return;
 
-        this.exportService.exportHtml(result, leftFile, rightFile);
+        this.exportService.exportHtml(result, leftFile, rightFile, this.state.viewMode(), this.state.options());
         this.messageService.add({
             severity: 'success',
             summary: 'Exported',
@@ -39,7 +39,7 @@ export class ExportPanel {
         });
     }
 
-    onExportImage(): void {
+    async onExportImage(): Promise<void> {
         const result = this.state.diffResult();
         const leftFile = this.state.leftFile();
         const rightFile = this.state.rightFile();
@@ -47,7 +47,7 @@ export class ExportPanel {
 
         this.imageStatus.set('exporting');
         try {
-            this.exportService.exportImage(result, leftFile, rightFile);
+            await this.exportService.exportImage(result, leftFile, rightFile, this.state.viewMode(), this.state.options());
             this.imageStatus.set('done');
             this.messageService.add({
                 severity: 'success',
@@ -56,13 +56,13 @@ export class ExportPanel {
                 life: 2000
             });
             setTimeout(() => this.imageStatus.set('idle'), 2000);
-        } catch {
+        } catch (err) {
             this.imageStatus.set('idle');
             this.messageService.add({
                 severity: 'error',
                 summary: 'Export failed',
-                detail: 'Could not generate image',
-                life: 3000
+                detail: err instanceof Error ? err.message : 'Could not generate image',
+                life: 4000
             });
         }
     }

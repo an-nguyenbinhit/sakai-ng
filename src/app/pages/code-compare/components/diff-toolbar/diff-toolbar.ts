@@ -99,7 +99,7 @@ export class DiffToolbar {
         const rightFile = this.state.rightFile();
         if (!result || !leftFile || !rightFile) return;
 
-        this.exportService.exportHtml(result, leftFile, rightFile);
+        this.exportService.exportHtml(result, leftFile, rightFile, this.state.viewMode(), this.state.options());
         this.messageService.add({ severity: 'success', summary: 'Exported', detail: 'HTML diff file downloaded', life: 2000 });
     }
 
@@ -111,7 +111,7 @@ export class DiffToolbar {
 
         this.imageStatus.set('exporting');
         try {
-            await this.exportService.exportImage(result, leftFile, rightFile);
+            await this.exportService.exportImage(result, leftFile, rightFile, this.state.viewMode(), this.state.options());
             this.imageStatus.set('done');
             this.messageService.add({ severity: 'success', summary: 'Exported', detail: 'Diff image downloaded as PNG', life: 2000 });
             setTimeout(() => this.imageStatus.set('idle'), 2000);
