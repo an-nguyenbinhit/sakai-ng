@@ -1,32 +1,102 @@
-<div class="flex flex-col gap-4 p-4">
-    <!-- Input panels: always visible -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="p-4 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-border">
-            <p-code-input side="left" />
-        </div>
-        <div class="p-4 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-border">
-            <p-code-input side="right" />
+<div class="flex flex-col">
+
+    <!-- Compact collapsed header: animates in when both files loaded & panel collapsed -->
+    <div
+        class="overflow-hidden transition-[max-height,opacity] duration-500 ease-in-out"
+        [style.max-height]="(hasBothFiles() && inputCollapsed()) ? '56px' : '0px'"
+        [style.opacity]="(hasBothFiles() && inputCollapsed()) ? '1' : '0'"
+        [style.pointer-events]="(hasBothFiles() && inputCollapsed()) ? 'auto' : 'none'"
+    >
+        <div class="flex items-center gap-3 px-4 py-2.5 mb-2 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-border mx-4">
+            <!-- Left file info -->
+            <i class="pi pi-file text-primary text-sm shrink-0"></i>
+            <span class="text-sm font-medium text-surface-700 dark:text-surface-200 truncate" style="max-width: 200px">
+                {{ state.leftFile()?.name ?? 'untitled' }}
+            </span>
+            <span class="text-xs text-surface-400 shrink-0">{{ leftLineCount() }} lines</span>
+
+            <i class="pi pi-arrows-h text-surface-300 dark:text-surface-600 shrink-0 mx-2"></i>
+
+            <!-- Right file info -->
+            <i class="pi pi-file text-primary text-sm shrink-0"></i>
+            <span class="text-sm font-medium text-surface-700 dark:text-surface-200 truncate" style="max-width: 200px">
+                {{ state.rightFile()?.name ?? 'untitled' }}
+            </span>
+            <span class="text-xs text-surface-400 shrink-0">{{ rightLineCount() }} lines</span>
+
+            <!-- Edit button -->
+            <p-button
+                class="ml-auto"
+                icon="pi pi-pencil"
+                label="Edit inputs"
+                severity="secondary"
+                [text]="true"
+                size="small"
+                pTooltip="Expand input panels to edit"
+                tooltipPosition="left"
+                (onClick)="inputCollapsed.set(false)"
+            />
         </div>
     </div>
 
-    @if (hasBothFiles()) {
-        <p-diff-toolbar />
-        <p-diff-summary />
+    <!-- Input panels: collapse/expand with grid-template-rows animation -->
+    <div
+        class="grid transition-[grid-template-rows] duration-500 ease-in-out"
+        [style.grid-template-rows]="(hasBothFiles() && inputCollapsed()) ? '0fr' : '1fr'"
+    >
+        <div class="overflow-hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                <div class="p-4 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-border">
+                    <p-code-input side="left" />
+                </div>
+                <div class="p-4 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-border">
+                    <p-code-input side="right" />
+                </div>
+            </div>
 
-        <!-- Diff viewer + minimap -->
-        <div class="flex gap-3">
-            <div class="flex-1 min-w-0">
-                <p-diff-viewer />
-            </div>
-            <div class="w-14 shrink-0">
-                <p-diff-minimap />
-            </div>
+            <!-- Manual collapse button: visible only when both files are loaded -->
+            @if (hasBothFiles()) {
+                <div class="flex justify-center pb-3 -mt-2">
+                    <p-button
+                        icon="pi pi-chevron-up"
+                        label="Collapse panels"
+                        severity="secondary"
+                        [text]="true"
+                        size="small"
+                        pTooltip="Collapse to see full diff view"
+                        (onClick)="inputCollapsed.set(true)"
+                    />
+                </div>
+            }
+
+            @if (!hasBothFiles() && hasAnyFile()) {
+                <div class="flex items-center px-4 pb-4 gap-2 text-sm text-surface-400">
+                    <i class="pi pi-info-circle"></i>
+                    <span>Add code to the {{ state.leftFile() ? 'right (Code B)' : 'left (Code A)' }} panel to start comparing.</span>
+                </div>
+            }
         </div>
+    </div>
 
-    } @else if (hasAnyFile()) {
-        <div class="flex items-center justify-center p-4 text-surface-400 border border-dashed border-surface-200 dark:border-surface-700 rounded-border">
-            <i class="pi pi-info-circle mr-2"></i>
-            <span>Add code to the {{ state.leftFile() ? 'right (Code B)' : 'left (Code A)' }} panel to start comparing.</span>
+    <!-- Diff section -->
+    @if (hasBothFiles()) {
+        <div class="flex flex-col gap-2 px-4 pb-4">
+            <p-diff-toolbar />
+            <p-diff-summary />
+
+            <!-- Diff viewer: taller when inputs are collapsed -->
+            <div
+                class="flex gap-3 transition-[height] duration-500 ease-in-out"
+                [style.height]="inputCollapsed() ? 'calc(100vh - 22rem)' : '65vh'"
+            >
+                <div class="flex-1 min-w-0 h-full">
+                    <p-diff-viewer class="block h-full" />
+                </div>
+                <div class="w-14 shrink-0">
+                    <p-diff-minimap />
+                </div>
+            </div>
         </div>
     }
+
 </div>
