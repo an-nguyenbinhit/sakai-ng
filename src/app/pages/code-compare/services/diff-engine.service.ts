@@ -12,7 +12,7 @@ interface PairedLine {
 
 @Injectable({ providedIn: 'root' })
 export class DiffEngine {
-    compute(leftContent: string, rightContent: string, opts: DiffOptions, expandedHunks: Set<number> = new Set()): DiffResult {
+    compute(leftContent: string, rightContent: string, opts: DiffOptions, showAll = false): DiffResult {
         const leftNorm = this.applyIgnoreOptions(leftContent, opts);
         const rightNorm = this.applyIgnoreOptions(rightContent, opts);
 
@@ -21,17 +21,25 @@ export class DiffEngine {
         });
 
         const paired = this.pairLines(changes);
-        const hunks = this.buildHunks(paired, opts.contextLines, expandedHunks);
+
+        // Compute true totals from paired BEFORE folding so stats don't change with show/hide toggle
+        let totalAdded = 0;
+        let totalRemoved = 0;
+        let totalModified = 0;
+        let totalUnchanged = 0;
+        for (const row of paired) {
+            if (row.type === 'added') totalAdded++;
+            else if (row.type === 'removed') totalRemoved++;
+            else if (row.type === 'modified') totalModified++;
+            else totalUnchanged++;
+        }
+
+        const hunks = this.buildHunks(paired, opts.contextLines, showAll);
 
         const flatLeft: DiffLine[] = [];
         const flatRight: DiffLine[] = [];
         const sideBySideRows: SideBySideRow[] = [];
         const inlineRows: DiffLine[] = [];
-
-        let totalAdded = 0;
-        let totalRemoved = 0;
-        let totalModified = 0;
-        let totalUnchanged = 0;
 
         for (const hunk of hunks) {
             for (const row of hunk) {
@@ -88,22 +96,18 @@ export class DiffEngine {
                     leftLine.raw = '';
                     leftLine.highlightedHtml = '';
                     rightLine.type = 'added';
-                    totalAdded++;
                 } else if (row.type === 'removed') {
                     leftLine.type = 'removed';
                     rightLine.type = 'unchanged';
                     rightLine.lineNumber = null;
                     rightLine.raw = '';
                     rightLine.highlightedHtml = '';
-                    totalRemoved++;
                 } else if (row.type === 'modified') {
                     leftLine.type = 'modified';
                     rightLine.type = 'modified';
-                    totalModified++;
                 } else {
                     leftLine.type = 'unchanged';
                     rightLine.type = 'unchanged';
-                    totalUnchanged++;
                 }
 
                 flatLeft.push(leftLine);
@@ -234,7 +238,10 @@ export class DiffEngine {
         return result;
     }
 
-    private buildHunks(paired: PairedLine[], contextLines: number, expandedHunks: Set<number>): PairedLine[][] {
+    private buildHunks(paired: PairedLine[], contextLines: number, showAll = false): PairedLine[][] {
+        if (showAll) {
+            return paired.length > 0 ? [paired] : [];
+        }
         // Find indices of non-unchanged lines
         const changedIndices = new Set<number>();
         paired.forEach((row, idx) => {
@@ -247,7 +254,6 @@ export class DiffEngine {
 
         const result: PairedLine[][] = [];
         let currentHunk: PairedLine[] = [];
-        let hunkIndex = 0;
 
         for (let i = 0; i < paired.length; i++) {
             if (changedIndices.has(i)) {
@@ -263,23 +269,15 @@ export class DiffEngine {
                         result.push(currentHunk);
                         currentHunk = [];
                     }
-                    if (expandedHunks.has(hunkIndex)) {
-                        // Expand: push actual unchanged lines
-                        result.push(paired.slice(i, j));
-                    } else {
-                        // Fold: add placeholder
-                        const foldPlaceholder: any = {
-                            type: 'fold',
-                            leftText: null,
-                            rightText: null,
-                            leftLineNum: null,
-                            rightLineNum: null,
-                            foldedCount: foldCount,
-                            hunkIndex: hunkIndex
-                        };
-                        result.push([foldPlaceholder]);
-                    }
-                    hunkIndex++;
+                    const foldPlaceholder: any = {
+                        type: 'fold',
+                        leftText: null,
+                        rightText: null,
+                        leftLineNum: null,
+                        rightLineNum: null,
+                        foldedCount: foldCount
+                    };
+                    result.push([foldPlaceholder]);
                     i = j - 1;
                 }
             }

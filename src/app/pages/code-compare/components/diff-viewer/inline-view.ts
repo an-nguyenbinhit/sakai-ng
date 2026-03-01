@@ -32,12 +32,6 @@ export class InlineView {
         this.state.setScrollRatio(ratio);
     }
 
-    onFoldClick(line: DiffLine): void {
-        if (line.hunkIndex !== undefined) {
-            this.state.expandFold(line.hunkIndex);
-        }
-    }
-
     trackLine(index: number, _line: DiffLine): number {
         return index;
     }

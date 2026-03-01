@@ -25,7 +25,7 @@ export class DiffLineComponent {
             'bg-red-50 dark:bg-red-950': type === 'removed',
             'bg-yellow-50 dark:bg-yellow-950': type === 'modified',
             'bg-surface-0 dark:bg-surface-900': type === 'unchanged',
-            'bg-surface-100 dark:bg-surface-800 cursor-pointer hover:bg-surface-200 dark:hover:bg-surface-700': type === 'fold',
+            'bg-surface-100 dark:bg-surface-800': type === 'fold',
             'border-b border-surface-100 dark:border-surface-800': type !== 'fold'
         };
     });

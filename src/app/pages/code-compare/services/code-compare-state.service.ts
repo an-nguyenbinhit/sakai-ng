@@ -68,14 +68,14 @@ export class CodeCompareState {
     viewMode = signal<ViewMode>('side-by-side');
     searchState = signal<SearchState>({ query: '', matchIndices: [], currentMatchIndex: 0 });
     scrollRatio = signal<number>(0);
-    expandedHunks = signal<Set<number>>(new Set());
+    showAllUnchanged = signal<boolean>(false);
 
     // Computed diff result
     diffResult = computed<DiffResult | null>(() => {
         const left = this.leftFile();
         const right = this.rightFile();
         if (!left || !right) return null;
-        return this.diffEngine.compute(left.content, right.content, this.options(), this.expandedHunks());
+        return this.diffEngine.compute(left.content, right.content, this.options(), this.showAllUnchanged());
     });
 
     constructor() {
@@ -98,7 +98,6 @@ export class CodeCompareState {
         } else {
             this.rightFile.set(file);
         }
-        this.expandedHunks.set(new Set());
     }
 
     clearFile(side: 'left' | 'right'): void {
@@ -107,7 +106,6 @@ export class CodeCompareState {
         } else {
             this.rightFile.set(null);
         }
-        this.expandedHunks.set(new Set());
     }
 
     clearAll(): void {
@@ -121,16 +119,12 @@ export class CodeCompareState {
         this.viewMode.set('side-by-side');
         this.searchState.set({ query: '', matchIndices: [], currentMatchIndex: 0 });
         this.scrollRatio.set(0);
-        this.expandedHunks.set(new Set());
+        this.showAllUnchanged.set(false);
         sessionStorage.removeItem(SESSION_KEY);
     }
 
-    expandFold(hunkIndex: number): void {
-        this.expandedHunks.update(set => {
-            const next = new Set(set);
-            next.add(hunkIndex);
-            return next;
-        });
+    toggleShowAllUnchanged(): void {
+        this.showAllUnchanged.update(v => !v);
     }
 
     swapFiles(): void {

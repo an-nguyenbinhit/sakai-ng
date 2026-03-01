@@ -46,6 +46,7 @@ export class DiffToolbar {
 
     viewMode = computed(() => this.state.viewMode());
     options = computed(() => this.state.options());
+    showAllUnchanged = computed(() => this.state.showAllUnchanged());
     searchState = computed(() => this.state.searchState());
     searchQuery = computed(() => this.state.searchState().query);
     diffResult = computed(() => this.state.diffResult());

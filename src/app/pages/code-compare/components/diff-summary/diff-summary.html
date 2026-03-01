@@ -35,6 +35,17 @@
             </span>
         </div>
 
+        <p-button
+            [icon]="showAllUnchanged() ? 'pi pi-eye-slash' : 'pi pi-eye'"
+            [label]="showAllUnchanged() ? 'Hide unchanged' : 'Show unchanged'"
+            severity="secondary"
+            [text]="true"
+            size="small"
+            (onClick)="state.toggleShowAllUnchanged()"
+            [pTooltip]="showAllUnchanged() ? 'Collapse unchanged lines' : 'Expand all unchanged lines'"
+            tooltipPosition="top"
+        />
+
         <div class="ml-auto text-xs text-surface-400">
             Total: {{ summary()!.total }} lines
         </div>

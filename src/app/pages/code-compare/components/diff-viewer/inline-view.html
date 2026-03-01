@@ -16,7 +16,6 @@
             *cdkVirtualFor="let line of rows(); trackBy: trackLine"
             [line]="line"
             [searchQuery]="searchQuery()"
-            (click)="onFoldClick(line)"
         />
     </cdk-virtual-scroll-viewport>
 </div>

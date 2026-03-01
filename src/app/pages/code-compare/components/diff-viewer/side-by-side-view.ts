@@ -64,13 +64,6 @@ export class SideBySideView implements AfterViewInit, OnDestroy {
         if (this.rightScrollListener) rightEl.removeEventListener('scroll', this.rightScrollListener);
     }
 
-    onFoldClick(row: SideBySideRow): void {
-        const hunkIndex = row.left.hunkIndex ?? row.right.hunkIndex;
-        if (hunkIndex !== undefined) {
-            this.state.expandFold(hunkIndex);
-        }
-    }
-
     trackRow(index: number, row: SideBySideRow): number {
         return row.index;
     }
