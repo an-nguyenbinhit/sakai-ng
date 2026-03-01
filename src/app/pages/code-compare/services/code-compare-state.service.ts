@@ -111,10 +111,18 @@ export class CodeCompareState {
     }
 
     clearAll(): void {
+        this.reset();
+    }
+
+    reset(): void {
         this.leftFile.set(null);
         this.rightFile.set(null);
+        this.options.set({ ...DEFAULT_OPTIONS });
+        this.viewMode.set('side-by-side');
         this.searchState.set({ query: '', matchIndices: [], currentMatchIndex: 0 });
+        this.scrollRatio.set(0);
         this.expandedHunks.set(new Set());
+        sessionStorage.removeItem(SESSION_KEY);
     }
 
     expandFold(hunkIndex: number): void {

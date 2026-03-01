@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CodeCompareState } from './services/code-compare-state.service';
 import { CodeInput } from './components/code-input/code-input';
@@ -17,9 +17,13 @@ import { DiffMinimap } from './components/diff-minimap/diff-minimap';
     templateUrl: './code-compare.html',
     styleUrl: './code-compare.scss'
 })
-export class CodeCompare {
+export class CodeCompare implements OnInit {
     state = inject(CodeCompareState);
 
     hasAnyFile = computed(() => !!(this.state.leftFile() || this.state.rightFile()));
     hasBothFiles = computed(() => !!(this.state.leftFile() && this.state.rightFile()));
+
+    ngOnInit(): void {
+        this.state.reset();
+    }
 }
