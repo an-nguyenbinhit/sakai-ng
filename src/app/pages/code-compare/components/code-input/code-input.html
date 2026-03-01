@@ -6,7 +6,11 @@
                 {{ side() === 'left' ? 'Code A' : 'Code B' }}
             </span>
             @if (fileName()) {
-                <p-tag [value]="fileName()!" severity="secondary" styleClass="text-xs truncate max-w-36" />
+                <span
+                    class="inline-block px-2 py-0.5 rounded bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-200 text-xs truncate min-w-0 max-w-36 shrink"
+                    [pTooltip]="fileName()!"
+                    tooltipPosition="bottom"
+                >{{ fileName() }}</span>
             }
             @if (detectedLanguage() !== 'plaintext' && fileName()) {
                 <p-tag [value]="detectedLanguage()" severity="secondary" styleClass="text-xs" />
