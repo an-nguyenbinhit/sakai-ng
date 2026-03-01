@@ -1,6 +1,9 @@
 <div
-    class="flex min-h-6 font-mono text-sm leading-6 select-text group"
+    class="flex min-w-max font-mono select-text group"
     [ngClass]="rowClass()"
+    [style.font-size.px]="fontSize()"
+    [style.line-height.px]="lineHeight()"
+    [style.min-height.px]="lineHeight()"
 >
     <!-- Line number gutter -->
     <div
@@ -20,7 +23,7 @@
     </div>
 
     <!-- Content -->
-    <div class="flex-1 px-2 py-0.5 overflow-x-auto">
+    <div class="flex-1 px-2 py-0.5 whitespace-pre">
         @if (line().type === 'fold') {
             <span class="text-surface-500 dark:text-surface-400 italic text-xs">
                 ... {{ line().foldedCount }} unchanged lines ...

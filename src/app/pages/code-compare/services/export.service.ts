@@ -3,26 +3,25 @@ import { DiffResult, FileContent, DiffOptions, ViewMode } from '../models/diff.m
 
 @Injectable({ providedIn: 'root' })
 export class ExportService {
-    exportHtml(result: DiffResult, leftFile: FileContent, rightFile: FileContent, viewMode: ViewMode, options: DiffOptions): void {
+    exportHtml(result: DiffResult, leftFile: FileContent, rightFile: FileContent, viewMode: ViewMode, options: DiffOptions, fontSize = 14): void {
         const html =
             viewMode === 'inline'
-                ? this.buildInlineHtmlExport(result, leftFile, rightFile, options)
-                : this.buildSideBySideHtmlExport(result, leftFile, rightFile, options);
+                ? this.buildInlineHtmlExport(result, leftFile, rightFile, options, fontSize)
+                : this.buildSideBySideHtmlExport(result, leftFile, rightFile, options, fontSize);
         this.downloadFile(`diff-${Date.now()}.html`, html, 'text/html;charset=utf-8');
     }
 
-    exportImage(result: DiffResult, leftFile: FileContent, rightFile: FileContent, viewMode: ViewMode, options: DiffOptions): Promise<void> {
+    exportImage(result: DiffResult, leftFile: FileContent, rightFile: FileContent, viewMode: ViewMode, options: DiffOptions, fontSize = 14): Promise<void> {
         return viewMode === 'inline'
-            ? this.renderInlineCanvas(result, leftFile, rightFile, options)
-            : this.renderSideBySideCanvas(result, leftFile, rightFile, options);
+            ? this.renderInlineCanvas(result, leftFile, rightFile, options, fontSize)
+            : this.renderSideBySideCanvas(result, leftFile, rightFile, options, fontSize);
     }
 
     // ─── Side-by-side image ───────────────────────────────────────────────────
 
-    private renderSideBySideCanvas(result: DiffResult, leftFile: FileContent, rightFile: FileContent, options: DiffOptions): Promise<void> {
+    private renderSideBySideCanvas(result: DiffResult, leftFile: FileContent, rightFile: FileContent, options: DiffOptions, fontSize: number): Promise<void> {
         return new Promise((resolve, reject) => {
-            const fontSize = 14;
-            const lineHeight = 22;
+            const lineHeight = fontSize + 8;
             const numColWidth = 52;
             const padding = 8;
             const headerHeight = 60;
@@ -286,10 +285,9 @@ export class ExportService {
 
     // ─── Inline image ─────────────────────────────────────────────────────────
 
-    private renderInlineCanvas(result: DiffResult, leftFile: FileContent, rightFile: FileContent, options: DiffOptions): Promise<void> {
+    private renderInlineCanvas(result: DiffResult, leftFile: FileContent, rightFile: FileContent, options: DiffOptions, fontSize: number): Promise<void> {
         return new Promise((resolve, reject) => {
-            const fontSize = 14;
-            const lineHeight = 22;
+            const lineHeight = fontSize + 8;
             const numColWidth = 52;
             const markerWidth = 24;
             const padding = 8;
@@ -541,7 +539,7 @@ export class ExportService {
 
     // ─── Side-by-side HTML ────────────────────────────────────────────────────
 
-    private buildSideBySideHtmlExport(result: DiffResult, leftFile: FileContent, rightFile: FileContent, options: DiffOptions): string {
+    private buildSideBySideHtmlExport(result: DiffResult, leftFile: FileContent, rightFile: FileContent, options: DiffOptions, fontSize: number): string {
         const rows = result.sideBySideRows
             .map(row => {
                 if (row.left.type === 'fold') {
@@ -581,7 +579,7 @@ export class ExportService {
   .added { color: #155724; background: #d4edda; padding: 2px 8px; border-radius: 4px; }
   .removed { color: #721c24; background: #f8d7da; padding: 2px 8px; border-radius: 4px; }
   .modified { color: #856404; background: #fff3cd; padding: 2px 8px; border-radius: 4px; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  table { width: 100%; border-collapse: collapse; font-size: ${fontSize}px; table-layout: fixed; }
   td { border-bottom: 1px solid #f0f0f0; vertical-align: top; }
   .mark-add { background: #acf2bd; }
   .mark-del { background: #fdb8c0; }
@@ -615,7 +613,7 @@ ${rows}
 
     // ─── Inline HTML ──────────────────────────────────────────────────────────
 
-    private buildInlineHtmlExport(result: DiffResult, leftFile: FileContent, rightFile: FileContent, options: DiffOptions): string {
+    private buildInlineHtmlExport(result: DiffResult, leftFile: FileContent, rightFile: FileContent, options: DiffOptions, fontSize: number): string {
         const rows = result.inlineRows
             .map(row => {
                 if (row.type === 'fold') {
@@ -653,7 +651,7 @@ ${rows}
   .added { color: #155724; background: #d4edda; padding: 2px 8px; border-radius: 4px; }
   .removed { color: #721c24; background: #f8d7da; padding: 2px 8px; border-radius: 4px; }
   .modified { color: #856404; background: #fff3cd; padding: 2px 8px; border-radius: 4px; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  table { width: 100%; border-collapse: collapse; font-size: ${fontSize}px; table-layout: fixed; }
   td { border-bottom: 1px solid #f0f0f0; vertical-align: top; }
   .mark-add { background: #acf2bd; }
   .mark-del { background: #fdb8c0; }

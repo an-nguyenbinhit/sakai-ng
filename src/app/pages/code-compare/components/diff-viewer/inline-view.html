@@ -8,7 +8,7 @@
 
     <cdk-virtual-scroll-viewport
         #viewport
-        [itemSize]="lineHeight"
+        [itemSize]="state.lineHeight()"
         class="flex-1 overflow-auto"
         (scrolledIndexChange)="onScroll($event)"
     >
@@ -16,6 +16,8 @@
             *cdkVirtualFor="let line of rows(); trackBy: trackLine"
             [line]="line"
             [searchQuery]="searchQuery()"
+            [fontSize]="state.fontSize()"
+            [lineHeight]="state.lineHeight()"
         />
     </cdk-virtual-scroll-viewport>
 </div>

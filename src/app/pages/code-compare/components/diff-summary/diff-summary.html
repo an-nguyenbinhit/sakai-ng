@@ -35,16 +35,45 @@
             </span>
         </div>
 
-        <p-button
-            [icon]="showAllUnchanged() ? 'pi pi-eye-slash' : 'pi pi-eye'"
-            [label]="showAllUnchanged() ? 'Hide unchanged' : 'Show unchanged'"
-            severity="secondary"
-            [text]="true"
-            size="small"
-            (onClick)="state.toggleShowAllUnchanged()"
-            [pTooltip]="showAllUnchanged() ? 'Collapse unchanged lines' : 'Expand all unchanged lines'"
-            tooltipPosition="top"
-        />
+        @if (summary()!.totalUnchanged > 0) {
+            <p-button
+                [icon]="showAllUnchanged() ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                [label]="showAllUnchanged() ? 'Hide unchanged' : 'Show unchanged'"
+                severity="secondary"
+                [text]="true"
+                size="small"
+                (onClick)="state.toggleShowAllUnchanged()"
+                [pTooltip]="showAllUnchanged() ? 'Collapse unchanged lines' : 'Expand all unchanged lines'"
+                tooltipPosition="top"
+            />
+        }
+
+        <!-- Font size control -->
+        <div class="flex items-center gap-0.5">
+            <p-button
+                icon="pi pi-minus"
+                severity="secondary"
+                [text]="true"
+                size="small"
+                (onClick)="state.decreaseFontSize()"
+                [disabled]="state.fontSize() <= 10"
+                pTooltip="Decrease font size"
+                tooltipPosition="top"
+                aria-label="Decrease font size"
+            />
+            <span class="text-xs text-surface-500 w-10 text-center font-mono select-none">{{ state.fontSize() }}px</span>
+            <p-button
+                icon="pi pi-plus"
+                severity="secondary"
+                [text]="true"
+                size="small"
+                (onClick)="state.increaseFontSize()"
+                [disabled]="state.fontSize() >= 22"
+                pTooltip="Increase font size"
+                tooltipPosition="top"
+                aria-label="Increase font size"
+            />
+        </div>
 
         <div class="ml-auto text-xs text-surface-400">
             Total: {{ summary()!.total }} lines

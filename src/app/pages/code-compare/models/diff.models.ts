@@ -65,6 +65,7 @@ export interface CodeCompareSession {
     rightFile: FileContent | null;
     options: DiffOptions;
     viewMode: ViewMode;
+    fontSize?: number;
 }
 
 export const DEFAULT_OPTIONS: DiffOptions = {

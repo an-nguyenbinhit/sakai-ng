@@ -12,6 +12,8 @@ import { DiffLine, WordToken } from '../../models/diff.models';
 export class DiffLineComponent {
     line = input.required<DiffLine>();
     searchQuery = input<string>('');
+    fontSize = input<number>(14);
+    lineHeight = input<number>(24);
 
     hasTokens = computed(() => {
         const tokens = this.line().tokens;

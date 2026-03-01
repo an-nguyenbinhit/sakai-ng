@@ -6,13 +6,15 @@
         </div>
         <cdk-virtual-scroll-viewport
             #leftViewport
-            [itemSize]="lineHeight"
+            [itemSize]="state.lineHeight()"
             class="flex-1 overflow-auto"
         >
             <p-diff-line
                 *cdkVirtualFor="let row of rows(); trackBy: trackRow"
                 [line]="row.left"
                 [searchQuery]="searchQuery()"
+                [fontSize]="state.fontSize()"
+                [lineHeight]="state.lineHeight()"
             />
         </cdk-virtual-scroll-viewport>
     </div>
@@ -24,13 +26,15 @@
         </div>
         <cdk-virtual-scroll-viewport
             #rightViewport
-            [itemSize]="lineHeight"
+            [itemSize]="state.lineHeight()"
             class="flex-1 overflow-auto"
         >
             <p-diff-line
                 *cdkVirtualFor="let row of rows(); trackBy: trackRow"
                 [line]="row.right"
                 [searchQuery]="searchQuery()"
+                [fontSize]="state.fontSize()"
+                [lineHeight]="state.lineHeight()"
             />
         </cdk-virtual-scroll-viewport>
     </div>

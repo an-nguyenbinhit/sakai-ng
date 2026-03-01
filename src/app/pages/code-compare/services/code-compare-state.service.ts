@@ -31,6 +31,8 @@ export class CodeCompareState {
     searchState = signal<SearchState>({ query: '', matchIndices: [], currentMatchIndex: 0 });
     scrollRatio = signal<number>(0);
     showAllUnchanged = signal<boolean>(false);
+    fontSize = signal<number>(14);
+    lineHeight = computed(() => this.fontSize() + 10);
 
     // Computed diff result
     diffResult = computed<DiffResult | null>(() => {
@@ -82,7 +84,16 @@ export class CodeCompareState {
         this.searchState.set({ query: '', matchIndices: [], currentMatchIndex: 0 });
         this.scrollRatio.set(0);
         this.showAllUnchanged.set(false);
+        this.fontSize.set(14);
         sessionStorage.removeItem(SESSION_KEY);
+    }
+
+    increaseFontSize(): void {
+        this.fontSize.update(s => Math.min(s + 2, 22));
+    }
+
+    decreaseFontSize(): void {
+        this.fontSize.update(s => Math.max(s - 2, 10));
     }
 
     toggleShowAllUnchanged(): void {
@@ -149,7 +160,8 @@ export class CodeCompareState {
                 leftFile: this.leftFile(),
                 rightFile: this.rightFile(),
                 options: this.options(),
-                viewMode: this.viewMode()
+                viewMode: this.viewMode(),
+                fontSize: this.fontSize()
             };
             sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
         } catch {
@@ -166,6 +178,7 @@ export class CodeCompareState {
             if (session.rightFile) this.rightFile.set(session.rightFile);
             if (session.options) this.options.set(session.options);
             if (session.viewMode) this.viewMode.set(session.viewMode);
+            if (session.fontSize) this.fontSize.set(session.fontSize);
         } catch {
             sessionStorage.removeItem(SESSION_KEY);
         }

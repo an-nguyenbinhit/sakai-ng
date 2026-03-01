@@ -5,8 +5,6 @@ import { CodeCompareState } from '../../services/code-compare-state.service';
 import { DiffLineComponent } from '../diff-line/diff-line';
 import { SideBySideRow } from '../../models/diff.models';
 
-const LINE_HEIGHT = 24; // px
-
 @Component({
     selector: 'p-side-by-side-view',
     standalone: true,
@@ -15,12 +13,10 @@ const LINE_HEIGHT = 24; // px
     styleUrl: './side-by-side-view.scss'
 })
 export class SideBySideView implements AfterViewInit, OnDestroy {
-    private state = inject(CodeCompareState);
+    state = inject(CodeCompareState);
 
     leftViewport = viewChild.required<CdkVirtualScrollViewport>('leftViewport');
     rightViewport = viewChild.required<CdkVirtualScrollViewport>('rightViewport');
-
-    readonly lineHeight = LINE_HEIGHT;
 
     rows = computed<SideBySideRow[]>(() => this.state.diffResult()?.sideBySideRows ?? []);
     leftName = computed(() => this.state.leftFile()?.name ?? 'Code A');
@@ -64,7 +60,7 @@ export class SideBySideView implements AfterViewInit, OnDestroy {
         if (this.rightScrollListener) rightEl.removeEventListener('scroll', this.rightScrollListener);
     }
 
-    trackRow(index: number, row: SideBySideRow): number {
+    trackRow(_index: number, row: SideBySideRow): number {
         return row.index;
     }
 
