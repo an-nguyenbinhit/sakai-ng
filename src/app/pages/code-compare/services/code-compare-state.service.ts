@@ -13,44 +13,6 @@ import { SyntaxHighlight } from './syntax-highlight.service';
 
 const SESSION_KEY = 'code-compare-session';
 
-const SAMPLE_LEFT = `function fibonacci(n) {
-  if (n <= 1) return n;
-  let a = 0, b = 1;
-  for (let i = 2; i <= n; i++) {
-    let temp = a + b;
-    a = b;
-    b = temp;
-  }
-  return b;
-}
-
-// Calculate first 10 fibonacci numbers
-const results = [];
-for (let i = 0; i < 10; i++) {
-  results.push(fibonacci(i));
-}
-console.log(results);
-`;
-
-const SAMPLE_RIGHT = `function fibonacci(n: number): number {
-  if (n < 0) throw new Error('n must be non-negative');
-  if (n <= 1) return n;
-  let a = 0, b = 1;
-  for (let i = 2; i <= n; i++) {
-    const temp = a + b;
-    a = b;
-    b = temp;
-  }
-  return b;
-}
-
-// Calculate first 15 fibonacci numbers
-const results: number[] = [];
-for (let i = 0; i < 15; i++) {
-  results.push(fibonacci(i));
-}
-console.log('Fibonacci:', results);
-`;
 
 @Injectable({ providedIn: 'root' })
 export class CodeCompareState {
@@ -176,22 +138,6 @@ export class CodeCompareState {
         });
     }
 
-    loadSampleData(): void {
-        this.leftFile.set({
-            name: 'fibonacci.js',
-            content: SAMPLE_LEFT,
-            encoding: 'UTF-8',
-            language: 'javascript',
-            size: SAMPLE_LEFT.length
-        });
-        this.rightFile.set({
-            name: 'fibonacci.ts',
-            content: SAMPLE_RIGHT,
-            encoding: 'UTF-8',
-            language: 'typescript',
-            size: SAMPLE_RIGHT.length
-        });
-    }
 
     setScrollRatio(ratio: number): void {
         this.scrollRatio.set(ratio);
