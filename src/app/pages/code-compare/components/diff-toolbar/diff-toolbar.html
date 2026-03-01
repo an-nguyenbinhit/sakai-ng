@@ -114,7 +114,7 @@
         <p-button
             icon="pi pi-file-export"
             label="Export HTML"
-            severity="secondary"
+            severity="primary"
             [outlined]="true"
             size="small"
             (onClick)="onExportHtml()"
@@ -133,16 +133,6 @@
             tooltipPosition="top"
         />
         <p-divider layout="vertical" styleClass="!m-0 !h-6" />
-        <!-- Clear -->
-        <p-button
-            icon="pi pi-times"
-            label="Clear all"
-            severity="secondary"
-            [outlined]="true"
-            size="small"
-            (onClick)="state.clearAll()"
-            pTooltip="Clear all and start over"
-        />
         <!-- Swap -->
         <p-button
             icon="pi pi-arrows-h"
@@ -152,6 +142,16 @@
             size="small"
             (onClick)="state.swapFiles()"
             pTooltip="Swap left and right"
+        />
+        <!-- Clear -->
+        <p-button
+            icon="pi pi-times"
+            label="Clear all"
+            severity="danger"
+            [outlined]="true"
+            size="small"
+            (onClick)="state.clearAll()"
+            pTooltip="Clear all and start over"
         />
     </div>
 </div>
