@@ -1,35 +1,53 @@
-<div class="card flex flex-col gap-4">
+<div class="card flex flex-col gap-4 relative" (drop)="onFileDrop($event)" (dragover)="onDragOver($event)"
+    (dragenter)="onDragEnter($event)" (dragleave)="onDragLeave($event)">
+    <div *ngIf="isDragging"
+        class="absolute inset-0 bg-primary/10 border-2 border-primary border-dashed rounded flex min-h-[600px] items-center justify-center z-50 pointer-events-none">
+        <div class="text-2xl font-bold text-primary">Drop file here to load</div>
+    </div>
+
     <div class="font-semibold text-xl">Code Formatter</div>
     <p-toast></p-toast>
-    
+
     <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-1 flex flex-col gap-2">
             <label for="languageSelect" class="font-medium">Language</label>
-            <p-select 
-                id="languageSelect"
-                [options]="languages" 
-                [(ngModel)]="selectedLanguage" 
-                optionLabel="name" 
-                optionValue="code"
-                placeholder="Select a Language" 
-                styleClass="w-full md:w-56"
-            ></p-select>
+            <p-select id="languageSelect" [options]="languages" [(ngModel)]="selectedLanguage" optionLabel="name"
+                optionValue="code" placeholder="Select a Language" styleClass="w-full md:w-56"
+                (onChange)="onLanguageChange()"></p-select>
         </div>
         <div class="flex flex-wrap gap-2 items-end md:ml-auto">
+            <p-button icon="pi pi-cog" severity="secondary" (click)="displaySettings = true"
+                ariaLabel="Settings"></p-button>
             <p-button label="Format" icon="pi pi-align-left" (click)="formatCode()"></p-button>
             <p-button label="Copy" icon="pi pi-copy" severity="secondary" (click)="copyCode()"></p-button>
             <p-button label="Clear" icon="pi pi-trash" severity="danger" (click)="clearCode()"></p-button>
         </div>
     </div>
 
-    <div class="flex-1 mt-2">
-        <textarea 
-            pTextarea 
-            [(ngModel)]="codeContent" 
-            rows="20" 
-            class="w-full font-mono text-sm leading-relaxed p-4 bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded" 
-            placeholder="Paste your code here..."
-            spellcheck="false"
-        ></textarea>
+    <div class="flex-1 mt-2 h-[600px] border border-surface-200 dark:border-surface-700 rounded overflow-hidden">
+        <ngx-monaco-editor class="w-full h-full" [options]="editorOptions"
+            [(ngModel)]="codeContent"></ngx-monaco-editor>
     </div>
+
+    <p-drawer [(visible)]="displaySettings" position="right" header="Formatter Settings" styleClass="w-full sm:w-80">
+        <div class="flex flex-col gap-6 mt-4">
+            <div class="flex flex-col gap-2">
+                <label class="font-medium">Tab Size</label>
+                <p-select [options]="tabSizeOptions" [(ngModel)]="tabWidth" optionLabel="name" optionValue="code"
+                    styleClass="w-full"></p-select>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="font-medium">Print Width</label>
+                <input pInputText type="number" [(ngModel)]="printWidth" class="w-full" />
+            </div>
+            <div class="flex items-center gap-2">
+                <p-checkbox [(ngModel)]="useTabs" binary="true" inputId="useTabs"></p-checkbox>
+                <label for="useTabs">Use Tabs</label>
+            </div>
+            <div class="flex items-center gap-2">
+                <p-checkbox [(ngModel)]="singleQuote" binary="true" inputId="singleQuote"></p-checkbox>
+                <label for="singleQuote">Single Quotes</label>
+            </div>
+        </div>
+    </p-drawer>
 </div>
