@@ -13,6 +13,10 @@ export const appRoutes: Routes = [
             {
                 path: 'code-compare',
                 loadComponent: () => import('./app/pages/code-compare/code-compare').then((m) => m.CodeCompare)
+            },
+            {
+                path: 'code-formatter',
+                loadComponent: () => import('./app/pages/code-formatter/code-formatter').then((m) => m.CodeFormatter)
             }
         ]
     },
