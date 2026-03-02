@@ -32,6 +32,7 @@ npx ng test --include='**/path/to/file.spec.ts'
 
 ### Code Conventions
 
+- **Component Structure**: Always separate HTML, SCSS, and TS into distinct files (`.html`, `.scss`, `.ts`). Do **NOT** use inline `template` or `styles` in the `@Component` decorator.
 - **Component Class Names**: Do **NOT** use suffixes for component classes. Use `Dashboard` instead of `DashboardComponent`.
 - **Component Selectors**: Custom layout components should use the `app-` prefix. PrimeNG components use the `p-` prefix.
 - **Formatting**: The project uses single quotes, 4-space indent, and a 250-char print width (enforced by Prettier).
@@ -64,5 +65,5 @@ The main shell component `AppLayout` is composed of:
 
 - The project uses the PrimeNG `Aura` preset by default (`src/app.config.ts`).
 - **Global Styles**: Defined in `src/assets/styles.scss` and `src/assets/tailwind.css`.
-- **Component Styles**: Use inline SCSS with `inlineStyleLanguage: "scss"` specified in `angular.json`.
+- **Component Styles**: Use external SCSS files for component-specific styles (`styleUrl: './component-name.scss'`).
 - The project implements **Tailwind CSS v4** via PostCSS and PrimeUI Tailwind integration.

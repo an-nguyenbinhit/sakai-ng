@@ -1,0 +1,35 @@
+<div class="card flex flex-col gap-4">
+    <div class="font-semibold text-xl">Code Formatter</div>
+    <p-toast></p-toast>
+    
+    <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1 flex flex-col gap-2">
+            <label for="languageSelect" class="font-medium">Language</label>
+            <p-select 
+                id="languageSelect"
+                [options]="languages" 
+                [(ngModel)]="selectedLanguage" 
+                optionLabel="name" 
+                optionValue="code"
+                placeholder="Select a Language" 
+                styleClass="w-full md:w-56"
+            ></p-select>
+        </div>
+        <div class="flex flex-wrap gap-2 items-end md:ml-auto">
+            <p-button label="Format" icon="pi pi-align-left" (click)="formatCode()"></p-button>
+            <p-button label="Copy" icon="pi pi-copy" severity="secondary" (click)="copyCode()"></p-button>
+            <p-button label="Clear" icon="pi pi-trash" severity="danger" (click)="clearCode()"></p-button>
+        </div>
+    </div>
+
+    <div class="flex-1 mt-2">
+        <textarea 
+            pTextarea 
+            [(ngModel)]="codeContent" 
+            rows="20" 
+            class="w-full font-mono text-sm leading-relaxed p-4 bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded" 
+            placeholder="Paste your code here..."
+            spellcheck="false"
+        ></textarea>
+    </div>
+</div>
