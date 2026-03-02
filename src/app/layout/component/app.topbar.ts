@@ -35,6 +35,10 @@ import { LayoutService } from '@/app/layout/service/layout.service';
                 <i class="pi pi-code"></i>
                 <span>Code Compare</span>
             </a>
+            <a routerLink="/code-formatter" routerLinkActive="topnav-active" class="topnav-item">
+                <i class="pi pi-align-left"></i>
+                <span>Code Formatter</span>
+            </a>
         </nav>
 
         <div class="layout-topbar-actions">

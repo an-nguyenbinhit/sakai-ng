@@ -45,13 +45,16 @@
                 </div>
             </a>
 
-            <!-- Code Formatter — coming soon -->
-            <div class="flex flex-col gap-3 p-4 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl opacity-50 select-none">
+            <!-- Code Formatter — active -->
+            <a
+                routerLink="/code-formatter"
+                class="group flex flex-col gap-3 p-4 bg-surface-0 dark:bg-surface-900 border border-primary/30 dark:border-primary/30 rounded-xl hover:border-primary hover:shadow-lg transition-all cursor-pointer no-underline"
+            >
                 <div class="flex items-start justify-between">
                     <div class="flex items-center justify-center w-11 h-11 rounded-xl bg-purple-50 dark:bg-purple-950">
                         <i class="pi pi-align-left text-purple-500" style="font-size: 1.25rem"></i>
                     </div>
-                    <p-tag value="Soon" severity="secondary" styleClass="text-xs" />
+                    <i class="pi pi-arrow-right text-primary/50 group-hover:text-primary group-hover:translate-x-0.5 transition-all mt-1"></i>
                 </div>
                 <div class="flex flex-col gap-1">
                     <h3 class="font-semibold text-surface-800 dark:text-surface-100 m-0">Code Formatter</h3>
@@ -59,7 +62,11 @@
                         Format and beautify code across multiple languages instantly.
                     </p>
                 </div>
-            </div>
+                <div class="flex items-center gap-1 text-xs font-medium text-primary mt-auto">
+                    <span>Open tool</span>
+                    <i class="pi pi-arrow-right text-xs group-hover:translate-x-0.5 transition-transform"></i>
+                </div>
+            </a>
 
             <!-- JSON Tools — coming soon -->
             <div class="flex flex-col gap-3 p-4 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl opacity-50 select-none">
