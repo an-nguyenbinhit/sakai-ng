@@ -8,28 +8,10 @@
             "Glob",
             "Grep",
             "TodoWrite",
-            "Bash(npm start)",
-            "Bash(npm run *)",
-            "Bash(npm test *)",
-            "Bash(npx ng *)",
-            "Bash(npx prettier *)",
-            "Bash(git status)",
-            "Bash(git diff *)",
-            "Bash(git log *)",
-            "Bash(git add *)",
-            "Bash(git commit *)",
-            "Bash(node *)",
+            "Bash(*)",
             "mcp__playwright__*"
         ],
-        "ask": [
-            "Bash(git push *)",
-            "Bash(git reset *)",
-            "Bash(git checkout -- *)"
-        ],
-        "deny": [
-            "Bash(rm -rf *)",
-            "Bash(del /f *)"
-        ]
+        "deny": []
     },
     "hooks": {
         "PostToolUse": [
