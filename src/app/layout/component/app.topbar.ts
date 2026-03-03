@@ -47,6 +47,10 @@ import { LayoutService } from '@/app/layout/service/layout.service';
                 <i class="pi pi-search"></i>
                 <span>Regex Tester</span>
             </a>
+            <a routerLink="/encode-decode" routerLinkActive="topnav-active" class="topnav-item">
+                <i class="pi pi-lock"></i>
+                <span>Encode / Decode</span>
+            </a>
         </nav>
 
         <div class="layout-topbar-actions">
