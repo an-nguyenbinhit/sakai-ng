@@ -1,14 +1,36 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
-import { signal, WritableSignal, NO_ERRORS_SCHEMA } from '@angular/core';
+import { Component, signal, WritableSignal, NO_ERRORS_SCHEMA } from '@angular/core';
 
-import { CodeCompare } from './code-compare'; // removed .ts extension
+import { CodeCompare } from './code-compare';
 import { CodeCompareState } from './services/code-compare-state.service';
 import { CodeInput } from './components/code-input/code-input';
 import { DiffToolbar } from './components/diff-toolbar/diff-toolbar';
 import { DiffSummary } from './components/diff-summary/diff-summary';
 import { DiffViewer } from './components/diff-viewer/diff-viewer';
 import { DiffMinimap } from './components/diff-minimap/diff-minimap';
+
+// ── Stub child components ────────────────────────────────────────────────────
+// CodeCompare is standalone and directly imports these. We replace them with
+// empty stubs so that CodeInput's required inputs / effects / setTimeout don't
+// interfere with the host-component tests.
+
+@Component({ selector: 'p-code-input', standalone: true, template: '' })
+class CodeInputStub { }
+
+@Component({ selector: 'p-diff-toolbar', standalone: true, template: '' })
+class DiffToolbarStub { }
+
+@Component({ selector: 'p-diff-summary', standalone: true, template: '' })
+class DiffSummaryStub { }
+
+@Component({ selector: 'p-diff-viewer', standalone: true, template: '' })
+class DiffViewerStub { }
+
+@Component({ selector: 'p-diff-minimap', standalone: true, template: '' })
+class DiffMinimapStub { }
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 describe('CodeCompare Component', () => {
     let component: CodeCompare;
@@ -31,13 +53,29 @@ describe('CodeCompare Component', () => {
             imports: [CodeCompare],
             providers: [{ provide: CodeCompareState, useValue: mockState }],
             schemas: [NO_ERRORS_SCHEMA]
-        }).compileComponents();
+        })
+            .overrideComponent(CodeCompare, {
+                // Replace the real child-component imports with lightweight stubs.
+                // Also add NO_ERRORS_SCHEMA here — for standalone components, schemas
+                // must be declared on the component itself, not on the TestBed module.
+                set: {
+                    imports: [
+                        CommonModule,
+                        CodeInputStub,
+                        DiffToolbarStub,
+                        DiffSummaryStub,
+                        DiffViewerStub,
+                        DiffMinimapStub
+                    ],
+                    schemas: [NO_ERRORS_SCHEMA]
+                }
+            })
+            .compileComponents();
     });
 
     beforeEach(() => {
         fixture = TestBed.createComponent(CodeCompare);
         component = fixture.componentInstance;
-        // Don't call fixture.detectChanges() immediately if you want to test ngOnInit separately
     });
 
     it('should create the component', () => {
@@ -101,21 +139,22 @@ describe('CodeCompare Component', () => {
         });
 
         it('should expand (set to false) when it does not have both files', () => {
-            // Let's set it to true first manually to verify
+            // First, set BOTH files so hasBothFiles() becomes true, then manually collapse
+            mockLeftFile.set({ content: '1' });
+            mockRightFile.set({ content: '2' });
+            TestBed.flushEffects();
             component.inputCollapsed.set(true);
 
-            // Provide only one file
-            mockLeftFile.set({ content: '1' });
+            // Now remove one file — hasBothFiles() changes true → false, triggering the effect
             mockRightFile.set(null);
-
-            // Manually trigger effect propagation
             TestBed.flushEffects();
 
+            // Effect should have reset inputCollapsed to false
             expect(component.inputCollapsed()).toBeFalse();
         });
 
         it('onInputPanelBlur should collapse input if it has both files and blur moves outside container', () => {
-            // Mock both files
+            // Set both files so hasBothFiles() = true
             mockLeftFile.set({ content: '1' });
             mockRightFile.set({ content: '2' });
             TestBed.flushEffects();
@@ -136,6 +175,7 @@ describe('CodeCompare Component', () => {
         });
 
         it('onInputPanelBlur should NOT collapse if blur moves INSIDE the container', () => {
+            // Set both files so hasBothFiles() = true
             mockLeftFile.set({ content: '1' });
             mockRightFile.set({ content: '2' });
             TestBed.flushEffects();

@@ -43,19 +43,34 @@ describe('CodeCompareState', () => {
         expect(service.lineHeight()).toBe(24);
     });
 
-    it('should load initial state from session storage if exists', () => {
-        sessionStorage.setItem('code-compare-session', JSON.stringify({
-            viewMode: 'inline',
-            fontSize: 18,
-            options: { ...DEFAULT_OPTIONS, ignoreWhitespace: true }
-        }));
+    describe('should load initial state from session storage if exists', () => {
+        beforeEach(async () => {
+            // Set session storage BEFORE TestBed initialises the service,
+            // so that the constructor's loadFromSession() picks it up.
+            sessionStorage.clear();
+            sessionStorage.setItem('code-compare-session', JSON.stringify({
+                viewMode: 'inline',
+                fontSize: 18,
+                options: { ...DEFAULT_OPTIONS, ignoreWhitespace: true }
+            }));
 
-        // Re-initialize service to pick up session storage
-        const newService = TestBed.inject(CodeCompareState);
+            // Re-configure TestBed so CodeCompareState is freshly instantiated
+            TestBed.resetTestingModule();
+            TestBed.configureTestingModule({
+                providers: [
+                    CodeCompareState,
+                    { provide: DiffEngine, useValue: mockDiffEngine },
+                    { provide: SyntaxHighlight, useValue: mockSyntaxHighlight }
+                ]
+            });
+            service = TestBed.inject(CodeCompareState);
+        });
 
-        expect(newService.viewMode()).toBe('inline');
-        expect(newService.fontSize()).toBe(18);
-        expect(newService.options().ignoreWhitespace).toBeTrue();
+        it('reads viewMode, fontSize, and options from session storage', () => {
+            expect(service.viewMode()).toBe('inline');
+            expect(service.fontSize()).toBe(18);
+            expect(service.options().ignoreWhitespace).toBeTrue();
+        });
     });
 
     describe('setFile and clearFile', () => {
