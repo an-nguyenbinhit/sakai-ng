@@ -1,0 +1,129 @@
+<div class="flex flex-col gap-4 min-h-[600px] w-full max-w-[1400px] mx-auto">
+    <p-toast></p-toast>
+
+
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Left Side: Inputs -->
+        <div class="col-span-1 lg:col-span-7 flex flex-col gap-4">
+            <!-- Regex Pattern Input -->
+            <div class="card flex flex-col gap-3 pt-4">
+                <div class="flex items-center justify-between">
+                    <span class="font-semibold text-xl">Regular Expression</span>
+                    <div class="flex items-center gap-2">
+                        <p-button icon="pi pi-copy" [text]="true" severity="secondary" pTooltip="Copy Regex"
+                            tooltipPosition="bottom" (click)="copyRegex()"></p-button>
+                        <p-button icon="pi pi-trash" [text]="true" severity="secondary" pTooltip="Clear"
+                            tooltipPosition="bottom" (click)="clearInputs()"></p-button>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 w-full mt-2">
+                    <span class="text-xl font-mono text-surface-500 font-bold">/</span>
+                    <input type="text" pInputText [(ngModel)]="pattern" (ngModelChange)="onInputChange()"
+                        placeholder="Enter regex pattern here (e.g. \d+)" class="flex-1 font-mono text-lg p-3" />
+                    <span class="text-xl font-mono text-surface-500 font-bold">/</span>
+                </div>
+
+                <!-- Error Message -->
+                <div *ngIf="regexError"
+                    class="text-red-500 dark:text-red-400 text-sm mt-1 bg-red-50 dark:bg-red-900/10 p-2 rounded">
+                    <i class="pi pi-exclamation-triangle mr-1"></i> {{ regexError }}
+                </div>
+
+                <!-- Flags -->
+                <div
+                    class="flex flex-wrap gap-4 mt-2 bg-surface-50 dark:bg-surface-800 p-3 rounded-lg border border-surface-200 dark:border-surface-700">
+                    <div class="flex items-center">
+                        <p-checkbox [(ngModel)]="flagG" binary="true" inputId="flagG"
+                            (onChange)="onFlagChange()"></p-checkbox>
+                        <label for="flagG"
+                            class="ml-2 font-medium text-surface-700 dark:text-surface-200 cursor-pointer">Global
+                            (g)</label>
+                    </div>
+                    <div class="flex items-center">
+                        <p-checkbox [(ngModel)]="flagI" binary="true" inputId="flagI"
+                            (onChange)="onFlagChange()"></p-checkbox>
+                        <label for="flagI"
+                            class="ml-2 font-medium text-surface-700 dark:text-surface-200 cursor-pointer">Case
+                            Insensitive (i)</label>
+                    </div>
+                    <div class="flex flex-1 items-center">
+                        <p-checkbox [(ngModel)]="flagM" binary="true" inputId="flagM"
+                            (onChange)="onFlagChange()"></p-checkbox>
+                        <label for="flagM"
+                            class="ml-2 font-medium text-surface-700 dark:text-surface-200 cursor-pointer">Multiline
+                            (m)</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test String -->
+            <div class="card flex flex-col gap-3 pt-4">
+                <div class="font-semibold text-xl">Test String</div>
+                <textarea pInputTextarea [(ngModel)]="testString" (ngModelChange)="onInputChange()" rows="8"
+                    class="w-full font-mono text-base p-4" spellcheck="false"
+                    placeholder="Paste your test string here..."></textarea>
+            </div>
+
+            <!-- Live Preview Area -->
+            <div class="card flex flex-col gap-3 flex-1 pt-4 bg-surface-50 dark:bg-[#1e1e1e]">
+                <div class="font-semibold text-xl">Live Highlight</div>
+                <div class="whitespace-pre-wrap break-all font-mono text-base text-surface-900 dark:text-surface-0 min-h-[150px] p-4 border border-surface-200 dark:border-surface-700 rounded-lg bg-surface-0 dark:bg-surface-900 overflow-auto"
+                    [innerHTML]="highlightedHtml"></div>
+            </div>
+        </div>
+
+        <!-- Right Side: Matches & Results -->
+        <div class="col-span-1 lg:col-span-5 flex flex-col gap-4">
+            <div class="card flex flex-col gap-3 h-full pt-4">
+                <div class="flex items-center justify-between">
+                    <span class="font-semibold text-xl">Match Results</span>
+                    <p-button icon="pi pi-copy" [text]="true" severity="secondary" pTooltip="Copy Matches"
+                        tooltipPosition="bottom" (click)="copyMatches()" [disabled]="matches.length === 0"></p-button>
+                </div>
+
+                <div
+                    class="flex items-center justify-between bg-surface-50 dark:bg-surface-800 p-4 rounded-xl border border-surface-200 dark:border-surface-700 mt-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                            <i class="pi pi-list text-xl"></i>
+                        </div>
+                        <span class="font-medium text-surface-600 dark:text-surface-300">Total Matches</span>
+                    </div>
+                    <span class="font-bold text-2xl text-primary">{{matches.length}}</span>
+                </div>
+
+                <div class="flex-1 overflow-auto mt-2 -mx-2 px-2">
+                    <p-table [value]="matches" [scrollable]="true" scrollHeight="flex"
+                        styleClass="p-datatable-sm w-full">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th style="width: 15%">#</th>
+                                <th style="width: 55%">Match</th>
+                                <th style="width: 30%">Position</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-m>
+                            <tr>
+                                <td>{{m.index}}</td>
+                                <td class="font-mono text-sm max-w-[200px] truncate" [title]="m.match">{{m.match}}</td>
+                                <td class="text-sm text-surface-500">{{m.start}}-{{m.end}}</td>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="emptymessage">
+                            <tr>
+                                <td colspan="3" class="text-center p-8 text-surface-500">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <i class="pi pi-inbox text-3xl"></i>
+                                        <span>No matches found. Check your pattern or test string.</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

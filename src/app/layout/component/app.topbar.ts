@@ -43,6 +43,10 @@ import { LayoutService } from '@/app/layout/service/layout.service';
                 <i class="pi pi-database"></i>
                 <span>JSON Tools</span>
             </a>
+            <a routerLink="/regex-tester" routerLinkActive="topnav-active" class="topnav-item">
+                <i class="pi pi-search"></i>
+                <span>Regex Tester</span>
+            </a>
         </nav>
 
         <div class="layout-topbar-actions">

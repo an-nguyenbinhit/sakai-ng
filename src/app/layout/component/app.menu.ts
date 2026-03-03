@@ -32,7 +32,8 @@ export class AppMenu {
                 items: [
                     { label: 'Code Compare', icon: 'pi pi-fw pi-code', routerLink: ['/code-compare'] },
                     { label: 'Code Formatter', icon: 'pi pi-fw pi-align-left', routerLink: ['/code-formatter'] },
-                    { label: 'JSON Tools', icon: 'pi pi-fw pi-wrench', routerLink: ['/json-tools'] }
+                    { label: 'JSON Tools', icon: 'pi pi-fw pi-wrench', routerLink: ['/json-tools'] },
+                    { label: 'Regex Tester', icon: 'pi pi-fw pi-search', routerLink: ['/regex-tester'] }
                 ]
             }
         ];

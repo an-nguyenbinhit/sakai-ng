@@ -21,6 +21,10 @@ export const appRoutes: Routes = [
             {
                 path: 'json-tools',
                 loadComponent: () => import('./app/pages/json-tools/json-tools').then((m) => m.JsonTools)
+            },
+            {
+                path: 'regex-tester',
+                loadComponent: () => import('./app/pages/regex-tester/regex-tester').then((m) => m.RegexTester)
             }
         ]
     },
