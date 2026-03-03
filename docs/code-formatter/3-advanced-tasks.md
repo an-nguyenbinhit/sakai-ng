@@ -2,7 +2,7 @@
 
 ## 1. Business Analyst (BA)
 *   **Task BA-2.1: AC for Syntax Highlighting & Code Editor**
-    *   **Description**: Replace plain text areas with a professional compiler display (Monaco/VS Code web editor). Require the editor theme to synchronize (Dark/Light theme) with the entire App (Sakai-NG).
+    *   **Description**: Replace plain text areas with a professional compiler display (Monaco/VS Code web editor). Require the editor theme to synchronize (Dark/Light theme) with the entire App (DevWorkspace).
 *   **Task BA-2.2: AC for Formatting Settings Menu**
     *   **Description**: Create advanced configuration inputs: Tab size (2, 4, 8), Print Width (80, 100, 120), "Use tabs" vs "Use spaces", Single quotes vs Double quotes.
 *   **Task BA-2.3: AC for File Tooling**

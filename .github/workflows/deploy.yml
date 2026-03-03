@@ -31,5 +31,5 @@ jobs:
           personal_token: ${{ secrets.DEPLOY_TOKEN }}
           external_repository: an-nguyenbinhit/DevWorkspace
           publish_branch: main
-          publish_dir: ./dist/sakai-ng/browser
+          publish_dir: ./dist/devworkspace/browser
           commit_message: "deploy: ${{ github.sha }}"

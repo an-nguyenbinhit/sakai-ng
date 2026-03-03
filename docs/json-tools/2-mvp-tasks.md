@@ -10,7 +10,7 @@
 
 ## 2. Developer / AI Coding - Implementation
 *   **Task DEV-1.1: Component & Routing Initialization**
-    *   **Description**: Follow the standard folder structure (Sakai-NG framework). Create the Angular Component `json-tools`. Import it into the app router. Ensure top and sidebar menu links are active.
+    *   **Description**: Follow the standard folder structure (DevWorkspace framework). Create the Angular Component `json-tools`. Import it into the app router. Ensure top and sidebar menu links are active.
 *   **Task DEV-1.2: Build Basic User Interface (UI)**
     *   **Description**: Use PrimeNG APIs (`p-button`, `p-toast`, textareas) with TailwindCSS to build the View. Make sure it is fully responsive on desktop and mobile.
 *   **Task DEV-1.3: Integrate JSON Processing Utilities**

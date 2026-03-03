@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 npm start          # Dev server at http://localhost:4200 (auto-reloads on changes)
-npm run build      # Production build to dist/sakai-ng/
+npm run build      # Production build to dist/devworkspace/
 npm run watch      # Dev build with file watching
 npm test           # Unit tests via Karma/Jasmine
 npm run format     # Format all JS/TS/HTML files with Prettier
@@ -19,7 +19,7 @@ npx ng test --include='**/path/to/file.spec.ts'
 
 ## Architecture
 
-**Sakai-NG** is an Angular 21 admin template built on [PrimeNG](https://primeng.org/) component library with Tailwind CSS v4.
+**DevWorkspace** is an Angular 21 admin template built on [PrimeNG](https://primeng.org/) component library with Tailwind CSS v4.
 
 ### Key architectural choices
 

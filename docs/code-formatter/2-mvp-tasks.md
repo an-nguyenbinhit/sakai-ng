@@ -10,7 +10,7 @@
 
 ## 2. Developer / AI Coding - Implementation
 *   **Task DEV-1.1: Component & Routing Initialization**
-    *   **Description**: Follow the standard folder structure (Sakai-NG framework). Create the Angular Component `code-formatter`. Import it into the router module. Configure the sidebar menu.
+    *   **Description**: Follow the standard folder structure (DevWorkspace framework). Create the Angular Component `code-formatter`. Import it into the router module. Configure the sidebar menu.
 *   **Task DEV-1.2: Build Basic User Interface (UI)**
     *   **Description**: Use PrimeNG API (`p-dropdown`, `p-button`, `p-toast`) and TailwindCSS/Sakai layout to build the View. Ensure the UI is responsive on both mobile and desktop.
 *   **Task DEV-1.3: Integrate Code Formatting Library (Prettier)**
