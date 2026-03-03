@@ -39,6 +39,10 @@ import { LayoutService } from '@/app/layout/service/layout.service';
                 <i class="pi pi-align-left"></i>
                 <span>Code Formatter</span>
             </a>
+            <a routerLink="/json-tools" routerLinkActive="topnav-active" class="topnav-item">
+                <i class="pi pi-database"></i>
+                <span>JSON Tools</span>
+            </a>
         </nav>
 
         <div class="layout-topbar-actions">
