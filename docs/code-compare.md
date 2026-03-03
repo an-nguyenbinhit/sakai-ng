@@ -113,6 +113,13 @@ Accessible via the **DiffToolbar**. Each option directly affects the diff algori
 | **Char Diff** | Off | Highlight differing characters (finer-grained than Word Diff) |
 | **Context Lines** | 3 | Number of unchanged lines shown around each change block |
 
+### Zoom / Font Size
+
+You can adjust the display size of the code via the toolbar:
+- **Increase Font Size** (Max: 22px)
+- **Decrease Font Size** (Min: 10px)
+- Default size is **14px**. Line height scales automatically.
+
 ---
 
 ## 4. Navigation & Search
@@ -187,7 +194,8 @@ After each change, state is automatically saved to `sessionStorage` under the ke
     "leftFile": { "name": "...", "content": "...", "language": "...", "encoding": "...", "size": 0 },
     "rightFile": { ... },
     "options": { "ignoreWhitespace": false, "wordDiff": true, ... },
-    "viewMode": "side-by-side"
+    "viewMode": "side-by-side",
+    "fontSize": 14
 }
 ```
 
@@ -198,6 +206,7 @@ After each change, state is automatically saved to `sessionStorage` under the ke
 | Left / right file content | Yes |
 | Diff options | Yes |
 | View mode | Yes |
+| Font size | Yes |
 | Search keyword | No |
 | Scroll position | No |
 
@@ -244,6 +253,7 @@ Single source of truth. Key signals:
 | `rightFile` | `FileContent \| null` | Code B content |
 | `options` | `DiffOptions` | All filter options |
 | `viewMode` | `'side-by-side' \| 'inline'` | Current view mode |
+| `fontSize` | `number` | The display font size (10 to 22) |
 | `showAllUnchanged` | `boolean` | Fold toggle |
 | `scrollRatio` | `number` | Synchronized scroll between two panels |
 | `searchState` | `SearchState` | Query + search results |
