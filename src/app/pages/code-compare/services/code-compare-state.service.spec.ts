@@ -195,4 +195,197 @@ describe('CodeCompareState', () => {
             expect(mockSyntaxHighlight.loadLanguage).toHaveBeenCalledWith('typescript');
         });
     });
+
+    // ─── Missing cases ────────────────────────────────────────────────────────
+
+    describe('clearAll()', () => {
+        it('should delegate to reset() and clear all state', () => {
+            const dummyFile: FileContent = { name: 'f', content: 'x', language: 'plaintext', encoding: 'utf-8', size: 1 };
+            service.setFile('left', dummyFile);
+            service.viewMode.set('inline');
+
+            service.clearAll();
+
+            expect(service.leftFile()).toBeNull();
+            expect(service.viewMode()).toBe('side-by-side');
+            expect(sessionStorage.getItem('code-compare-session')).toBeNull();
+        });
+    });
+
+    describe('setViewMode()', () => {
+        it('should update viewMode signal', () => {
+            expect(service.viewMode()).toBe('side-by-side');
+            service.setViewMode('inline');
+            expect(service.viewMode()).toBe('inline');
+        });
+
+        it('should switch back to side-by-side', () => {
+            service.setViewMode('inline');
+            service.setViewMode('side-by-side');
+            expect(service.viewMode()).toBe('side-by-side');
+        });
+    });
+
+    describe('setScrollRatio()', () => {
+        it('should update scrollRatio signal', () => {
+            expect(service.scrollRatio()).toBe(0);
+            service.setScrollRatio(0.75);
+            expect(service.scrollRatio()).toBe(0.75);
+        });
+
+        it('should update to 0 and 1 boundaries', () => {
+            service.setScrollRatio(0);
+            expect(service.scrollRatio()).toBe(0);
+            service.setScrollRatio(1);
+            expect(service.scrollRatio()).toBe(1);
+        });
+    });
+
+    describe('lineHeight computed', () => {
+        it('should equal fontSize + 10', () => {
+            expect(service.lineHeight()).toBe(service.fontSize() + 10);
+        });
+
+        it('should update reactively with fontSize', () => {
+            service.fontSize.set(18);
+            expect(service.lineHeight()).toBe(28);
+        });
+    });
+
+    describe('decreaseFontSize() — normal case', () => {
+        it('should decrease fontSize by 2 from default', () => {
+            expect(service.fontSize()).toBe(14);
+            service.decreaseFontSize();
+            expect(service.fontSize()).toBe(12);
+        });
+    });
+
+    describe('setSearch() — edge cases', () => {
+        it('setSearch("") should reset search state to empty', () => {
+            // First set a real search
+            service.searchState.set({ query: 'old', matchIndices: [1, 2], currentMatchIndex: 1 });
+
+            service.setSearch('');
+
+            const state = service.searchState();
+            expect(state.query).toBe('');
+            expect(state.matchIndices).toEqual([]);
+            expect(state.currentMatchIndex).toBe(0);
+        });
+
+        it('setSearch() with non-empty query but no diffResult → does nothing', () => {
+            // No files set → diffResult() is null
+            service.setSearch('hello');
+            // Should remain unset
+            expect(service.searchState().query).toBe('');
+        });
+    });
+
+    describe('nextMatch() / prevMatch() — guard when empty', () => {
+        it('nextMatch() does nothing when matchIndices is empty', () => {
+            service.searchState.set({ query: '', matchIndices: [], currentMatchIndex: 0 });
+            service.nextMatch();
+            expect(service.searchState().currentMatchIndex).toBe(0);
+        });
+
+        it('prevMatch() does nothing when matchIndices is empty', () => {
+            service.searchState.set({ query: '', matchIndices: [], currentMatchIndex: 0 });
+            service.prevMatch();
+            expect(service.searchState().currentMatchIndex).toBe(0);
+        });
+    });
+
+    describe('persistToSession effect', () => {
+        it('should persist state to sessionStorage when a file is set', () => {
+            const dummyFile: FileContent = { name: 'persist.ts', content: 'code', language: 'typescript', encoding: 'utf-8', size: 4 };
+            service.setFile('left', dummyFile);
+
+            // Flush all pending effects
+            TestBed.flushEffects();
+
+            const raw = sessionStorage.getItem('code-compare-session');
+            expect(raw).not.toBeNull();
+            const session = JSON.parse(raw!);
+            expect(session.leftFile).toBeTruthy();
+            expect(session.leftFile.name).toBe('persist.ts');
+        });
+
+        it('should persist viewMode changes to sessionStorage', () => {
+            service.setViewMode('inline');
+            TestBed.flushEffects();
+
+            const raw = sessionStorage.getItem('code-compare-session');
+            expect(raw).not.toBeNull();
+            const session = JSON.parse(raw!);
+            expect(session.viewMode).toBe('inline');
+        });
+    });
+
+    describe('loadFromSession() — leftFile / rightFile restore', () => {
+        beforeEach(async () => {
+            sessionStorage.clear();
+            const leftFile: FileContent = { name: 'left.ts', content: 'left content', language: 'typescript', encoding: 'utf-8', size: 12 };
+            const rightFile: FileContent = { name: 'right.ts', content: 'right content', language: 'javascript', encoding: 'utf-8', size: 13 };
+            sessionStorage.setItem('code-compare-session', JSON.stringify({
+                leftFile,
+                rightFile,
+                viewMode: 'inline',
+                fontSize: 16,
+                options: { ignoreWhitespace: false, ignoreCase: false, ignoreBlankLines: false, ignoreComments: false, trimLines: false, wordDiff: true, charDiff: false, contextLines: 3 }
+            }));
+
+            TestBed.resetTestingModule();
+            TestBed.configureTestingModule({
+                providers: [
+                    { provide: 'CodeCompareState', useClass: undefined },
+                    { provide: DiffEngine, useValue: mockDiffEngine },
+                    { provide: SyntaxHighlight, useValue: mockSyntaxHighlight }
+                ]
+            });
+            // Re-import the actual service
+            TestBed.resetTestingModule();
+            TestBed.configureTestingModule({
+                providers: [
+                    CodeCompareState,
+                    { provide: DiffEngine, useValue: mockDiffEngine },
+                    { provide: SyntaxHighlight, useValue: mockSyntaxHighlight }
+                ]
+            });
+            service = TestBed.inject(CodeCompareState);
+        });
+
+        it('should restore leftFile from session storage', () => {
+            expect(service.leftFile()).toBeTruthy();
+            expect(service.leftFile()!.name).toBe('left.ts');
+        });
+
+        it('should restore rightFile from session storage', () => {
+            expect(service.rightFile()).toBeTruthy();
+            expect(service.rightFile()!.name).toBe('right.ts');
+        });
+    });
+
+    describe('loadFromSession() — bad JSON', () => {
+        beforeEach(async () => {
+            sessionStorage.clear();
+            sessionStorage.setItem('code-compare-session', 'INVALID JSON {{{{');
+
+            TestBed.resetTestingModule();
+            TestBed.configureTestingModule({
+                providers: [
+                    CodeCompareState,
+                    { provide: DiffEngine, useValue: mockDiffEngine },
+                    { provide: SyntaxHighlight, useValue: mockSyntaxHighlight }
+                ]
+            });
+            service = TestBed.inject(CodeCompareState);
+        });
+
+        it('should clear corrupted session and initialize with defaults', () => {
+            // Bad JSON → catch block removes the item
+            expect(sessionStorage.getItem('code-compare-session')).toBeNull();
+            expect(service.leftFile()).toBeNull();
+            expect(service.rightFile()).toBeNull();
+        });
+    });
 });
