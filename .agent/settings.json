@@ -1,0 +1,8 @@
+{
+    "autoApprove": {
+        "all": true,
+        "runCommand": true,
+        "fileEdits": true,
+        "browserActions": true
+    }
+}
