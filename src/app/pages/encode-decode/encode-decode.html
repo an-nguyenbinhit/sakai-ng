@@ -1,0 +1,37 @@
+<div class="card">
+    <span class="text-surface-900 dark:text-surface-0 text-xl font-bold mb-4 block">Encode / Decode</span>
+    <p class="text-surface-600 dark:text-surface-400 mb-5">Convert strings between Base64, URL, and HTML entity formats.</p>
+
+    <p-toast></p-toast>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="flex flex-col gap-2">
+            <label for="input" class="font-semibold text-surface-900 dark:text-surface-0">Input String</label>
+            <textarea pTextarea id="input" rows="12" [(ngModel)]="inputString" placeholder="Paste your text here..." class="w-full resize-y font-mono text-sm"></textarea>
+
+            <div class="flex flex-wrap gap-3 items-center mt-2">
+                <p-selectbutton [options]="operations" [(ngModel)]="operation" optionLabel="label" optionValue="value"></p-selectbutton>
+
+                <p-button label="Encode" icon="pi pi-angle-double-right" (click)="encode()"></p-button>
+                <p-button label="Decode" icon="pi pi-angle-double-right" severity="secondary" (click)="decode()"></p-button>
+                <p-button icon="pi pi-trash" severity="danger" (click)="clearInputs()" pTooltip="Clear" [outlined]="true"></p-button>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-2 h-full">
+            <label for="output" class="font-semibold text-surface-900 dark:text-surface-0">Result</label>
+            <textarea
+                pTextarea
+                id="output"
+                rows="12"
+                [ngModel]="outputString"
+                readonly
+                class="w-full resize-y bg-surface-50 dark:bg-surface-900 text-surface-600 dark:text-surface-400 font-mono text-sm"
+                placeholder="Output will appear here..."
+            ></textarea>
+            <div class="mt-2">
+                <p-button label="Copy to Clipboard" icon="pi pi-copy" severity="success" (click)="copyToClipboard()" [disabled]="!outputString"></p-button>
+            </div>
+        </div>
+    </div>
+</div>

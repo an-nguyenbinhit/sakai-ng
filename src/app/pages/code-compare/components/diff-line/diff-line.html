@@ -1,43 +1,27 @@
-<div
-    class="flex min-w-max font-mono select-text group"
-    [ngClass]="rowClass()"
-    [style.font-size.px]="fontSize()"
-    [style.line-height.px]="lineHeight()"
-    [style.min-height.px]="lineHeight()"
->
+<div class="flex min-w-max font-mono select-text group" [ngClass]="rowClass()" [style.font-size.px]="fontSize()" [style.line-height.px]="lineHeight()" [style.min-height.px]="lineHeight()">
     <!-- Line number gutter -->
-    <div
-        class="w-10 shrink-0 text-right pr-2 text-xs text-surface-400 dark:text-surface-500 select-none border-r border-surface-200 dark:border-surface-700 py-0.5"
-        [ngClass]="gutterClass()"
-    >
+    <div class="w-10 shrink-0 text-right pr-2 text-xs text-surface-400 dark:text-surface-500 select-none border-r border-surface-200 dark:border-surface-700 py-0.5" [ngClass]="gutterClass()">
         @if (line().type === 'fold') {
-            <span>···</span>
-        } @else {
-            {{ line().lineNumber ?? '' }}
-        }
+        <span>···</span>
+        } @else { {{ line().lineNumber ?? '' }} }
     </div>
 
     <!-- Diff marker -->
-    <div class="w-5 shrink-0 text-center text-xs font-bold py-0.5 select-none" [ngClass]="markerClass()">
-        {{ marker() }}
-    </div>
+    <div class="w-5 shrink-0 text-center text-xs font-bold py-0.5 select-none" [ngClass]="markerClass()">{{ marker() }}</div>
 
     <!-- Content -->
     <div class="flex-1 px-2 py-0.5 whitespace-pre">
         @if (line().type === 'fold') {
-            <span class="text-surface-500 dark:text-surface-400 italic text-xs">
-                ... {{ line().foldedCount }} unchanged lines ...
-            </span>
+        <span class="text-surface-500 dark:text-surface-400 italic text-xs"> ... {{ line().foldedCount }} unchanged lines ... </span>
         } @else if (hasTokens()) {
-            <!-- Word/char diff tokens -->
-            @for (token of line().tokens; track $index) {
-                <span [ngClass]="tokenClass(token)">{{ token.text }}</span>
-            }
-        } @else if (line().highlightedHtml) {
-            <!-- Syntax highlighted or plain escaped HTML -->
-            <span [innerHTML]="highlightedContent()"></span>
+        <!-- Word/char diff tokens -->
+        @for (token of line().tokens; track $index) {
+        <span [ngClass]="tokenClass(token)">{{ token.text }}</span>
+        } } @else if (line().highlightedHtml) {
+        <!-- Syntax highlighted or plain escaped HTML -->
+        <span [innerHTML]="highlightedContent()"></span>
         } @else {
-            <span>&nbsp;</span>
+        <span>&nbsp;</span>
         }
     </div>
 </div>

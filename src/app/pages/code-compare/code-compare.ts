@@ -10,11 +10,7 @@ import { DiffMinimap } from './components/diff-minimap/diff-minimap';
 @Component({
     selector: 'p-code-compare',
     standalone: true,
-    imports: [
-        CommonModule,
-        CodeInput, DiffToolbar, DiffSummary,
-        DiffViewer, DiffMinimap,
-    ],
+    imports: [CommonModule, CodeInput, DiffToolbar, DiffSummary, DiffViewer, DiffMinimap],
     templateUrl: './code-compare.html',
     styleUrl: './code-compare.scss'
 })

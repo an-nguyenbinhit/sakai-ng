@@ -9,8 +9,7 @@
 const UI_EXTENSIONS = /\.(ts|html|scss|css)$/;
 
 // Exclude non-UI TypeScript files
-const EXCLUDE_SUFFIXES =
-    /\.(spec\.ts|service\.ts|config\.ts|guard\.ts|interceptor\.ts|pipe\.ts|resolver\.ts|module\.ts)$/;
+const EXCLUDE_SUFFIXES = /\.(spec\.ts|service\.ts|config\.ts|guard\.ts|interceptor\.ts|pipe\.ts|resolver\.ts|module\.ts)$/;
 
 // Must be inside src/app/
 const SRC_APP = /src[/\\]app[/\\]/;
@@ -51,8 +50,8 @@ async function main() {
                 `1. Ensure the dev server is running (npm start → http://localhost:4200)`,
                 `2. Use playwright-mcp to navigate to the relevant page`,
                 `3. Take a screenshot to confirm the UI renders correctly`,
-                `4. Check for visual regressions, layout issues, or console errors`,
-            ].join('\n'),
+                `4. Check for visual regressions, layout issues, or console errors`
+            ].join('\n')
         };
 
         process.stdout.write(JSON.stringify(result));

@@ -16,7 +16,7 @@ import { AppMenuitem } from './app.menuitem';
                 <li class="menu-separator"></li>
             }
         }
-    </ul> `,
+    </ul> `
 })
 export class AppMenu {
     model: MenuItem[] = [];
@@ -33,7 +33,8 @@ export class AppMenu {
                     { label: 'Code Compare', icon: 'pi pi-fw pi-code', routerLink: ['/code-compare'] },
                     { label: 'Code Formatter', icon: 'pi pi-fw pi-align-left', routerLink: ['/code-formatter'] },
                     { label: 'JSON Tools', icon: 'pi pi-fw pi-wrench', routerLink: ['/json-tools'] },
-                    { label: 'Regex Tester', icon: 'pi pi-fw pi-search', routerLink: ['/regex-tester'] }
+                    { label: 'Regex Tester', icon: 'pi pi-fw pi-search', routerLink: ['/regex-tester'] },
+                    { label: 'Encode / Decode', icon: 'pi pi-fw pi-sync', routerLink: ['/encode-decode'] }
                 ]
             }
         ];

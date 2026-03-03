@@ -56,10 +56,14 @@ export class DiffLineComponent {
 
     marker = computed(() => {
         switch (this.line().type) {
-            case 'added': return '+';
-            case 'removed': return '-';
-            case 'modified': return '~';
-            default: return '';
+            case 'added':
+                return '+';
+            case 'removed':
+                return '-';
+            case 'modified':
+                return '~';
+            default:
+                return '';
         }
     });
 
@@ -70,10 +74,7 @@ export class DiffLineComponent {
 
         // Highlight search matches within pre-escaped content
         const escapedQuery = this.escapeRegex(this.escapeHtml(query));
-        return html.replace(
-            new RegExp(`(${escapedQuery})`, 'gi'),
-            '<mark class="bg-yellow-300 dark:bg-yellow-600 rounded">$1</mark>'
-        );
+        return html.replace(new RegExp(`(${escapedQuery})`, 'gi'), '<mark class="bg-yellow-300 dark:bg-yellow-600 rounded">$1</mark>');
     });
 
     tokenClass(token: WordToken): Record<string, boolean> {
@@ -84,10 +85,7 @@ export class DiffLineComponent {
     }
 
     private escapeHtml(text: string): string {
-        return text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
+        return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
     private escapeRegex(str: string): string {

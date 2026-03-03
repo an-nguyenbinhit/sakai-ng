@@ -1,18 +1,9 @@
 import { Injectable, signal, computed, effect, inject } from '@angular/core';
-import {
-    FileContent,
-    DiffOptions,
-    DiffResult,
-    SearchState,
-    ViewMode,
-    CodeCompareSession,
-    DEFAULT_OPTIONS
-} from '../models/diff.models';
+import { FileContent, DiffOptions, DiffResult, SearchState, ViewMode, CodeCompareSession, DEFAULT_OPTIONS } from '../models/diff.models';
 import { DiffEngine } from './diff-engine.service';
 import { SyntaxHighlight } from './syntax-highlight.service';
 
 const SESSION_KEY = 'code-compare-session';
-
 
 @Injectable({ providedIn: 'root' })
 export class CodeCompareState {
@@ -89,15 +80,15 @@ export class CodeCompareState {
     }
 
     increaseFontSize(): void {
-        this.fontSize.update(s => Math.min(s + 2, 22));
+        this.fontSize.update((s) => Math.min(s + 2, 22));
     }
 
     decreaseFontSize(): void {
-        this.fontSize.update(s => Math.max(s - 2, 10));
+        this.fontSize.update((s) => Math.max(s - 2, 10));
     }
 
     toggleShowAllUnchanged(): void {
-        this.showAllUnchanged.update(v => !v);
+        this.showAllUnchanged.update((v) => !v);
     }
 
     swapFiles(): void {
@@ -108,7 +99,7 @@ export class CodeCompareState {
     }
 
     updateOptions(patch: Partial<DiffOptions>): void {
-        this.options.update(opts => ({ ...opts, ...patch }));
+        this.options.update((opts) => ({ ...opts, ...patch }));
     }
 
     setViewMode(mode: ViewMode): void {
@@ -134,7 +125,7 @@ export class CodeCompareState {
     }
 
     nextMatch(): void {
-        this.searchState.update(s => {
+        this.searchState.update((s) => {
             if (s.matchIndices.length === 0) return s;
             const next = (s.currentMatchIndex + 1) % s.matchIndices.length;
             return { ...s, currentMatchIndex: next };
@@ -142,13 +133,12 @@ export class CodeCompareState {
     }
 
     prevMatch(): void {
-        this.searchState.update(s => {
+        this.searchState.update((s) => {
             if (s.matchIndices.length === 0) return s;
             const prev = (s.currentMatchIndex - 1 + s.matchIndices.length) % s.matchIndices.length;
             return { ...s, currentMatchIndex: prev };
         });
     }
-
 
     setScrollRatio(ratio: number): void {
         this.scrollRatio.set(ratio);

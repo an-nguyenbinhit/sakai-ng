@@ -4,17 +4,12 @@ import { DiffResult, FileContent, DiffOptions, ViewMode } from '../models/diff.m
 @Injectable({ providedIn: 'root' })
 export class ExportService {
     exportHtml(result: DiffResult, leftFile: FileContent, rightFile: FileContent, viewMode: ViewMode, options: DiffOptions, fontSize = 14): void {
-        const html =
-            viewMode === 'inline'
-                ? this.buildInlineHtmlExport(result, leftFile, rightFile, options, fontSize)
-                : this.buildSideBySideHtmlExport(result, leftFile, rightFile, options, fontSize);
+        const html = viewMode === 'inline' ? this.buildInlineHtmlExport(result, leftFile, rightFile, options, fontSize) : this.buildSideBySideHtmlExport(result, leftFile, rightFile, options, fontSize);
         this.downloadFile(`diff-${Date.now()}.html`, html, 'text/html;charset=utf-8');
     }
 
     exportImage(result: DiffResult, leftFile: FileContent, rightFile: FileContent, viewMode: ViewMode, options: DiffOptions, fontSize = 14): Promise<void> {
-        return viewMode === 'inline'
-            ? this.renderInlineCanvas(result, leftFile, rightFile, options, fontSize)
-            : this.renderSideBySideCanvas(result, leftFile, rightFile, options, fontSize);
+        return viewMode === 'inline' ? this.renderInlineCanvas(result, leftFile, rightFile, options, fontSize) : this.renderSideBySideCanvas(result, leftFile, rightFile, options, fontSize);
     }
 
     // ─── Side-by-side image ───────────────────────────────────────────────────
@@ -35,7 +30,7 @@ export class ExportService {
             mCtx.font = monoFont;
 
             let maxTextWidth = 300;
-            rows.forEach(row => {
+            rows.forEach((row) => {
                 if (row.left.type !== 'fold') {
                     maxTextWidth = Math.max(maxTextWidth, mCtx.measureText(this.unescapeHtml(row.left.raw ?? '')).width);
                     maxTextWidth = Math.max(maxTextWidth, mCtx.measureText(this.unescapeHtml(row.right.raw ?? '')).width);
@@ -74,8 +69,7 @@ export class ExportService {
 
                 if (tokens && tokens.length > 0) {
                     for (const tok of tokens) {
-                        const hl: 'added' | 'removed' | undefined =
-                            tok.type === 'added' ? 'added' : tok.type === 'removed' ? 'removed' : undefined;
+                        const hl: 'added' | 'removed' | undefined = tok.type === 'added' ? 'added' : tok.type === 'removed' ? 'removed' : undefined;
                         for (const ch of this.unescapeHtml(tok.text)) addChar(ch, hl);
                     }
                 } else {
@@ -98,7 +92,7 @@ export class ExportService {
                 lineCount: number;
             }
 
-            const visualRows: VisualRow[] = rows.map(row => {
+            const visualRows: VisualRow[] = rows.map((row) => {
                 if (row.left.type === 'fold') {
                     return {
                         isFold: true,
@@ -197,7 +191,7 @@ export class ExportService {
 
             let currentY = headerHeight;
 
-            visualRows.forEach(vr => {
+            visualRows.forEach((vr) => {
                 const rowH = vr.lineCount * lineHeight;
                 const y = currentY;
 
@@ -236,7 +230,7 @@ export class ExportService {
                     segLines.forEach((segs, li) => {
                         let segX = offsetX + numColWidth + padding;
                         const sy = y + li * lineHeight + lineHeight / 2;
-                        segs.forEach(seg => {
+                        segs.forEach((seg) => {
                             const segW = mCtx.measureText(seg.text).width;
                             if (seg.highlight === 'added') {
                                 ctx.fillStyle = '#acf2bd';
@@ -264,7 +258,7 @@ export class ExportService {
                 currentY += rowH;
             });
 
-            canvas.toBlob(blob => {
+            canvas.toBlob((blob) => {
                 if (!blob) {
                     reject(new Error('Failed to generate image blob'));
                     return;
@@ -302,7 +296,7 @@ export class ExportService {
             mCtx.font = monoFont;
 
             let maxTextWidth = 400;
-            rows.forEach(row => {
+            rows.forEach((row) => {
                 if (row.type !== 'fold') {
                     maxTextWidth = Math.max(maxTextWidth, mCtx.measureText(this.unescapeHtml(row.raw ?? '')).width);
                 }
@@ -340,8 +334,7 @@ export class ExportService {
 
                 if (tokens && tokens.length > 0) {
                     for (const tok of tokens) {
-                        const hl: 'added' | 'removed' | undefined =
-                            tok.type === 'added' ? 'added' : tok.type === 'removed' ? 'removed' : undefined;
+                        const hl: 'added' | 'removed' | undefined = tok.type === 'added' ? 'added' : tok.type === 'removed' ? 'removed' : undefined;
                         for (const ch of this.unescapeHtml(tok.text)) addChar(ch, hl);
                     }
                 } else {
@@ -362,7 +355,7 @@ export class ExportService {
                 lineCount: number;
             }
 
-            const visualRows: VisualInlineRow[] = rows.map(row => {
+            const visualRows: VisualInlineRow[] = rows.map((row) => {
                 if (row.type === 'fold') {
                     return { isFold: true, foldCount: row.foldedCount, segs: [], type: 'fold', lineNum: null, marker: '', lineCount: 1 };
                 }
@@ -440,7 +433,7 @@ export class ExportService {
 
             let currentY = headerHeight;
 
-            visualRows.forEach(vr => {
+            visualRows.forEach((vr) => {
                 const rowH = vr.lineCount * lineHeight;
                 const y = currentY;
 
@@ -491,7 +484,7 @@ export class ExportService {
                 vr.segs.forEach((segs, li) => {
                     let segX = numColWidth + markerWidth + padding;
                     const sy = y + li * lineHeight + lineHeight / 2;
-                    segs.forEach(seg => {
+                    segs.forEach((seg) => {
                         const segW = mCtx.measureText(seg.text).width;
                         if (seg.highlight === 'added') {
                             ctx.fillStyle = '#acf2bd';
@@ -518,7 +511,7 @@ export class ExportService {
                 currentY += rowH;
             });
 
-            canvas.toBlob(blob => {
+            canvas.toBlob((blob) => {
                 if (!blob) {
                     reject(new Error('Failed to generate image blob'));
                     return;
@@ -541,7 +534,7 @@ export class ExportService {
 
     private buildSideBySideHtmlExport(result: DiffResult, leftFile: FileContent, rightFile: FileContent, options: DiffOptions, fontSize: number): string {
         const rows = result.sideBySideRows
-            .map(row => {
+            .map((row) => {
                 if (row.left.type === 'fold') {
                     const count = row.left.foldedCount ?? 0;
                     return `<tr style="background:#e8e8e8"><td colspan="4" style="padding:4px 8px;text-align:center;color:#666;font-style:italic">... ${count} unchanged lines ...</td></tr>`;
@@ -615,7 +608,7 @@ ${rows}
 
     private buildInlineHtmlExport(result: DiffResult, leftFile: FileContent, rightFile: FileContent, options: DiffOptions, fontSize: number): string {
         const rows = result.inlineRows
-            .map(row => {
+            .map((row) => {
                 if (row.type === 'fold') {
                     return `<tr style="background:#e8e8e8"><td colspan="3" style="padding:4px 8px;text-align:center;color:#666;font-style:italic">... ${row.foldedCount ?? 0} unchanged lines ...</td></tr>`;
                 }
@@ -624,8 +617,7 @@ ${rows}
                 const lineNum = row.lineNumber ?? '';
                 const content = this.renderTokensOrRaw(row);
                 const marker = row.type === 'added' ? '+' : row.type === 'removed' ? '-' : row.type === 'modified' ? '~' : '';
-                const markerColor =
-                    row.type === 'added' ? '#155724' : row.type === 'removed' ? '#721c24' : row.type === 'modified' ? '#856404' : '#999';
+                const markerColor = row.type === 'added' ? '#155724' : row.type === 'removed' ? '#721c24' : row.type === 'modified' ? '#856404' : '#999';
 
                 return `<tr>
   <td style="width:40px;text-align:right;padding:2px 8px;color:#999;background:#f5f5f5;border-right:1px solid #ddd;user-select:none;white-space:nowrap">${lineNum}</td>
@@ -736,7 +728,7 @@ ${rows}
     private renderTokensOrRaw(line: { tokens: any[] | null; raw: string; highlightedHtml: string }): string {
         if (line.tokens && line.tokens.length > 0) {
             return line.tokens
-                .map(t => {
+                .map((t) => {
                     if (t.type === 'added') return `<span class="mark-add">${t.text}</span>`;
                     if (t.type === 'removed') return `<span class="mark-del">${t.text}</span>`;
                     return t.text;

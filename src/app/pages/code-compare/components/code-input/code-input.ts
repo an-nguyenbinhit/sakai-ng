@@ -13,10 +13,44 @@ import { FileContent } from '../../models/diff.models';
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 const SUPPORTED_EXTENSIONS = [
-    '.txt', '.js', '.ts', '.jsx', '.tsx', '.py', '.java', '.go', '.rb', '.php',
-    '.cs', '.cpp', '.c', '.h', '.json', '.yaml', '.yml', '.xml', '.html', '.css',
-    '.scss', '.md', '.sql', '.sh', '.bat', '.env', '.log', '.csv', '.rs', '.swift',
-    '.kt', '.dart', '.toml', '.graphql', '.r', '.lua', '.dockerfile', '.mjs'
+    '.txt',
+    '.js',
+    '.ts',
+    '.jsx',
+    '.tsx',
+    '.py',
+    '.java',
+    '.go',
+    '.rb',
+    '.php',
+    '.cs',
+    '.cpp',
+    '.c',
+    '.h',
+    '.json',
+    '.yaml',
+    '.yml',
+    '.xml',
+    '.html',
+    '.css',
+    '.scss',
+    '.md',
+    '.sql',
+    '.sh',
+    '.bat',
+    '.env',
+    '.log',
+    '.csv',
+    '.rs',
+    '.swift',
+    '.kt',
+    '.dart',
+    '.toml',
+    '.graphql',
+    '.r',
+    '.lua',
+    '.dockerfile',
+    '.mjs'
 ];
 
 @Component({
@@ -192,9 +226,9 @@ export class CodeInput {
 
     private detectEncoding(buffer: ArrayBuffer): string {
         const bytes = new Uint8Array(buffer);
-        if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) return 'UTF-8';
-        if (bytes[0] === 0xFF && bytes[1] === 0xFE) return 'UTF-16LE';
-        if (bytes[0] === 0xFE && bytes[1] === 0xFF) return 'UTF-16BE';
+        if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) return 'UTF-8';
+        if (bytes[0] === 0xff && bytes[1] === 0xfe) return 'UTF-16LE';
+        if (bytes[0] === 0xfe && bytes[1] === 0xff) return 'UTF-16BE';
         return 'UTF-8';
     }
 

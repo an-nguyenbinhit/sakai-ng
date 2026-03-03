@@ -4,19 +4,19 @@ import { CodeCompareState } from '../../services/code-compare-state.service';
 import { DiffLineType, SideBySideRow } from '../../models/diff.models';
 
 const COLOR_MAP: Record<DiffLineType, string> = {
-    added: '#86efac',     // green-300
-    removed: '#fca5a5',   // red-300
-    modified: '#fde047',  // yellow-300
+    added: '#86efac', // green-300
+    removed: '#fca5a5', // red-300
+    modified: '#fde047', // yellow-300
     unchanged: 'transparent',
-    fold: '#e2e8f0'       // surface-200
+    fold: '#e2e8f0' // surface-200
 };
 
 const DARK_COLOR_MAP: Record<DiffLineType, string> = {
-    added: '#166534',     // green-800
-    removed: '#991b1b',   // red-800
-    modified: '#854d0e',  // yellow-800
+    added: '#166534', // green-800
+    removed: '#991b1b', // red-800
+    modified: '#854d0e', // yellow-800
     unchanged: 'transparent',
-    fold: '#334155'       // surface-700
+    fold: '#334155' // surface-700
 };
 
 @Component({
@@ -63,11 +63,7 @@ export class DiffMinimap {
         if (!result) return;
 
         const isSideBySide = this.state.viewMode() === 'side-by-side';
-        const lineTypes: DiffLineType[] = isSideBySide
-            ? result.sideBySideRows.map((row: SideBySideRow) =>
-                  row.left.type !== 'unchanged' ? row.left.type : row.right.type
-              )
-            : result.inlineRows.map(l => l.type);
+        const lineTypes: DiffLineType[] = isSideBySide ? result.sideBySideRows.map((row: SideBySideRow) => (row.left.type !== 'unchanged' ? row.left.type : row.right.type)) : result.inlineRows.map((l) => l.type);
 
         const containerHeight = canvas.parentElement?.clientHeight ?? 400;
         const containerWidth = canvas.parentElement?.clientWidth ?? 48;

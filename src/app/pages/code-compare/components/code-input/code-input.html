@@ -2,50 +2,23 @@
     <!-- Header -->
     <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0">
-            <span class="font-semibold text-sm text-surface-700 dark:text-surface-200 shrink-0">
-                {{ side() === 'left' ? 'Code A' : 'Code B' }}
-            </span>
+            <span class="font-semibold text-sm text-surface-700 dark:text-surface-200 shrink-0"> {{ side() === 'left' ? 'Code A' : 'Code B' }} </span>
             @if (fileName()) {
-                <span
-                    class="inline-block px-2 py-0.5 rounded bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-200 text-xs truncate min-w-0 max-w-36 shrink"
-                    [pTooltip]="fileName()!"
-                    tooltipPosition="bottom"
-                >{{ fileName() }}</span>
-            }
-            @if (detectedLanguage() !== 'plaintext' && fileName()) {
-                <p-tag [value]="detectedLanguage()" severity="secondary" styleClass="text-xs" />
+            <span class="inline-block px-2 py-0.5 rounded bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-200 text-xs truncate min-w-0 max-w-36 shrink" [pTooltip]="fileName()!" tooltipPosition="bottom">{{ fileName() }}</span>
+            } @if (detectedLanguage() !== 'plaintext' && fileName()) {
+            <p-tag [value]="detectedLanguage()" severity="secondary" styleClass="text-xs" />
             }
         </div>
         <div class="flex items-center gap-1">
-            <p-button
-                label="Attach file"
-                icon="pi pi-paperclip"
-                severity="primary"
-                [outlined]="true"
-                size="small"
-                (onClick)="triggerFileInput()"
-            />
+            <p-button label="Attach file" icon="pi pi-paperclip" severity="primary" [outlined]="true" size="small" (onClick)="triggerFileInput()" />
             @if (text()) {
-                <p-button
-                    icon="pi pi-times"
-                    severity="secondary"
-                    [rounded]="true"
-                    [text]="true"
-                    size="small"
-                    (onClick)="clear()"
-                    pTooltip="Clear"
-                />
+            <p-button icon="pi pi-times" severity="secondary" [rounded]="true" [text]="true" size="small" (onClick)="clear()" pTooltip="Clear" />
             }
         </div>
     </div>
 
     <!-- Textarea with drag-and-drop -->
-    <div
-        class="relative"
-        (dragover)="onDragOver($event)"
-        (dragleave)="onDragLeave($event)"
-        (drop)="onDrop($event)"
-    >
+    <div class="relative" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
         <textarea
             pTextarea
             [rows]="11"
@@ -55,34 +28,27 @@
             [class.!border-primary]="isDragOver()"
         ></textarea>
         @if (isDragOver()) {
-            <div class="absolute inset-0 flex items-center justify-center bg-primary-50/90 dark:bg-primary-950/90 pointer-events-none border-2 border-primary border-dashed rounded-border">
-                <div class="text-center">
-                    <i class="pi pi-cloud-upload text-2xl text-primary"></i>
-                    <p class="text-primary font-medium text-sm mt-1">Drop file here</p>
-                </div>
+        <div class="absolute inset-0 flex items-center justify-center bg-primary-50/90 dark:bg-primary-950/90 pointer-events-none border-2 border-primary border-dashed rounded-border">
+            <div class="text-center">
+                <i class="pi pi-cloud-upload text-2xl text-primary"></i>
+                <p class="text-primary font-medium text-sm mt-1">Drop file here</p>
             </div>
+        </div>
         }
-        <input
-            #fileInput
-            type="file"
-            class="hidden"
-            [accept]="supportedExtensions"
-            (change)="onFileSelected($event)"
-        />
+        <input #fileInput type="file" class="hidden" [accept]="supportedExtensions" (change)="onFileSelected($event)" />
     </div>
 
     <!-- Status bar -->
     <div class="flex items-center justify-between text-xs text-surface-400 px-0.5 min-h-4">
         @if (errorMessage()) {
-            <p-message severity="error" [text]="errorMessage()!" styleClass="w-full" />
+        <p-message severity="error" [text]="errorMessage()!" styleClass="w-full" />
         } @else {
-            <span>{{ lineCount() > 0 ? lineCount() + ' lines' : '' }}</span>
-            @if (isLoading()) {
-                <span class="flex items-center gap-1">
-                    <i class="pi pi-spin pi-spinner"></i>
-                    Reading file...
-                </span>
-            }
-        }
+        <span>{{ lineCount() > 0 ? lineCount() + ' lines' : '' }}</span>
+        @if (isLoading()) {
+        <span class="flex items-center gap-1">
+            <i class="pi pi-spin pi-spinner"></i>
+            Reading file...
+        </span>
+        } }
     </div>
 </div>

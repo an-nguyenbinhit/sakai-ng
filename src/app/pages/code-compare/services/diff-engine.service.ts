@@ -129,9 +129,7 @@ export class DiffEngine {
         }
 
         const totalLines = totalAdded + totalRemoved + totalModified + totalUnchanged;
-        const similarityPercent = totalLines > 0
-            ? Math.round((totalUnchanged / totalLines) * 100)
-            : 100;
+        const similarityPercent = totalLines > 0 ? Math.round((totalUnchanged / totalLines) * 100) : 100;
 
         return {
             flatLeft,
@@ -150,17 +148,17 @@ export class DiffEngine {
         let lines = text.split(/\r?\n|\r/);
 
         if (opts.ignoreBlankLines) {
-            lines = lines.filter(l => l.trim().length > 0);
+            lines = lines.filter((l) => l.trim().length > 0);
         }
 
         if (opts.trimLines) {
-            lines = lines.map(l => l.trim());
+            lines = lines.map((l) => l.trim());
         } else if (opts.ignoreWhitespace) {
-            lines = lines.map(l => l.trimEnd());
+            lines = lines.map((l) => l.trimEnd());
         }
 
         if (opts.ignoreComments) {
-            lines = lines.filter(l => !this.isCommentLine(l));
+            lines = lines.filter((l) => !this.isCommentLine(l));
         }
 
         return lines.join('\n');
@@ -168,12 +166,7 @@ export class DiffEngine {
 
     private isCommentLine(line: string): boolean {
         const trimmed = line.trim();
-        return trimmed.startsWith('//') ||
-            trimmed.startsWith('#') ||
-            trimmed.startsWith('*') ||
-            trimmed.startsWith('/*') ||
-            trimmed.startsWith('--') ||
-            trimmed.startsWith('<!--');
+        return trimmed.startsWith('//') || trimmed.startsWith('#') || trimmed.startsWith('*') || trimmed.startsWith('/*') || trimmed.startsWith('--') || trimmed.startsWith('<!--');
     }
 
     private pairLines(changes: Change[]): PairedLine[] {
@@ -310,11 +303,6 @@ export class DiffEngine {
     }
 
     escapeHtml(text: string): string {
-        return text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+        return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 }

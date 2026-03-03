@@ -75,7 +75,10 @@ export class CodeFormatter {
     private outputEditorInstance: any;
     private autoUpdateTimeout: any;
 
-    constructor(private messageService: MessageService, private layoutService: LayoutService) {
+    constructor(
+        private messageService: MessageService,
+        private layoutService: LayoutService
+    ) {
         effect(() => {
             const isDark = this.layoutService.isDarkTheme();
             const theme = isDark ? 'vs-dark' : 'vs-light';
@@ -93,7 +96,7 @@ export class CodeFormatter {
     }
 
     getLanguageLabel(): string {
-        const lang = this.languages.find(l => l.code === this.selectedLanguage);
+        const lang = this.languages.find((l) => l.code === this.selectedLanguage);
         return lang ? lang.name : 'Data';
     }
 
@@ -186,7 +189,7 @@ export class CodeFormatter {
 
     toggleFullscreen(container: HTMLElement) {
         if (!document.fullscreenElement) {
-            container.requestFullscreen().catch(err => {
+            container.requestFullscreen().catch((err) => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Fullscreen not supported' });
             });
         } else {
@@ -377,13 +380,27 @@ export class CodeFormatter {
 
         let ext = '.txt';
         switch (this.selectedLanguage) {
-            case 'typescript': ext = '.ts'; break;
-            case 'json': ext = '.json'; break;
-            case 'html': ext = '.html'; break;
-            case 'css': ext = '.css'; break;
-            case 'markdown': ext = '.md'; break;
-            case 'xml': ext = '.xml'; break;
-            case 'sql': ext = '.sql'; break;
+            case 'typescript':
+                ext = '.ts';
+                break;
+            case 'json':
+                ext = '.json';
+                break;
+            case 'html':
+                ext = '.html';
+                break;
+            case 'css':
+                ext = '.css';
+                break;
+            case 'markdown':
+                ext = '.md';
+                break;
+            case 'xml':
+                ext = '.xml';
+                break;
+            case 'sql':
+                ext = '.sql';
+                break;
         }
 
         a.href = url;

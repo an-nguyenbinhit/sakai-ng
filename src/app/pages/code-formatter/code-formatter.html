@@ -1,66 +1,45 @@
-<div class="flex flex-col xl:flex-row gap-4 relative h-[calc(100vh-8rem)] min-h-[600px] w-full"
-    (drop)="onFileDrop($event)" (dragover)="onDragOver($event)" (dragenter)="onDragEnter($event)"
-    (dragleave)="onDragLeave($event)">
-    <div *ngIf="isDragging"
-        class="absolute inset-0 bg-primary/10 border-2 border-primary border-dashed rounded-xl flex items-center justify-center z-50 pointer-events-none transition-all">
+<div class="flex flex-col xl:flex-row gap-4 relative h-[calc(100vh-8rem)] min-h-[600px] w-full" (drop)="onFileDrop($event)" (dragover)="onDragOver($event)" (dragenter)="onDragEnter($event)" (dragleave)="onDragLeave($event)">
+    <div *ngIf="isDragging" class="absolute inset-0 bg-primary/10 border-2 border-primary border-dashed rounded-xl flex items-center justify-center z-50 pointer-events-none transition-all">
         <div class="text-2xl font-bold text-primary">Drop file here to load</div>
     </div>
 
     <p-toast></p-toast>
 
     <!-- Left Pane: Input -->
-    <div
-        class="flex-1 flex flex-col min-w-0 border border-surface-200 dark:border-surface-700 rounded-xl overflow-hidden bg-surface-0 dark:bg-surface-900 shadow-sm">
-        <div
-            class="flex items-center justify-between px-4 py-2 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
+    <div class="flex-1 flex flex-col min-w-0 border border-surface-200 dark:border-surface-700 rounded-xl overflow-hidden bg-surface-0 dark:bg-surface-900 shadow-sm">
+        <div class="flex items-center justify-between px-4 py-2 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
             <div class="font-semibold text-surface-700 dark:text-surface-100">Input</div>
             <div class="flex items-center gap-1">
-                <p-button icon="pi pi-history" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Undo"
-                    tooltipPosition="bottom" (click)="undoInput()"></p-button>
+                <p-button icon="pi pi-history" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Undo" tooltipPosition="bottom" (click)="undoInput()"></p-button>
                 <div class="w-px h-4 bg-surface-300 dark:bg-surface-600 mx-1"></div>
-                <p-button icon="pi pi-folder-open" styleClass="w-8 h-8" [text]="true" severity="secondary"
-                    pTooltip="Load File" tooltipPosition="bottom" (click)="fileInput.click()"></p-button>
+                <p-button icon="pi pi-folder-open" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Load File" tooltipPosition="bottom" (click)="fileInput.click()"></p-button>
                 <input type="file" #fileInput class="hidden" (change)="onFileSelected($event)" />
-                <p-button icon="pi pi-save" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Save File"
-                    tooltipPosition="bottom" (click)="downloadCode(true)"></p-button>
+                <p-button icon="pi pi-save" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Save File" tooltipPosition="bottom" (click)="downloadCode(true)"></p-button>
                 <div class="w-px h-4 bg-surface-300 dark:bg-surface-600 mx-1"></div>
-                <p-button icon="pi pi-trash" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Clear"
-                    tooltipPosition="bottom" (click)="clearInput()"></p-button>
-                <p-button icon="pi pi-copy" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Copy"
-                    tooltipPosition="bottom" (click)="copyCode(true)"></p-button>
-                <p-button icon="pi pi-window-maximize" styleClass="w-8 h-8" [text]="true" severity="secondary"
-                    pTooltip="Fullscreen" tooltipPosition="bottom"
-                    (click)="toggleFullscreen(inputContainer)"></p-button>
+                <p-button icon="pi pi-trash" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Clear" tooltipPosition="bottom" (click)="clearInput()"></p-button>
+                <p-button icon="pi pi-copy" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Copy" tooltipPosition="bottom" (click)="copyCode(true)"></p-button>
+                <p-button icon="pi pi-window-maximize" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Fullscreen" tooltipPosition="bottom" (click)="toggleFullscreen(inputContainer)"></p-button>
             </div>
         </div>
         <div #inputContainer class="flex-1 relative bg-surface-0 dark:bg-[#1e1e1e]">
-            <ngx-monaco-editor class="absolute inset-0 w-full h-full" [options]="inputEditorOptions"
-                [(ngModel)]="inputCode" (ngModelChange)="onInputChange($event)"
-                (onInit)="onInputEditorInit($event)"></ngx-monaco-editor>
+            <ngx-monaco-editor class="absolute inset-0 w-full h-full" [options]="inputEditorOptions" [(ngModel)]="inputCode" (ngModelChange)="onInputChange($event)" (onInit)="onInputEditorInit($event)"></ngx-monaco-editor>
         </div>
-        <div
-            class="flex items-center justify-between px-4 py-1.5 bg-surface-50 dark:bg-surface-800 border-t border-surface-200 dark:border-surface-700 text-xs text-surface-500 font-medium">
+        <div class="flex items-center justify-between px-4 py-1.5 bg-surface-50 dark:bg-surface-800 border-t border-surface-200 dark:border-surface-700 text-xs text-surface-500 font-medium">
             <div>Ln: {{inputCursor.line}} Col: {{inputCursor.col}}</div>
             <div class="flex items-center gap-4">
                 <div>Size: <span class="font-bold text-surface-700 dark:text-surface-300">{{inputSize}} B</span></div>
                 <div class="flex gap-2">
-                    <button
-                        class="hover:text-primary transition-colors hover:bg-surface-200 dark:hover:bg-surface-700 px-1 rounded"
-                        (click)="increaseFontSize()">A+</button>
-                    <button
-                        class="hover:text-primary transition-colors hover:bg-surface-200 dark:hover:bg-surface-700 px-1 rounded"
-                        (click)="decreaseFontSize()">A-</button>
+                    <button class="hover:text-primary transition-colors hover:bg-surface-200 dark:hover:bg-surface-700 px-1 rounded" (click)="increaseFontSize()">A+</button>
+                    <button class="hover:text-primary transition-colors hover:bg-surface-200 dark:hover:bg-surface-700 px-1 rounded" (click)="decreaseFontSize()">A-</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Middle Pane: Controls -->
-    <div
-        class="xl:w-56 flex flex-col gap-4 shrink-0 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl p-4 shadow-sm items-center self-start xl:self-center">
+    <div class="xl:w-56 flex flex-col gap-4 shrink-0 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl p-4 shadow-sm items-center self-start xl:self-center">
         <div class="w-full flex justify-center">
-            <p-select [options]="languages" [(ngModel)]="selectedLanguage" optionLabel="name" optionValue="code"
-                placeholder="Select Data Type" styleClass="w-full" (onChange)="onLanguageChange()">
+            <p-select [options]="languages" [(ngModel)]="selectedLanguage" optionLabel="name" optionValue="code" placeholder="Select Data Type" styleClass="w-full" (onChange)="onLanguageChange()">
                 <ng-template pTemplate="selectedItem" let-selectedOption>
                     <div class="flex items-center gap-2">
                         <i class="pi pi-file-code"></i>
@@ -71,105 +50,76 @@
         </div>
 
         <div class="flex items-center gap-3 w-full justify-between mt-2">
-            <label for="autoUpdateSwitch"
-                class="text-sm font-medium text-surface-700 dark:text-surface-200 cursor-pointer">Auto update</label>
-            <p-toggleswitch inputId="autoUpdateSwitch" [(ngModel)]="autoUpdate"
-                (onChange)="onAutoUpdateChange()"></p-toggleswitch>
+            <label for="autoUpdateSwitch" class="text-sm font-medium text-surface-700 dark:text-surface-200 cursor-pointer">Auto update</label>
+            <p-toggleswitch inputId="autoUpdateSwitch" [(ngModel)]="autoUpdate" (onChange)="onAutoUpdateChange()"></p-toggleswitch>
         </div>
 
         <div class="flex items-center gap-2 w-full">
             <p-checkbox [(ngModel)]="formatCssJs" binary="true" inputId="formatCssJs"></p-checkbox>
-            <label for="formatCssJs"
-                class="text-xs font-medium text-surface-700 dark:text-surface-200 cursor-pointer">Format CSS & JS inside
-                HTML</label>
+            <label for="formatCssJs" class="text-xs font-medium text-surface-700 dark:text-surface-200 cursor-pointer">Format CSS & JS inside HTML</label>
         </div>
 
-        <p-button [label]="'Format ' + getLanguageLabel()" icon="pi pi-caret-right"
-            styleClass="w-full py-2 font-bold mt-2" (click)="formatCode()"></p-button>
+        <p-button [label]="'Format ' + getLanguageLabel()" icon="pi pi-caret-right" styleClass="w-full py-2 font-bold mt-2" (click)="formatCode()"></p-button>
 
         <div class="w-full border-t border-surface-200 dark:border-surface-700 my-2"></div>
 
         <div class="w-full flex items-center justify-between">
             <label class="text-sm font-medium text-surface-700 dark:text-surface-200">Tab Space</label>
-            <p-select [options]="tabSizeOptions" [(ngModel)]="tabWidth" optionLabel="name" optionValue="code"
-                styleClass="w-[70px] text-sm border-none shadow-none bg-surface-50 dark:bg-surface-800"
-                (onChange)="onFormatConfigChange()">
-            </p-select>
+            <p-select [options]="tabSizeOptions" [(ngModel)]="tabWidth" optionLabel="name" optionValue="code" styleClass="w-[70px] text-sm border-none shadow-none bg-surface-50 dark:bg-surface-800" (onChange)="onFormatConfigChange()"> </p-select>
         </div>
 
         <div class="flex flex-col gap-2 w-full mt-2">
-            <p-button label="Download" icon="pi pi-download" severity="secondary" styleClass="w-full"
-                (click)="downloadCode(false)"></p-button>
-            <p-button label="Settings" icon="pi pi-cog" severity="secondary" styleClass="w-full" ariaLabel="Settings"
-                pTooltip="Advanced Settings" tooltipPosition="bottom" (click)="displaySettings = true"></p-button>
+            <p-button label="Download" icon="pi pi-download" severity="secondary" styleClass="w-full" (click)="downloadCode(false)"></p-button>
+            <p-button label="Settings" icon="pi pi-cog" severity="secondary" styleClass="w-full" ariaLabel="Settings" pTooltip="Advanced Settings" tooltipPosition="bottom" (click)="displaySettings = true"></p-button>
         </div>
     </div>
 
     <!-- Right Pane: Output -->
-    <div
-        class="flex-1 flex flex-col min-w-0 border border-surface-200 dark:border-surface-700 rounded-xl overflow-hidden bg-surface-0 dark:bg-surface-900 shadow-sm">
-        <div
-            class="flex items-center justify-between px-4 py-2 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
+    <div class="flex-1 flex flex-col min-w-0 border border-surface-200 dark:border-surface-700 rounded-xl overflow-hidden bg-surface-0 dark:bg-surface-900 shadow-sm">
+        <div class="flex items-center justify-between px-4 py-2 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
             <div class="font-semibold text-surface-700 dark:text-surface-100">Output</div>
             <div class="flex items-center gap-1">
-                <p-button icon="pi pi-trash" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Clear"
-                    tooltipPosition="bottom" (click)="clearOutput()"></p-button>
+                <p-button icon="pi pi-trash" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Clear" tooltipPosition="bottom" (click)="clearOutput()"></p-button>
                 <div class="w-px h-4 bg-surface-300 dark:bg-surface-600 mx-1"></div>
-                <p-button icon="pi pi-download" styleClass="w-8 h-8" [text]="true" severity="secondary"
-                    pTooltip="Download" tooltipPosition="bottom" (click)="downloadCode(false)"></p-button>
-                <p-button icon="pi pi-copy" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Copy"
-                    tooltipPosition="bottom" (click)="copyCode(false)"></p-button>
-                <p-button icon="pi pi-window-maximize" styleClass="w-8 h-8" [text]="true" severity="secondary"
-                    pTooltip="Fullscreen" tooltipPosition="bottom"
-                    (click)="toggleFullscreen(outputContainer)"></p-button>
+                <p-button icon="pi pi-download" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Download" tooltipPosition="bottom" (click)="downloadCode(false)"></p-button>
+                <p-button icon="pi pi-copy" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Copy" tooltipPosition="bottom" (click)="copyCode(false)"></p-button>
+                <p-button icon="pi pi-window-maximize" styleClass="w-8 h-8" [text]="true" severity="secondary" pTooltip="Fullscreen" tooltipPosition="bottom" (click)="toggleFullscreen(outputContainer)"></p-button>
             </div>
         </div>
         <div #outputContainer class="flex-1 relative bg-surface-0 dark:bg-[#1e1e1e]">
-            <ngx-monaco-editor class="absolute inset-0 w-full h-full" [options]="outputEditorOptions"
-                [(ngModel)]="outputCode" (onInit)="onOutputEditorInit($event)"></ngx-monaco-editor>
+            <ngx-monaco-editor class="absolute inset-0 w-full h-full" [options]="outputEditorOptions" [(ngModel)]="outputCode" (onInit)="onOutputEditorInit($event)"></ngx-monaco-editor>
         </div>
-        <div
-            class="flex items-center justify-between px-4 py-1.5 bg-surface-50 dark:bg-surface-800 border-t border-surface-200 dark:border-surface-700 text-xs text-surface-500 font-medium">
+        <div class="flex items-center justify-between px-4 py-1.5 bg-surface-50 dark:bg-surface-800 border-t border-surface-200 dark:border-surface-700 text-xs text-surface-500 font-medium">
             <div>Ln: {{outputCursor.line}} Col: {{outputCursor.col}}</div>
             <div class="flex items-center gap-4">
                 <div>Size: <span class="font-bold text-surface-700 dark:text-surface-300">{{outputSize}} B</span></div>
                 <div class="flex gap-2">
-                    <button
-                        class="hover:text-primary transition-colors hover:bg-surface-200 dark:hover:bg-surface-700 px-1 rounded"
-                        (click)="increaseFontSize()">A+</button>
-                    <button
-                        class="hover:text-primary transition-colors hover:bg-surface-200 dark:hover:bg-surface-700 px-1 rounded"
-                        (click)="decreaseFontSize()">A-</button>
+                    <button class="hover:text-primary transition-colors hover:bg-surface-200 dark:hover:bg-surface-700 px-1 rounded" (click)="increaseFontSize()">A+</button>
+                    <button class="hover:text-primary transition-colors hover:bg-surface-200 dark:hover:bg-surface-700 px-1 rounded" (click)="decreaseFontSize()">A-</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Advanced Settings Drawer -->
-    <p-drawer [(visible)]="displaySettings" position="right" header="Advanced Formatter Settings"
-        styleClass="w-full sm:w-80">
+    <p-drawer [(visible)]="displaySettings" position="right" header="Advanced Formatter Settings" styleClass="w-full sm:w-80">
         <div class="flex flex-col gap-6 mt-4">
             <div class="flex flex-col gap-2">
                 <label class="font-medium text-surface-700 dark:text-surface-200">Load Sample</label>
-                <p-button label="Load Demo Data" icon="pi pi-file" severity="secondary"
-                    (click)="loadSample()"></p-button>
+                <p-button label="Load Demo Data" icon="pi pi-file" severity="secondary" (click)="loadSample()"></p-button>
             </div>
             <div class="w-full border-t border-surface-200 dark:border-surface-700"></div>
             <div class="flex flex-col gap-2">
                 <label class="font-medium text-surface-700 dark:text-surface-200">Print Width</label>
-                <input pInputText type="number" [(ngModel)]="printWidth" class="w-full"
-                    (change)="onFormatConfigChange()" />
+                <input pInputText type="number" [(ngModel)]="printWidth" class="w-full" (change)="onFormatConfigChange()" />
             </div>
             <div class="flex items-center gap-2">
-                <p-checkbox [(ngModel)]="useTabs" binary="true" inputId="useTabs"
-                    (onChange)="onFormatConfigChange()"></p-checkbox>
+                <p-checkbox [(ngModel)]="useTabs" binary="true" inputId="useTabs" (onChange)="onFormatConfigChange()"></p-checkbox>
                 <label for="useTabs" class="text-surface-700 dark:text-surface-200 cursor-pointer">Use Tabs</label>
             </div>
             <div class="flex items-center gap-2">
-                <p-checkbox [(ngModel)]="singleQuote" binary="true" inputId="singleQuote"
-                    (onChange)="onFormatConfigChange()"></p-checkbox>
-                <label for="singleQuote" class="text-surface-700 dark:text-surface-200 cursor-pointer">Single
-                    Quotes</label>
+                <p-checkbox [(ngModel)]="singleQuote" binary="true" inputId="singleQuote" (onChange)="onFormatConfigChange()"></p-checkbox>
+                <label for="singleQuote" class="text-surface-700 dark:text-surface-200 cursor-pointer">Single Quotes</label>
             </div>
         </div>
     </p-drawer>

@@ -1,86 +1,70 @@
 <div class="flex flex-col">
-
     <!-- Input panels section -->
     @if (hasBothFiles()) {
-        <!-- Unified card: header + collapsible panels -->
-        <div class="mx-4 mb-2 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-border overflow-hidden">
-
-            <!-- Clickable toggle header -->
-            <div
-                class="flex items-center px-4 py-2.5 bg-surface-50 dark:bg-surface-800 cursor-pointer select-none hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors"
-                (click)="inputCollapsed.set(!inputCollapsed())"
-            >
-                <div class="flex-1 flex items-center justify-center gap-2 min-w-0">
-                    <i class="pi pi-file text-primary text-sm shrink-0"></i>
-                    <span class="text-sm font-medium text-surface-700 dark:text-surface-200 truncate max-w-[200px]">{{ state.leftFile()?.name ?? 'untitled' }}</span>
-                    <span class="text-xs text-surface-400 shrink-0">{{ leftLineCount() }} lines</span>
-                    <i class="pi pi-arrows-h text-surface-300 dark:text-surface-600 shrink-0 mx-2"></i>
-                    <i class="pi pi-file text-primary text-sm shrink-0"></i>
-                    <span class="text-sm font-medium text-surface-700 dark:text-surface-200 truncate max-w-[200px]">{{ state.rightFile()?.name ?? 'untitled' }}</span>
-                    <span class="text-xs text-surface-400 shrink-0">{{ rightLineCount() }} lines</span>
-                </div>
-                <i
-                    class="pi text-surface-400 text-sm shrink-0"
-                    [class.pi-chevron-up]="!inputCollapsed()"
-                    [class.pi-chevron-down]="inputCollapsed()"
-                ></i>
+    <!-- Unified card: header + collapsible panels -->
+    <div class="mx-4 mb-2 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-border overflow-hidden">
+        <!-- Clickable toggle header -->
+        <div class="flex items-center px-4 py-2.5 bg-surface-50 dark:bg-surface-800 cursor-pointer select-none hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors" (click)="inputCollapsed.set(!inputCollapsed())">
+            <div class="flex-1 flex items-center justify-center gap-2 min-w-0">
+                <i class="pi pi-file text-primary text-sm shrink-0"></i>
+                <span class="text-sm font-medium text-surface-700 dark:text-surface-200 truncate max-w-[200px]">{{ state.leftFile()?.name ?? 'untitled' }}</span>
+                <span class="text-xs text-surface-400 shrink-0">{{ leftLineCount() }} lines</span>
+                <i class="pi pi-arrows-h text-surface-300 dark:text-surface-600 shrink-0 mx-2"></i>
+                <i class="pi pi-file text-primary text-sm shrink-0"></i>
+                <span class="text-sm font-medium text-surface-700 dark:text-surface-200 truncate max-w-[200px]">{{ state.rightFile()?.name ?? 'untitled' }}</span>
+                <span class="text-xs text-surface-400 shrink-0">{{ rightLineCount() }} lines</span>
             </div>
+            <i class="pi text-surface-400 text-sm shrink-0" [class.pi-chevron-up]="!inputCollapsed()" [class.pi-chevron-down]="inputCollapsed()"></i>
+        </div>
 
-            <!-- Collapsible content -->
-            <div
-                class="grid transition-[grid-template-rows] duration-500 ease-in-out"
-                [style.grid-template-rows]="inputCollapsed() ? '0fr' : '1fr'"
-            >
-                <div class="overflow-hidden" (focusout)="onInputPanelBlur($event)">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-                        <div class="p-4 border border-surface-200 dark:border-surface-700 rounded-border">
-                            <p-code-input side="left" />
-                        </div>
-                        <div class="p-4 border border-surface-200 dark:border-surface-700 rounded-border">
-                            <p-code-input side="right" />
-                        </div>
+        <!-- Collapsible content -->
+        <div class="grid transition-[grid-template-rows] duration-500 ease-in-out" [style.grid-template-rows]="inputCollapsed() ? '0fr' : '1fr'">
+            <div class="overflow-hidden" (focusout)="onInputPanelBlur($event)">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                    <div class="p-4 border border-surface-200 dark:border-surface-700 rounded-border">
+                        <p-code-input side="left" />
+                    </div>
+                    <div class="p-4 border border-surface-200 dark:border-surface-700 rounded-border">
+                        <p-code-input side="right" />
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     } @else {
-        <!-- No card wrapper when both files not loaded yet -->
-        <div class="overflow-hidden" (focusout)="onInputPanelBlur($event)">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-                <div class="p-4 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-border">
-                    <p-code-input side="left" />
-                </div>
-                <div class="p-4 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-border">
-                    <p-code-input side="right" />
-                </div>
+    <!-- No card wrapper when both files not loaded yet -->
+    <div class="overflow-hidden" (focusout)="onInputPanelBlur($event)">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+            <div class="p-4 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-border">
+                <p-code-input side="left" />
             </div>
-            @if (hasAnyFile()) {
-                <div class="flex items-center px-4 pb-4 gap-2 text-sm text-surface-400">
-                    <i class="pi pi-info-circle"></i>
-                    <span>Add code to the {{ state.leftFile() ? 'right (Code B)' : 'left (Code A)' }} panel to start comparing.</span>
-                </div>
-            }
+            <div class="p-4 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-border">
+                <p-code-input side="right" />
+            </div>
         </div>
+        @if (hasAnyFile()) {
+        <div class="flex items-center px-4 pb-4 gap-2 text-sm text-surface-400">
+            <i class="pi pi-info-circle"></i>
+            <span>Add code to the {{ state.leftFile() ? 'right (Code B)' : 'left (Code A)' }} panel to start comparing.</span>
+        </div>
+        }
+    </div>
     }
 
     <!-- Diff section -->
     @if (hasBothFiles()) {
-        <div class="flex flex-col gap-2 px-4 pb-4">
-            <p-diff-toolbar [diffViewer]="diffViewerRef" />
-            <p-diff-summary />
+    <div class="flex flex-col gap-2 px-4 pb-4">
+        <p-diff-toolbar [diffViewer]="diffViewerRef" />
+        <p-diff-summary />
 
-            <div
-                class="flex gap-3 transition-[height] duration-500 ease-in-out"
-                [style.height]="inputCollapsed() ? 'calc(100vh - 22rem)' : '65vh'"
-            >
-                <div class="flex-1 min-w-0 h-full">
-                    <p-diff-viewer #diffViewerRef class="block h-full" />
-                </div>
-                <div class="w-14 shrink-0">
-                    <p-diff-minimap />
-                </div>
+        <div class="flex gap-3 transition-[height] duration-500 ease-in-out" [style.height]="inputCollapsed() ? 'calc(100vh - 22rem)' : '65vh'">
+            <div class="flex-1 min-w-0 h-full">
+                <p-diff-viewer #diffViewerRef class="block h-full" />
+            </div>
+            <div class="w-14 shrink-0">
+                <p-diff-minimap />
             </div>
         </div>
+    </div>
     }
-
 </div>

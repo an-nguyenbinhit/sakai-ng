@@ -45,7 +45,10 @@ export class RegexTester {
         { label: 'HTML Tags', pattern: '<\\/?\\w+((\\s+\\w+(\\s*=\\s*(?:".*?"|\'.*?\'|[\\^"\'>\\s]+))?)+\\s*|\\s*)\\/?>', desc: 'Match opening and closing HTML tags' }
     ];
 
-    constructor(private messageService: MessageService, private sanitizer: DomSanitizer) {
+    constructor(
+        private messageService: MessageService,
+        private sanitizer: DomSanitizer
+    ) {
         this.evaluateRegex();
     }
 
@@ -96,12 +99,14 @@ export class RegexTester {
             } else {
                 const res = this.testString.match(regex);
                 if (res && res.index !== undefined) {
-                    this.matches = [{
-                        index: 1,
-                        match: res[0],
-                        start: res.index,
-                        end: res.index + res[0].length
-                    }];
+                    this.matches = [
+                        {
+                            index: 1,
+                            match: res[0],
+                            start: res.index,
+                            end: res.index + res[0].length
+                        }
+                    ];
                 } else {
                     this.matches = [];
                 }
@@ -121,7 +126,6 @@ export class RegexTester {
             } else {
                 this.updateHighlightedHtml(this.testString);
             }
-
         } catch (e: any) {
             this.matches = [];
             this.updateHighlightedHtml(this.testString);
@@ -137,11 +141,7 @@ export class RegexTester {
     }
 
     escapeHtml(unsafe: string) {
-        return (unsafe || '').replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+        return (unsafe || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
 
     clearInputs() {
@@ -164,7 +164,7 @@ export class RegexTester {
 
     copyMatches() {
         if (this.matches.length === 0) return;
-        const text = this.matches.map(m => m.match).join('\n');
+        const text = this.matches.map((m) => m.match).join('\n');
         navigator.clipboard.writeText(text).then(() => {
             this.messageService.add({ severity: 'success', summary: 'Copied', detail: 'Matches copied to clipboard' });
         });

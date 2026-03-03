@@ -3,17 +3,7 @@
 <div class="flex flex-wrap items-center gap-2 px-4 py-2 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-border">
     <span class="text-sm font-medium text-surface-600 dark:text-surface-300 mr-2">Export:</span>
 
-    <p-button
-        icon="pi pi-file-export"
-        label="Export HTML"
-        severity="secondary"
-        [outlined]="true"
-        size="small"
-        (onClick)="onExportHtml()"
-        pTooltip="Download diff as self-contained HTML file"
-        tooltipPosition="top"
-        aria-label="Export diff as HTML"
-    />
+    <p-button icon="pi pi-file-export" label="Export HTML" severity="secondary" [outlined]="true" size="small" (onClick)="onExportHtml()" pTooltip="Download diff as self-contained HTML file" tooltipPosition="top" aria-label="Export diff as HTML" />
 
     <p-button
         icon="pi pi-image"

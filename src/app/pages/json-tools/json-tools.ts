@@ -57,7 +57,10 @@ export class JsonTools {
     private outputEditorInstance: any;
     private autoUpdateTimeout: any;
 
-    constructor(private messageService: MessageService, private layoutService: LayoutService) {
+    constructor(
+        private messageService: MessageService,
+        private layoutService: LayoutService
+    ) {
         effect(() => {
             const isDark = this.layoutService.isDarkTheme();
             const theme = isDark ? 'vs-dark' : 'vs-light';
@@ -155,7 +158,7 @@ export class JsonTools {
 
     toggleFullscreen(container: HTMLElement) {
         if (!document.fullscreenElement) {
-            container.requestFullscreen().catch(err => {
+            container.requestFullscreen().catch((err) => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Fullscreen not supported' });
             });
         } else {
@@ -234,7 +237,7 @@ export class JsonTools {
         } catch (error: any) {
             console.error('Minification error:', error);
             if (!this.autoUpdate) {
-                 this.messageService.add({ severity: 'error', summary: 'Minification Error', detail: 'Invalid JSON data.' });
+                this.messageService.add({ severity: 'error', summary: 'Minification Error', detail: 'Invalid JSON data.' });
             }
         }
     }
@@ -251,12 +254,12 @@ export class JsonTools {
             // Create a function dynamically (be careful with this in a real prod env regarding XSS if inputs aren't trusted)
             const fn = new Function('data', this.transformFn);
             const result = fn(parsed);
-            
+
             // Format output to be readable
             this.outputCode = typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result);
             this.outputSize = new Blob([this.outputCode]).size;
             if (!this.autoUpdate) this.messageService.add({ severity: 'success', summary: 'Success', detail: 'JSON transformed!' });
-             this.displayTransformSettings = false;
+            this.displayTransformSettings = false;
         } catch (error: any) {
             console.error('Transform error:', error);
             if (!this.autoUpdate) {

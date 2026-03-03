@@ -25,6 +25,10 @@ export const appRoutes: Routes = [
             {
                 path: 'regex-tester',
                 loadComponent: () => import('./app/pages/regex-tester/regex-tester').then((m) => m.RegexTester)
+            },
+            {
+                path: 'encode-decode',
+                loadComponent: () => import('./app/pages/encode-decode/encode-decode').then((m) => m.EncodeDecode)
             }
         ]
     },

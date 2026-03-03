@@ -19,12 +19,7 @@ import { ViewMode } from '../../models/diff.models';
 @Component({
     selector: 'p-diff-toolbar',
     standalone: true,
-    imports: [
-        CommonModule, FormsModule,
-        ButtonModule, SelectButtonModule, CheckboxModule,
-        InputTextModule, TooltipModule, DividerModule,
-        IconFieldModule, InputIconModule, ToastModule
-    ],
+    imports: [CommonModule, FormsModule, ButtonModule, SelectButtonModule, CheckboxModule, InputTextModule, TooltipModule, DividerModule, IconFieldModule, InputIconModule, ToastModule],
     providers: [MessageService],
     templateUrl: './diff-toolbar.html',
     styleUrl: './diff-toolbar.scss'
