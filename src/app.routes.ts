@@ -17,6 +17,10 @@ export const appRoutes: Routes = [
             {
                 path: 'code-formatter',
                 loadComponent: () => import('./app/pages/code-formatter/code-formatter').then((m) => m.CodeFormatter)
+            },
+            {
+                path: 'json-tools',
+                loadComponent: () => import('./app/pages/json-tools/json-tools').then((m) => m.JsonTools)
             }
         ]
     },

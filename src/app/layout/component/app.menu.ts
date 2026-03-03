@@ -31,7 +31,8 @@ export class AppMenu {
                 label: 'Tools',
                 items: [
                     { label: 'Code Compare', icon: 'pi pi-fw pi-code', routerLink: ['/code-compare'] },
-                    { label: 'Code Formatter', icon: 'pi pi-fw pi-align-left', routerLink: ['/code-formatter'] }
+                    { label: 'Code Formatter', icon: 'pi pi-fw pi-align-left', routerLink: ['/code-formatter'] },
+                    { label: 'JSON Tools', icon: 'pi pi-fw pi-wrench', routerLink: ['/json-tools'] }
                 ]
             }
         ];
