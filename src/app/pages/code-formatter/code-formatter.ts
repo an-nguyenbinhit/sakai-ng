@@ -262,7 +262,7 @@ export class CodeFormatter {
                     throw new Error('Unsupported language');
             }
 
-            const formatted = await prettier.format(this.inputCode, {
+            const formatted = await this.callPrettierFormat(this.inputCode, {
                 parser: parser,
                 plugins: plugins,
                 printWidth: Number(this.printWidth),
@@ -280,6 +280,11 @@ export class CodeFormatter {
                 this.messageService.add({ severity: 'error', summary: 'Formatting Error', detail: error.message || 'Syntax error in code.' });
             }
         }
+    }
+
+    /** Protected wrapper so unit tests can spy on `prettier.format` calls without touching the sealed module export. */
+    protected callPrettierFormat(code: string, options: object): Promise<string> {
+        return prettier.format(code, options) as Promise<string>;
     }
 
     onDragOver(event: DragEvent) {
