@@ -1,4 +1,4 @@
-import { Component, effect } from '@angular/core';
+import { Component, effect, signal, ChangeDetectionStrategy, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
@@ -29,7 +29,7 @@ import { format as sqlFormat } from 'sql-formatter';
     imports: [CommonModule, FormsModule, SelectModule, ButtonModule, ToastModule, TextareaModule, EditorComponent, DrawerModule, CheckboxModule, InputTextModule, ToggleSwitchModule, TooltipModule],
     providers: [MessageService],
     templateUrl: './code-formatter.html',
-    styleUrl: './code-formatter.scss'
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CodeFormatter {
     languages = [
@@ -42,21 +42,21 @@ export class CodeFormatter {
         { name: 'SQL', code: 'sql' }
     ];
 
-    selectedLanguage: string = 'html';
-    inputCode: string = '';
-    outputCode: string = '';
+    selectedLanguage = signal<string>('html');
+    inputCode = signal<string>('');
+    outputCode = signal<string>('');
 
-    inputEditorOptions = { theme: 'vs-light', language: 'html', automaticLayout: true, fontSize: 14, minimap: { enabled: false }, scrollBeyondLastLine: false };
-    outputEditorOptions = { theme: 'vs-light', language: 'html', automaticLayout: true, readOnly: true, fontSize: 14, minimap: { enabled: false }, scrollBeyondLastLine: false };
+    inputEditorOptions = signal<any>({ theme: 'vs-light', language: 'html', automaticLayout: true, fontSize: 14, minimap: { enabled: false }, scrollBeyondLastLine: false });
+    outputEditorOptions = signal<any>({ theme: 'vs-light', language: 'html', automaticLayout: true, readOnly: true, fontSize: 14, minimap: { enabled: false }, scrollBeyondLastLine: false });
 
-    autoUpdate: boolean = false;
-    formatCssJs: boolean = true;
+    autoUpdate = signal<boolean>(false);
+    formatCssJs = signal<boolean>(true);
 
-    displaySettings: boolean = false;
-    tabWidth: number = 4;
-    printWidth: number = 80;
-    useTabs: boolean = false;
-    singleQuote: boolean = true;
+    displaySettings = signal<boolean>(false);
+    tabWidth = signal<number>(4);
+    printWidth = signal<number>(80);
+    useTabs = signal<boolean>(false);
+    singleQuote = signal<boolean>(true);
 
     tabSizeOptions = [
         { name: '2', code: 2 },
@@ -64,12 +64,12 @@ export class CodeFormatter {
         { name: '8', code: 8 }
     ];
 
-    isDragging: boolean = false;
+    isDragging = signal<boolean>(false);
 
-    inputCursor = { line: 1, col: 0 };
-    outputCursor = { line: 1, col: 0 };
-    inputSize: number = 0;
-    outputSize: number = 0;
+    inputCursor = signal<{ line: number; col: number }>({ line: 1, col: 0 });
+    outputCursor = signal<{ line: number; col: number }>({ line: 1, col: 0 });
+    inputSize = signal<number>(0);
+    outputSize = signal<number>(0);
 
     private inputEditorInstance: any;
     private outputEditorInstance: any;
@@ -79,35 +79,42 @@ export class CodeFormatter {
         private messageService: MessageService,
         private layoutService: LayoutService
     ) {
-        effect(() => {
-            const isDark = this.layoutService.isDarkTheme();
-            const theme = isDark ? 'vs-dark' : 'vs-light';
-            this.inputEditorOptions = { ...this.inputEditorOptions, theme };
-            this.outputEditorOptions = { ...this.outputEditorOptions, theme };
-        });
+        effect(
+            () => {
+                const isDark = this.layoutService.isDarkTheme();
+                const theme = isDark ? 'vs-dark' : 'vs-light';
+
+                const inOpts = untracked(() => this.inputEditorOptions());
+                this.inputEditorOptions.set({ ...inOpts, theme });
+
+                const outOpts = untracked(() => this.outputEditorOptions());
+                this.outputEditorOptions.set({ ...outOpts, theme });
+            },
+            { allowSignalWrites: true }
+        );
     }
 
     onLanguageChange() {
-        this.inputEditorOptions = { ...this.inputEditorOptions, language: this.selectedLanguage };
-        this.outputEditorOptions = { ...this.outputEditorOptions, language: this.selectedLanguage };
-        if (this.autoUpdate) {
+        this.inputEditorOptions.set({ ...this.inputEditorOptions(), language: this.selectedLanguage() });
+        this.outputEditorOptions.set({ ...this.outputEditorOptions(), language: this.selectedLanguage() });
+        if (this.autoUpdate()) {
             this.formatCode();
         }
     }
 
     getLanguageLabel(): string {
-        const lang = this.languages.find((l) => l.code === this.selectedLanguage);
+        const lang = this.languages.find((l) => l.code === this.selectedLanguage());
         return lang ? lang.name : 'Data';
     }
 
     onFormatConfigChange() {
-        if (this.autoUpdate) {
+        if (this.autoUpdate()) {
             this.formatCode();
         }
     }
 
     onAutoUpdateChange() {
-        if (this.autoUpdate) {
+        if (this.autoUpdate()) {
             this.formatCode();
         }
     }
@@ -115,22 +122,22 @@ export class CodeFormatter {
     onInputEditorInit(editor: any) {
         this.inputEditorInstance = editor;
         editor.onDidChangeCursorPosition((e: any) => {
-            this.inputCursor = { line: e.position.lineNumber, col: e.position.column };
+            this.inputCursor.set({ line: e.position.lineNumber, col: e.position.column });
         });
     }
 
     onOutputEditorInit(editor: any) {
         this.outputEditorInstance = editor;
         editor.onDidChangeCursorPosition((e: any) => {
-            this.outputCursor = { line: e.position.lineNumber, col: e.position.column };
+            this.outputCursor.set({ line: e.position.lineNumber, col: e.position.column });
         });
     }
 
     onInputChange(newValue: string) {
-        this.inputCode = newValue;
-        this.inputSize = new Blob([newValue]).size;
+        this.inputCode.set(newValue);
+        this.inputSize.set(new Blob([newValue]).size);
 
-        if (this.autoUpdate) {
+        if (this.autoUpdate()) {
             if (this.autoUpdateTimeout) {
                 clearTimeout(this.autoUpdateTimeout);
             }
@@ -141,18 +148,20 @@ export class CodeFormatter {
     }
 
     increaseFontSize() {
-        if (this.inputEditorOptions.fontSize < 30) {
-            const newSize = this.inputEditorOptions.fontSize + 1;
-            this.inputEditorOptions = { ...this.inputEditorOptions, fontSize: newSize };
-            this.outputEditorOptions = { ...this.outputEditorOptions, fontSize: newSize };
+        const inOpts = this.inputEditorOptions();
+        if (inOpts.fontSize < 30) {
+            const newSize = inOpts.fontSize + 1;
+            this.inputEditorOptions.set({ ...inOpts, fontSize: newSize });
+            this.outputEditorOptions.set({ ...this.outputEditorOptions(), fontSize: newSize });
         }
     }
 
     decreaseFontSize() {
-        if (this.inputEditorOptions.fontSize > 8) {
-            const newSize = this.inputEditorOptions.fontSize - 1;
-            this.inputEditorOptions = { ...this.inputEditorOptions, fontSize: newSize };
-            this.outputEditorOptions = { ...this.outputEditorOptions, fontSize: newSize };
+        const inOpts = this.inputEditorOptions();
+        if (inOpts.fontSize > 8) {
+            const newSize = inOpts.fontSize - 1;
+            this.inputEditorOptions.set({ ...inOpts, fontSize: newSize });
+            this.outputEditorOptions.set({ ...this.outputEditorOptions(), fontSize: newSize });
         }
     }
 
@@ -163,18 +172,18 @@ export class CodeFormatter {
     }
 
     clearInput() {
-        this.inputCode = '';
-        this.inputSize = 0;
-        if (this.autoUpdate) this.formatCode();
+        this.inputCode.set('');
+        this.inputSize.set(0);
+        if (this.autoUpdate()) this.formatCode();
     }
 
     clearOutput() {
-        this.outputCode = '';
-        this.outputSize = 0;
+        this.outputCode.set('');
+        this.outputSize.set(0);
     }
 
     copyCode(isInput: boolean) {
-        const content = isInput ? this.inputCode : this.outputCode;
+        const content = isInput ? this.inputCode() : this.outputCode();
         if (!content) return;
 
         navigator.clipboard.writeText(content).then(
@@ -198,19 +207,21 @@ export class CodeFormatter {
     }
 
     loadSample() {
-        this.inputCode = `function sayHello(name) {\nconsole.log( 'Hello ' +name);\n}\nconst test = [ 1, 2,  3 ];`;
-        this.selectedLanguage = 'typescript';
-        this.inputSize = new Blob([this.inputCode]).size;
+        const sample = `function sayHello(name) {\nconsole.log( 'Hello ' +name);\n}\nconst test = [ 1, 2,  3 ];`;
+        this.inputCode.set(sample);
+        this.selectedLanguage.set('typescript');
+        this.inputSize.set(new Blob([sample]).size);
         this.onLanguageChange();
         this.messageService.add({ severity: 'info', summary: 'Sample Loaded', detail: 'TypeScript sample loaded' });
-        if (this.autoUpdate) this.formatCode();
-        this.displaySettings = false;
+        if (this.autoUpdate()) this.formatCode();
+        this.displaySettings.set(false);
     }
 
     async formatCode() {
-        if (!this.inputCode.trim()) {
-            this.outputCode = '';
-            this.outputSize = 0;
+        const code = this.inputCode();
+        if (!code.trim()) {
+            this.outputCode.set('');
+            this.outputSize.set(0);
             return;
         }
 
@@ -218,7 +229,7 @@ export class CodeFormatter {
             let plugins: any[] = [];
             let parser = '';
 
-            switch (this.selectedLanguage) {
+            switch (this.selectedLanguage()) {
                 case 'typescript':
                 case 'javascript':
                     plugins = [babelPlugin, estreePlugin];
@@ -230,7 +241,7 @@ export class CodeFormatter {
                     break;
                 case 'html':
                     plugins = [htmlPlugin];
-                    if (this.formatCssJs) {
+                    if (this.formatCssJs()) {
                         plugins.push(babelPlugin, estreePlugin, postcssPlugin);
                     }
                     parser = 'html';
@@ -248,35 +259,35 @@ export class CodeFormatter {
                     parser = 'xml';
                     break;
                 case 'sql':
-                    const formattedSql = sqlFormat(this.inputCode, {
+                    const formattedSql = sqlFormat(code, {
                         language: 'sql',
-                        tabWidth: Number(this.tabWidth),
-                        useTabs: this.useTabs,
+                        tabWidth: Number(this.tabWidth()),
+                        useTabs: this.useTabs(),
                         keywordCase: 'upper'
                     });
-                    this.outputCode = formattedSql;
-                    this.outputSize = new Blob([this.outputCode]).size;
-                    if (!this.autoUpdate) this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Code formatted!' });
+                    this.outputCode.set(formattedSql);
+                    this.outputSize.set(new Blob([formattedSql]).size);
+                    if (!this.autoUpdate()) this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Code formatted!' });
                     return;
                 default:
                     throw new Error('Unsupported language');
             }
 
-            const formatted = await this.callPrettierFormat(this.inputCode, {
+            const formatted = await this.callPrettierFormat(code, {
                 parser: parser,
                 plugins: plugins,
-                printWidth: Number(this.printWidth),
-                tabWidth: Number(this.tabWidth),
-                useTabs: this.useTabs,
-                singleQuote: this.singleQuote
+                printWidth: Number(this.printWidth()),
+                tabWidth: Number(this.tabWidth()),
+                useTabs: this.useTabs(),
+                singleQuote: this.singleQuote()
             });
 
-            this.outputCode = formatted;
-            this.outputSize = new Blob([this.outputCode]).size;
-            if (!this.autoUpdate) this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Code formatted!' });
+            this.outputCode.set(formatted);
+            this.outputSize.set(new Blob([formatted]).size);
+            if (!this.autoUpdate()) this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Code formatted!' });
         } catch (error: any) {
             console.error('Formatting error:', error);
-            if (!this.autoUpdate) {
+            if (!this.autoUpdate()) {
                 this.messageService.add({ severity: 'error', summary: 'Formatting Error', detail: error.message || 'Syntax error in code.' });
             }
         }
@@ -284,7 +295,7 @@ export class CodeFormatter {
 
     /** Protected wrapper so unit tests can spy on `prettier.format` calls without touching the sealed module export. */
     protected callPrettierFormat(code: string, options: object): Promise<string> {
-        return prettier.format(code, options) as Promise<string>;
+        return prettier.format(code, options as any) as Promise<string>;
     }
 
     onDragOver(event: DragEvent) {
@@ -295,7 +306,7 @@ export class CodeFormatter {
     onDragEnter(event: DragEvent) {
         event.preventDefault();
         event.stopPropagation();
-        this.isDragging = true;
+        this.isDragging.set(true);
     }
 
     onDragLeave(event: DragEvent) {
@@ -303,14 +314,14 @@ export class CodeFormatter {
         event.stopPropagation();
         const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
         if (event.clientX < rect.left || event.clientX >= rect.right || event.clientY < rect.top || event.clientY >= rect.bottom) {
-            this.isDragging = false;
+            this.isDragging.set(false);
         }
     }
 
     onFileDrop(event: DragEvent) {
         event.preventDefault();
         event.stopPropagation();
-        this.isDragging = false;
+        this.isDragging.set(false);
 
         const files = event.dataTransfer?.files;
         if (files && files.length > 0) {
@@ -329,11 +340,12 @@ export class CodeFormatter {
     handleFile(file: File) {
         const reader = new FileReader();
         reader.onload = (e) => {
-            this.inputCode = e.target?.result as string;
-            this.inputSize = new Blob([this.inputCode]).size;
+            const res = e.target?.result as string;
+            this.inputCode.set(res);
+            this.inputSize.set(new Blob([res]).size);
             this.detectLanguageFromFile(file.name);
             this.messageService.add({ severity: 'info', summary: 'File Loaded', detail: `Loaded ${file.name}` });
-            if (this.autoUpdate) this.formatCode();
+            if (this.autoUpdate()) this.formatCode();
         };
         reader.readAsText(file);
     }
@@ -345,35 +357,35 @@ export class CodeFormatter {
             case 'ts':
             case 'jsx':
             case 'tsx':
-                this.selectedLanguage = 'typescript';
+                this.selectedLanguage.set('typescript');
                 break;
             case 'json':
-                this.selectedLanguage = 'json';
+                this.selectedLanguage.set('json');
                 break;
             case 'html':
             case 'htm':
-                this.selectedLanguage = 'html';
+                this.selectedLanguage.set('html');
                 break;
             case 'css':
             case 'scss':
             case 'less':
-                this.selectedLanguage = 'css';
+                this.selectedLanguage.set('css');
                 break;
             case 'md':
-                this.selectedLanguage = 'markdown';
+                this.selectedLanguage.set('markdown');
                 break;
             case 'xml':
-                this.selectedLanguage = 'xml';
+                this.selectedLanguage.set('xml');
                 break;
             case 'sql':
-                this.selectedLanguage = 'sql';
+                this.selectedLanguage.set('sql');
                 break;
         }
         this.onLanguageChange();
     }
 
     downloadCode(isInput: boolean) {
-        const content = isInput ? this.inputCode : this.outputCode;
+        const content = isInput ? this.inputCode() : this.outputCode();
         if (!content) {
             this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'No code to download.' });
             return;
@@ -384,7 +396,7 @@ export class CodeFormatter {
         const a = document.createElement('a');
 
         let ext = '.txt';
-        switch (this.selectedLanguage) {
+        switch (this.selectedLanguage()) {
             case 'typescript':
                 ext = '.ts';
                 break;

@@ -48,16 +48,16 @@ describe('EncodeDecode', () => {
     beforeEach(() => {
         const ctx = build();
         component = ctx.comp;
-        mockMessageService = ctx.msgSvc;
+        mockMessageService = ctx.msgSvc as any;
     });
 
     // ─────────────────────────────────────────────────────────────────────────
     // 1. Initialisation
     // ─────────────────────────────────────────────────────────────────────────
     describe('Initialisation', () => {
-        it('should have empty inputString', () => expect(component.inputString).toBe(''));
-        it('should have empty outputString', () => expect(component.outputString).toBe(''));
-        it('should default to Base64 operation', () => expect(component.operation).toBe('Base64'));
+        it('should have empty inputString', () => expect(component.inputString()).toBe(''));
+        it('should have empty outputString', () => expect(component.outputString()).toBe(''));
+        it('should default to Base64 operation', () => expect(component.operation()).toBe('Base64'));
         it('should expose 3 operations', () => expect(component.operations.length).toBe(3));
         it('should expose Base64 operation', () => {
             expect(component.operations.find(op => op.value === 'Base64')).toBeTruthy();
@@ -75,10 +75,10 @@ describe('EncodeDecode', () => {
     // ─────────────────────────────────────────────────────────────────────────
     describe('encode() — empty input guard', () => {
         it('does nothing when inputString is empty', () => {
-            component.inputString = '';
-            component.operation = 'Base64';
+            component.inputString.set('');
+            component.operation.set('Base64');
             component.encode();
-            expect(component.outputString).toBe('');
+            expect(component.outputString()).toBe('');
             expect(mockMessageService.add).not.toHaveBeenCalled();
         });
     });
@@ -87,30 +87,30 @@ describe('EncodeDecode', () => {
     // 3. encode() — Base64
     // ─────────────────────────────────────────────────────────────────────────
     describe('encode() — Base64', () => {
-        beforeEach(() => { component.operation = 'Base64'; });
+        beforeEach(() => { component.operation.set('Base64'); });
 
         it('encodes simple ASCII string', () => {
-            component.inputString = 'Hello';
+            component.inputString.set('Hello');
             component.encode();
-            expect(component.outputString).toBe(btoa('Hello'));
+            expect(component.outputString()).toBe(btoa('Hello'));
         });
 
         it('encodes string with spaces', () => {
-            component.inputString = 'Hello World';
+            component.inputString.set('Hello World');
             component.encode();
-            expect(component.outputString).toBe(btoa(unescape(encodeURIComponent('Hello World'))));
+            expect(component.outputString()).toBe(btoa(unescape(encodeURIComponent('Hello World'))));
         });
 
         it('encodes UTF-8 string', () => {
-            component.inputString = 'xin chào';
+            component.inputString.set('xin chào');
             component.encode();
-            expect(component.outputString).toBe(btoa(unescape(encodeURIComponent('xin chào'))));
+            expect(component.outputString()).toBe(btoa(unescape(encodeURIComponent('xin chào'))));
         });
 
         it('encodes numbers and symbols', () => {
-            component.inputString = '123!@#';
+            component.inputString.set('123!@#');
             component.encode();
-            expect(component.outputString).toBe(btoa('123!@#'));
+            expect(component.outputString()).toBe(btoa('123!@#'));
         });
     });
 
@@ -118,24 +118,24 @@ describe('EncodeDecode', () => {
     // 4. encode() — URL
     // ─────────────────────────────────────────────────────────────────────────
     describe('encode() — URL', () => {
-        beforeEach(() => { component.operation = 'URL'; });
+        beforeEach(() => { component.operation.set('URL'); });
 
         it('encodes spaces as %20', () => {
-            component.inputString = 'hello world';
+            component.inputString.set('hello world');
             component.encode();
-            expect(component.outputString).toBe('hello%20world');
+            expect(component.outputString()).toBe('hello%20world');
         });
 
         it('encodes special characters', () => {
-            component.inputString = 'a=1&b=2';
+            component.inputString.set('a=1&b=2');
             component.encode();
-            expect(component.outputString).toBe(encodeURIComponent('a=1&b=2'));
+            expect(component.outputString()).toBe(encodeURIComponent('a=1&b=2'));
         });
 
         it('encodes Vietnamese characters', () => {
-            component.inputString = 'Hà Nội';
+            component.inputString.set('Hà Nội');
             component.encode();
-            expect(component.outputString).toBe(encodeURIComponent('Hà Nội'));
+            expect(component.outputString()).toBe(encodeURIComponent('Hà Nội'));
         });
     });
 
@@ -143,30 +143,30 @@ describe('EncodeDecode', () => {
     // 5. encode() — HTML
     // ─────────────────────────────────────────────────────────────────────────
     describe('encode() — HTML', () => {
-        beforeEach(() => { component.operation = 'HTML'; });
+        beforeEach(() => { component.operation.set('HTML'); });
 
         it('encodes <, >, & and " to HTML entities', () => {
-            component.inputString = '<div>&"test"</div>';
+            component.inputString.set('<div>&"test"</div>');
             component.encode();
             // All special chars are replaced with &#nn; numeric entities.
             // Raw angle brackets and quotes must not appear literally.
-            expect(component.outputString).not.toContain('<');
-            expect(component.outputString).not.toContain('>');
-            expect(component.outputString).not.toContain('"');
+            expect(component.outputString()).not.toContain('<');
+            expect(component.outputString()).not.toContain('>');
+            expect(component.outputString()).not.toContain('"');
             // The encoded & itself becomes &#38; so the output contains &#
-            expect(component.outputString).toContain('&#');
+            expect(component.outputString()).toContain('&#');
         });
 
         it('produces numeric entity references', () => {
-            component.inputString = '<';
+            component.inputString.set('<');
             component.encode();
-            expect(component.outputString).toBe('&#60;');
+            expect(component.outputString()).toBe('&#60;');
         });
 
         it('keeps plain alphanumeric unchanged when no special chars', () => {
-            component.inputString = 'hello123';
+            component.inputString.set('hello123');
             component.encode();
-            expect(component.outputString).toBe('hello123');
+            expect(component.outputString()).toBe('hello123');
         });
     });
 
@@ -175,10 +175,10 @@ describe('EncodeDecode', () => {
     // ─────────────────────────────────────────────────────────────────────────
     describe('decode() — empty input guard', () => {
         it('does nothing when inputString is empty', () => {
-            component.inputString = '';
-            component.operation = 'Base64';
+            component.inputString.set('');
+            component.operation.set('Base64');
             component.decode();
-            expect(component.outputString).toBe('');
+            expect(component.outputString()).toBe('');
             expect(mockMessageService.add).not.toHaveBeenCalled();
         });
     });
@@ -187,28 +187,28 @@ describe('EncodeDecode', () => {
     // 7. decode() — Base64
     // ─────────────────────────────────────────────────────────────────────────
     describe('decode() — Base64', () => {
-        beforeEach(() => { component.operation = 'Base64'; });
+        beforeEach(() => { component.operation.set('Base64'); });
 
         it('round-trips ASCII encode → decode', () => {
-            component.inputString = 'Hello World';
+            component.inputString.set('Hello World');
             component.encode();
-            const encoded = component.outputString;
-            component.inputString = encoded;
+            const encoded = component.outputString();
+            component.inputString.set(encoded);
             component.decode();
-            expect(component.outputString).toBe('Hello World');
+            expect(component.outputString()).toBe('Hello World');
         });
 
         it('round-trips UTF-8 encode → decode', () => {
-            component.inputString = 'xin chào';
+            component.inputString.set('xin chào');
             component.encode();
-            const encoded = component.outputString;
-            component.inputString = encoded;
+            const encoded = component.outputString();
+            component.inputString.set(encoded);
             component.decode();
-            expect(component.outputString).toBe('xin chào');
+            expect(component.outputString()).toBe('xin chào');
         });
 
         it('shows error toast for invalid Base64', () => {
-            component.inputString = '!!!not-base64!!!';
+            component.inputString.set('!!!not-base64!!!');
             component.decode();
             expect(mockMessageService.add).toHaveBeenCalledWith(
                 jasmine.objectContaining({ severity: 'error', summary: 'Decoding Error' })
@@ -220,25 +220,25 @@ describe('EncodeDecode', () => {
     // 8. decode() — URL
     // ─────────────────────────────────────────────────────────────────────────
     describe('decode() — URL', () => {
-        beforeEach(() => { component.operation = 'URL'; });
+        beforeEach(() => { component.operation.set('URL'); });
 
         it('decodes %20 back to space', () => {
-            component.inputString = 'hello%20world';
+            component.inputString.set('hello%20world');
             component.decode();
-            expect(component.outputString).toBe('hello world');
+            expect(component.outputString()).toBe('hello world');
         });
 
         it('round-trips URL encode → decode', () => {
-            component.inputString = 'a=1&b=2';
+            component.inputString.set('a=1&b=2');
             component.encode();
-            const encoded = component.outputString;
-            component.inputString = encoded;
+            const encoded = component.outputString();
+            component.inputString.set(encoded);
             component.decode();
-            expect(component.outputString).toBe('a=1&b=2');
+            expect(component.outputString()).toBe('a=1&b=2');
         });
 
         it('shows error toast for invalid URL encoding', () => {
-            component.inputString = '%GG'; // invalid percent sequence
+            component.inputString.set('%GG'); // invalid percent sequence
             component.decode();
             expect(mockMessageService.add).toHaveBeenCalledWith(
                 jasmine.objectContaining({ severity: 'error', summary: 'Decoding Error' })
@@ -250,14 +250,14 @@ describe('EncodeDecode', () => {
     // 9. decode() — HTML (uses document.createElement('textarea'))
     // ─────────────────────────────────────────────────────────────────────────
     describe('decode() — HTML', () => {
-        beforeEach(() => { component.operation = 'HTML'; });
+        beforeEach(() => { component.operation.set('HTML'); });
 
         it('delegates to decodeHTML()', () => {
             spyOn(component, 'decodeHTML').and.returnValue('decoded text');
-            component.inputString = '&#72;'; // H
+            component.inputString.set('&#72;'); // H
             component.decode();
             expect(component.decodeHTML).toHaveBeenCalledWith('&#72;');
-            expect(component.outputString).toBe('decoded text');
+            expect(component.outputString()).toBe('decoded text');
         });
 
         it('decodeHTML() uses textarea to unescape &amp;', () => {
@@ -304,21 +304,21 @@ describe('EncodeDecode', () => {
     // ─────────────────────────────────────────────────────────────────────────
     describe('clearInputs()', () => {
         it('resets inputString to empty', () => {
-            component.inputString = 'some text';
+            component.inputString.set('some text');
             component.clearInputs();
-            expect(component.inputString).toBe('');
+            expect(component.inputString()).toBe('');
         });
         it('resets outputString to empty', () => {
-            component.outputString = 'SGVsbG8=';
+            component.outputString.set('SGVsbG8=');
             component.clearInputs();
-            expect(component.outputString).toBe('');
+            expect(component.outputString()).toBe('');
         });
         it('clears both at the same time', () => {
-            component.inputString = 'input';
-            component.outputString = 'output';
+            component.inputString.set('input');
+            component.outputString.set('output');
             component.clearInputs();
-            expect(component.inputString).toBe('');
-            expect(component.outputString).toBe('');
+            expect(component.inputString()).toBe('');
+            expect(component.outputString()).toBe('');
         });
     });
 
@@ -329,11 +329,11 @@ describe('EncodeDecode', () => {
         let clipboardSpy: jasmine.Spy;
 
         beforeEach(() => {
-            clipboardSpy = spyOn(mockClipboard, 'writeText').and.returnValue(Promise.resolve());
+            clipboardSpy = spyOn(navigator.clipboard, 'writeText').and.returnValue(Promise.resolve() as any);
         });
 
         it('does NOT call clipboard API when outputString is empty', (done) => {
-            component.outputString = '';
+            component.outputString.set('');
             component.copyToClipboard();
             Promise.resolve().then(() => {
                 expect(clipboardSpy).not.toHaveBeenCalled();
@@ -342,7 +342,7 @@ describe('EncodeDecode', () => {
         });
 
         it('calls clipboard API with outputString', (done) => {
-            component.outputString = 'SGVsbG8=';
+            component.outputString.set('SGVsbG8=');
             component.copyToClipboard();
             Promise.resolve().then(() => {
                 expect(clipboardSpy).toHaveBeenCalledWith('SGVsbG8=');
@@ -351,7 +351,7 @@ describe('EncodeDecode', () => {
         });
 
         it('shows success toast after copy', (done) => {
-            component.outputString = 'SGVsbG8=';
+            component.outputString.set('SGVsbG8=');
             component.copyToClipboard();
             // Wait 2 microtasks: clipboard writeText resolves, then .then() callback runs
             Promise.resolve()
@@ -365,7 +365,7 @@ describe('EncodeDecode', () => {
         });
 
         it('shows success detail message', (done) => {
-            component.outputString = 'data';
+            component.outputString.set('data');
             component.copyToClipboard();
             Promise.resolve()
                 .then(() => Promise.resolve())
@@ -383,8 +383,8 @@ describe('EncodeDecode', () => {
     // ─────────────────────────────────────────────────────────────────────────
     describe('encode() — error path', () => {
         it('shows error toast when encodeHTML throws', () => {
-            component.operation = 'HTML';
-            component.inputString = 'test';
+            component.operation.set('HTML');
+            component.inputString.set('test');
             spyOn(component, 'encodeHTML').and.throwError('Unexpected error');
             component.encode();
             expect(mockMessageService.add).toHaveBeenCalledWith(
@@ -402,29 +402,29 @@ describe('EncodeDecode', () => {
         for (const text of testCases) {
             describe(`Base64 round-trip for "${text}"`, () => {
                 it('recovers the original string', () => {
-                    component.operation = 'Base64';
-                    component.inputString = text;
+                    component.operation.set('Base64');
+                    component.inputString.set(text);
                     component.encode();
-                    const encoded = component.outputString;
+                    const encoded = component.outputString();
                     expect(encoded.length).toBeGreaterThan(0);
 
-                    component.inputString = encoded;
+                    component.inputString.set(encoded);
                     component.decode();
-                    expect(component.outputString).toBe(text);
+                    expect(component.outputString()).toBe(text);
                 });
             });
         }
 
         describe('URL round-trip', () => {
             it('recovers the original URL-encoded string', () => {
-                component.operation = 'URL';
-                component.inputString = 'hello world?q=42&lang=vi';
+                component.operation.set('URL');
+                component.inputString.set('hello world?q=42&lang=vi');
                 component.encode();
-                const encoded = component.outputString;
+                const encoded = component.outputString();
 
-                component.inputString = encoded;
+                component.inputString.set(encoded);
                 component.decode();
-                expect(component.outputString).toBe('hello world?q=42&lang=vi');
+                expect(component.outputString()).toBe('hello world?q=42&lang=vi');
             });
         });
     });

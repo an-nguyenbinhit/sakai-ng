@@ -16,22 +16,12 @@ import { LayoutService } from '@/app/layout/service/layout.service';
 // ─────────────────────────────────────────────────────────────────────────────
 // Clipboard polyfill — installed once, spy is reset each test in beforeEach.
 // ─────────────────────────────────────────────────────────────────────────────
-const mockClipboard = {
-    writeText: (_text: string): Promise<void> => Promise.resolve()
-};
-
-beforeAll(() => {
-    // Clipboard polyfill
-    try {
-        Object.defineProperty(navigator, 'clipboard', {
-            value: mockClipboard,
-            configurable: true,
-            writable: true
-        });
-    } catch (_) {
-        (navigator as any).clipboard = mockClipboard;
-    }
-});
+// ─────────────────────────────────────────────────────────────────────────────
+// Clipboard polyfill
+// ─────────────────────────────────────────────────────────────────────────────
+if (!navigator.clipboard) {
+    (navigator as any).clipboard = { writeText: () => Promise.resolve() };
+}
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -52,7 +42,7 @@ describe('CodeFormatter', () => {
     beforeEach(() => {
         const ctx = build();
         component = ctx.comp;
-        mockMessageService = ctx.msgSvc;
+        mockMessageService = ctx.msgSvc as any;
         mockLayoutService = ctx.layoutSvc;
     });
 
@@ -60,18 +50,18 @@ describe('CodeFormatter', () => {
     // 1. Initialisation
     // ─────────────────────────────────────────────────────────────────────────
     describe('Initialisation', () => {
-        it('should have selectedLanguage = html', () => expect(component.selectedLanguage).toBe('html'));
-        it('should have autoUpdate = false', () => expect(component.autoUpdate).toBe(false));
-        it('should have tabWidth = 4', () => expect(component.tabWidth).toBe(4));
-        it('should have printWidth = 80', () => expect(component.printWidth).toBe(80));
-        it('should have singleQuote = true', () => expect(component.singleQuote).toBe(true));
-        it('should have empty inputCode', () => expect(component.inputCode).toBe(''));
-        it('should have empty outputCode', () => expect(component.outputCode).toBe(''));
+        it('should have selectedLanguage = html', () => expect(component.selectedLanguage()).toBe('html'));
+        it('should have autoUpdate = false', () => expect(component.autoUpdate()).toBe(false));
+        it('should have tabWidth = 4', () => expect(component.tabWidth()).toBe(4));
+        it('should have printWidth = 80', () => expect(component.printWidth()).toBe(80));
+        it('should have singleQuote = true', () => expect(component.singleQuote()).toBe(true));
+        it('should have empty inputCode', () => expect(component.inputCode()).toBe(''));
+        it('should have empty outputCode', () => expect(component.outputCode()).toBe(''));
         it('should expose 7 languages', () => expect(component.languages.length).toBe(7));
-        it('should have isDragging = false', () => expect(component.isDragging).toBe(false));
-        it('should have inputSize = 0', () => expect(component.inputSize).toBe(0));
-        it('should have outputSize = 0', () => expect(component.outputSize).toBe(0));
-        it('should have displaySettings = false', () => expect(component.displaySettings).toBe(false));
+        it('should have isDragging = false', () => expect(component.isDragging()).toBe(false));
+        it('should have inputSize = 0', () => expect(component.inputSize()).toBe(0));
+        it('should have outputSize = 0', () => expect(component.outputSize()).toBe(0));
+        it('should have displaySettings = false', () => expect(component.displaySettings()).toBe(false));
     });
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -89,12 +79,12 @@ describe('CodeFormatter', () => {
         ];
         for (const [code, label] of cases) {
             it(`'${code}' → '${label}'`, () => {
-                component.selectedLanguage = code;
+                component.selectedLanguage.set(code);
                 expect(component.getLanguageLabel()).toBe(label);
             });
         }
         it('returns "Data" for unknown code', () => {
-            component.selectedLanguage = 'cobol';
+            component.selectedLanguage.set('cobol');
             expect(component.getLanguageLabel()).toBe('Data');
         });
     });
@@ -104,24 +94,24 @@ describe('CodeFormatter', () => {
     // ─────────────────────────────────────────────────────────────────────────
     describe('onLanguageChange()', () => {
         it('updates inputEditorOptions.language', () => {
-            component.selectedLanguage = 'css';
+            component.selectedLanguage.set('css');
             component.onLanguageChange();
-            expect(component.inputEditorOptions.language).toBe('css');
+            expect(component.inputEditorOptions().language).toBe('css');
         });
         it('updates outputEditorOptions.language', () => {
-            component.selectedLanguage = 'json';
+            component.selectedLanguage.set('json');
             component.onLanguageChange();
-            expect(component.outputEditorOptions.language).toBe('json');
+            expect(component.outputEditorOptions().language).toBe('json');
         });
         it('calls formatCode() when autoUpdate=true', () => {
             spyOn(component, 'formatCode').and.returnValue(Promise.resolve());
-            component.autoUpdate = true;
+            component.autoUpdate.set(true);
             component.onLanguageChange();
             expect(component.formatCode).toHaveBeenCalled();
         });
         it('does NOT call formatCode() when autoUpdate=false', () => {
             spyOn(component, 'formatCode');
-            component.autoUpdate = false;
+            component.autoUpdate.set(false);
             component.onLanguageChange();
             expect(component.formatCode).not.toHaveBeenCalled();
         });
@@ -133,13 +123,13 @@ describe('CodeFormatter', () => {
     describe('onFormatConfigChange()', () => {
         it('calls formatCode() when autoUpdate=true', () => {
             spyOn(component, 'formatCode').and.returnValue(Promise.resolve());
-            component.autoUpdate = true;
+            component.autoUpdate.set(true);
             component.onFormatConfigChange();
             expect(component.formatCode).toHaveBeenCalled();
         });
         it('does NOT call formatCode() when autoUpdate=false', () => {
             spyOn(component, 'formatCode');
-            component.autoUpdate = false;
+            component.autoUpdate.set(false);
             component.onFormatConfigChange();
             expect(component.formatCode).not.toHaveBeenCalled();
         });
@@ -151,13 +141,13 @@ describe('CodeFormatter', () => {
     describe('onAutoUpdateChange()', () => {
         it('calls formatCode() when autoUpdate=true', () => {
             spyOn(component, 'formatCode').and.returnValue(Promise.resolve());
-            component.autoUpdate = true;
+            component.autoUpdate.set(true);
             component.onAutoUpdateChange();
             expect(component.formatCode).toHaveBeenCalled();
         });
         it('does NOT call formatCode() when autoUpdate=false', () => {
             spyOn(component, 'formatCode');
-            component.autoUpdate = false;
+            component.autoUpdate.set(false);
             component.onAutoUpdateChange();
             expect(component.formatCode).not.toHaveBeenCalled();
         });
@@ -171,16 +161,16 @@ describe('CodeFormatter', () => {
 
         it('updates inputCode', () => {
             component.onInputChange('hello');
-            expect(component.inputCode).toBe('hello');
+            expect(component.inputCode()).toBe('hello');
         });
         it('updates inputSize', () => {
             component.onInputChange('abc');
-            expect(component.inputSize).toBe(3);
+            expect(component.inputSize()).toBe(3);
         });
         it('schedules formatCode() after 500ms when autoUpdate=true', () => {
             jasmine.clock().install();
             spyOn(component, 'formatCode').and.returnValue(Promise.resolve());
-            component.autoUpdate = true;
+            component.autoUpdate.set(true);
             component.onInputChange('code');
             expect(component.formatCode).not.toHaveBeenCalled();
             jasmine.clock().tick(500);
@@ -189,7 +179,7 @@ describe('CodeFormatter', () => {
         it('debounces rapid input calls', () => {
             jasmine.clock().install();
             spyOn(component, 'formatCode').and.returnValue(Promise.resolve());
-            component.autoUpdate = true;
+            component.autoUpdate.set(true);
             component.onInputChange('a');
             jasmine.clock().tick(200);
             component.onInputChange('ab');
@@ -201,7 +191,7 @@ describe('CodeFormatter', () => {
         it('does NOT schedule formatCode() when autoUpdate=false', () => {
             jasmine.clock().install();
             spyOn(component, 'formatCode');
-            component.autoUpdate = false;
+            component.autoUpdate.set(false);
             component.onInputChange('code');
             jasmine.clock().tick(600);
             expect(component.formatCode).not.toHaveBeenCalled();
@@ -213,30 +203,30 @@ describe('CodeFormatter', () => {
     // ─────────────────────────────────────────────────────────────────────────
     describe('increaseFontSize()', () => {
         it('increases both fontSizes by 1', () => {
-            const before = component.inputEditorOptions.fontSize;
+            const before = component.inputEditorOptions().fontSize;
             component.increaseFontSize();
-            expect(component.inputEditorOptions.fontSize).toBe(before + 1);
-            expect(component.outputEditorOptions.fontSize).toBe(before + 1);
+            expect(component.inputEditorOptions().fontSize).toBe(before + 1);
+            expect(component.outputEditorOptions().fontSize).toBe(before + 1);
         });
         it('does not exceed 30', () => {
-            component.inputEditorOptions = { ...component.inputEditorOptions, fontSize: 30 };
-            component.outputEditorOptions = { ...component.outputEditorOptions, fontSize: 30 };
+            component.inputEditorOptions.set({ ...component.inputEditorOptions(), fontSize: 30 });
+            component.outputEditorOptions.set({ ...component.outputEditorOptions(), fontSize: 30 });
             component.increaseFontSize();
-            expect(component.inputEditorOptions.fontSize).toBe(30);
+            expect(component.inputEditorOptions().fontSize).toBe(30);
         });
     });
     describe('decreaseFontSize()', () => {
         it('decreases both fontSizes by 1', () => {
-            const before = component.inputEditorOptions.fontSize;
+            const before = component.inputEditorOptions().fontSize;
             component.decreaseFontSize();
-            expect(component.inputEditorOptions.fontSize).toBe(before - 1);
-            expect(component.outputEditorOptions.fontSize).toBe(before - 1);
+            expect(component.inputEditorOptions().fontSize).toBe(before - 1);
+            expect(component.outputEditorOptions().fontSize).toBe(before - 1);
         });
         it('does not go below 8', () => {
-            component.inputEditorOptions = { ...component.inputEditorOptions, fontSize: 8 };
-            component.outputEditorOptions = { ...component.outputEditorOptions, fontSize: 8 };
+            component.inputEditorOptions.set({ ...component.inputEditorOptions(), fontSize: 8 });
+            component.outputEditorOptions.set({ ...component.outputEditorOptions(), fontSize: 8 });
             component.decreaseFontSize();
-            expect(component.inputEditorOptions.fontSize).toBe(8);
+            expect(component.inputEditorOptions().fontSize).toBe(8);
         });
     });
 
@@ -245,32 +235,32 @@ describe('CodeFormatter', () => {
     // ─────────────────────────────────────────────────────────────────────────
     describe('clearInput()', () => {
         it('resets inputCode and inputSize', () => {
-            component.inputCode = 'hello';
-            component.inputSize = 5;
+            component.inputCode.set('hello');
+            component.inputSize.set(5);
             component.clearInput();
-            expect(component.inputCode).toBe('');
-            expect(component.inputSize).toBe(0);
+            expect(component.inputCode()).toBe('');
+            expect(component.inputSize()).toBe(0);
         });
         it('calls formatCode() when autoUpdate=true', () => {
             spyOn(component, 'formatCode').and.returnValue(Promise.resolve());
-            component.autoUpdate = true;
+            component.autoUpdate.set(true);
             component.clearInput();
             expect(component.formatCode).toHaveBeenCalled();
         });
         it('does NOT call formatCode() when autoUpdate=false', () => {
             spyOn(component, 'formatCode');
-            component.autoUpdate = false;
+            component.autoUpdate.set(false);
             component.clearInput();
             expect(component.formatCode).not.toHaveBeenCalled();
         });
     });
     describe('clearOutput()', () => {
         it('resets outputCode and outputSize', () => {
-            component.outputCode = 'formatted';
-            component.outputSize = 9;
+            component.outputCode.set('formatted');
+            component.outputSize.set(9);
             component.clearOutput();
-            expect(component.outputCode).toBe('');
-            expect(component.outputSize).toBe(0);
+            expect(component.outputCode()).toBe('');
+            expect(component.outputSize()).toBe(0);
         });
     });
 
@@ -280,11 +270,11 @@ describe('CodeFormatter', () => {
     describe('copyCode()', () => {
         let clipboardSpy: jasmine.Spy;
         beforeEach(() => {
-            clipboardSpy = spyOn(mockClipboard, 'writeText').and.returnValue(Promise.resolve());
+            clipboardSpy = spyOn(navigator.clipboard, 'writeText').and.returnValue(Promise.resolve() as any);
         });
 
         it('copies inputCode when isInput=true', (done) => {
-            component.inputCode = 'input content';
+            component.inputCode.set('input content');
             component.copyCode(true);
             Promise.resolve().then(() => {
                 expect(clipboardSpy).toHaveBeenCalledWith('input content');
@@ -292,7 +282,7 @@ describe('CodeFormatter', () => {
             });
         });
         it('copies outputCode when isInput=false', (done) => {
-            component.outputCode = 'output content';
+            component.outputCode.set('output content');
             component.copyCode(false);
             Promise.resolve().then(() => {
                 expect(clipboardSpy).toHaveBeenCalledWith('output content');
@@ -300,7 +290,7 @@ describe('CodeFormatter', () => {
             });
         });
         it('does NOT call clipboard API when content is empty', (done) => {
-            component.inputCode = '';
+            component.inputCode.set('');
             component.copyCode(true);
             Promise.resolve().then(() => {
                 expect(clipboardSpy).not.toHaveBeenCalled();
@@ -308,7 +298,7 @@ describe('CodeFormatter', () => {
             });
         });
         it('shows success toast after copy', (done) => {
-            component.outputCode = 'code';
+            component.outputCode.set('code');
             component.copyCode(false);
             // Wait 2 microtasks: clipboard writeText resolves, then .then() callback runs
             Promise.resolve().then(() => Promise.resolve()).then(() => {
@@ -320,7 +310,7 @@ describe('CodeFormatter', () => {
         });
         it('shows error toast when clipboard fails', (done) => {
             clipboardSpy.and.returnValue(Promise.reject('denied'));
-            component.outputCode = 'code';
+            component.outputCode.set('code');
             component.copyCode(false);
             Promise.resolve().then(() => Promise.resolve()).then(() => {
                 expect(mockMessageService.add).toHaveBeenCalledWith(
@@ -336,17 +326,17 @@ describe('CodeFormatter', () => {
     // ─────────────────────────────────────────────────────────────────────────
     describe('formatCode() — empty input', () => {
         it('sets outputCode="" and outputSize=0', (done) => {
-            component.inputCode = '   ';
-            component.outputCode = 'old';
-            component.outputSize = 99;
+            component.inputCode.set('   ');
+            component.outputCode.set('old');
+            component.outputSize.set(99);
             component.formatCode().then(() => {
-                expect(component.outputCode).toBe('');
-                expect(component.outputSize).toBe(0);
+                expect(component.outputCode()).toBe('');
+                expect(component.outputSize()).toBe(0);
                 done();
             });
         });
         it('does NOT call messageService', (done) => {
-            component.inputCode = '';
+            component.inputCode.set('');
             component.formatCode().then(() => {
                 expect(mockMessageService.add).not.toHaveBeenCalled();
                 done();
@@ -359,30 +349,30 @@ describe('CodeFormatter', () => {
     // ─────────────────────────────────────────────────────────────────────────
     describe('formatCode() — SQL path', () => {
         beforeEach(() => {
-            component.selectedLanguage = 'sql';
-            component.inputCode = 'select * from t';
+            component.selectedLanguage.set('sql');
+            component.inputCode.set('select * from t');
         });
         it('produces formatted SQL', (done) => {
             component.formatCode().then(() => {
-                expect(component.outputCode.toUpperCase()).toContain('SELECT');
+                expect(component.outputCode().toUpperCase()).toContain('SELECT');
                 done();
             });
         });
         it('sets outputSize > 0', (done) => {
             component.formatCode().then(() => {
-                expect(component.outputSize).toBeGreaterThan(0);
+                expect(component.outputSize()).toBeGreaterThan(0);
                 done();
             });
         });
         it('shows success toast when autoUpdate=false', (done) => {
-            component.autoUpdate = false;
+            component.autoUpdate.set(false);
             component.formatCode().then(() => {
                 expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'success' }));
                 done();
             });
         });
         it('does NOT show toast when autoUpdate=true', (done) => {
-            component.autoUpdate = true;
+            component.autoUpdate.set(true);
             component.formatCode().then(() => {
                 expect(mockMessageService.add).not.toHaveBeenCalled();
                 done();
@@ -411,8 +401,8 @@ describe('CodeFormatter', () => {
 
         for (const [lang, code, parser] of parserCases) {
             it(`calls prettier with parser='${parser}' for '${lang}'`, (done) => {
-                component.selectedLanguage = lang;
-                component.inputCode = code;
+                component.selectedLanguage.set(lang);
+                component.inputCode.set(code);
                 component.formatCode().then(() => {
                     expect(prettierSpy).toHaveBeenCalledWith(code, jasmine.objectContaining({ parser }));
                     done();
@@ -421,27 +411,27 @@ describe('CodeFormatter', () => {
         }
 
         it('sets outputCode to formatted result', (done) => {
-            component.selectedLanguage = 'typescript';
-            component.inputCode = 'const x=1';
+            component.selectedLanguage.set('typescript');
+            component.inputCode.set('const x=1');
             component.formatCode().then(() => {
-                expect(component.outputCode).toBe('// ok\n');
+                expect(component.outputCode()).toBe('// ok\n');
                 done();
             });
         });
 
         it('sets outputSize > 0', (done) => {
-            component.selectedLanguage = 'typescript';
-            component.inputCode = 'const x=1';
+            component.selectedLanguage.set('typescript');
+            component.inputCode.set('const x=1');
             component.formatCode().then(() => {
-                expect(component.outputSize).toBeGreaterThan(0);
+                expect(component.outputSize()).toBeGreaterThan(0);
                 done();
             });
         });
 
         it('shows success toast when autoUpdate=false', (done) => {
-            component.selectedLanguage = 'typescript';
-            component.inputCode = 'const x=1';
-            component.autoUpdate = false;
+            component.selectedLanguage.set('typescript');
+            component.inputCode.set('const x=1');
+            component.autoUpdate.set(false);
             component.formatCode().then(() => {
                 expect(mockMessageService.add).toHaveBeenCalledWith(
                     jasmine.objectContaining({ severity: 'success', detail: 'Code formatted!' })
@@ -451,9 +441,9 @@ describe('CodeFormatter', () => {
         });
 
         it('does NOT show toast when autoUpdate=true', (done) => {
-            component.selectedLanguage = 'typescript';
-            component.inputCode = 'const x=1';
-            component.autoUpdate = true;
+            component.selectedLanguage.set('typescript');
+            component.inputCode.set('const x=1');
+            component.autoUpdate.set(true);
             component.formatCode().then(() => {
                 expect(mockMessageService.add).not.toHaveBeenCalled();
                 done();
@@ -461,12 +451,12 @@ describe('CodeFormatter', () => {
         });
 
         it('passes tabWidth, printWidth, useTabs, singleQuote to prettier', (done) => {
-            component.selectedLanguage = 'typescript';
-            component.inputCode = 'let a=1';
-            component.tabWidth = 2;
-            component.printWidth = 120;
-            component.useTabs = true;
-            component.singleQuote = false;
+            component.selectedLanguage.set('typescript');
+            component.inputCode.set('let a=1');
+            component.tabWidth.set(2);
+            component.printWidth.set(120);
+            component.useTabs.set(true);
+            component.singleQuote.set(false);
             component.formatCode().then(() => {
                 expect(prettierSpy).toHaveBeenCalledWith(
                     jasmine.any(String),
@@ -477,9 +467,9 @@ describe('CodeFormatter', () => {
         });
 
         it('passes multiple plugins for html when formatCssJs=true', (done) => {
-            component.selectedLanguage = 'html';
-            component.inputCode = '<div></div>';
-            component.formatCssJs = true;
+            component.selectedLanguage.set('html');
+            component.inputCode.set('<div></div>');
+            component.formatCssJs.set(true);
             component.formatCode().then(() => {
                 const args = prettierSpy.calls.mostRecent().args[1];
                 expect(args.plugins.length).toBeGreaterThan(1);
@@ -488,9 +478,9 @@ describe('CodeFormatter', () => {
         });
 
         it('passes only htmlPlugin when formatCssJs=false', (done) => {
-            component.selectedLanguage = 'html';
-            component.inputCode = '<div></div>';
-            component.formatCssJs = false;
+            component.selectedLanguage.set('html');
+            component.inputCode.set('<div></div>');
+            component.formatCssJs.set(false);
             component.formatCode().then(() => {
                 const args = prettierSpy.calls.mostRecent().args[1];
                 expect(args.plugins.length).toBe(1);
@@ -505,9 +495,9 @@ describe('CodeFormatter', () => {
     describe('formatCode() — error path', () => {
         it('shows error toast when prettier throws (autoUpdate=false)', (done) => {
             spyOn(component as any, 'callPrettierFormat').and.returnValue(Promise.reject(new Error('Syntax error')));
-            component.selectedLanguage = 'typescript';
-            component.inputCode = 'invalid!!!';
-            component.autoUpdate = false;
+            component.selectedLanguage.set('typescript');
+            component.inputCode.set('invalid!!!');
+            component.autoUpdate.set(false);
             component.formatCode().then(() => {
                 expect(mockMessageService.add).toHaveBeenCalledWith(
                     jasmine.objectContaining({ severity: 'error', summary: 'Formatting Error' })
@@ -518,9 +508,9 @@ describe('CodeFormatter', () => {
 
         it('does NOT show error when autoUpdate=true', (done) => {
             spyOn(component as any, 'callPrettierFormat').and.returnValue(Promise.reject(new Error('oops')));
-            component.selectedLanguage = 'typescript';
-            component.inputCode = 'bad!!!';
-            component.autoUpdate = true;
+            component.selectedLanguage.set('typescript');
+            component.inputCode.set('bad!!!');
+            component.autoUpdate.set(true);
             component.formatCode().then(() => {
                 expect(mockMessageService.add).not.toHaveBeenCalled();
                 done();
@@ -528,9 +518,9 @@ describe('CodeFormatter', () => {
         });
 
         it('shows error toast for unsupported language', (done) => {
-            component.selectedLanguage = 'unknown-lang';
-            component.inputCode = 'some code';
-            component.autoUpdate = false;
+            component.selectedLanguage.set('unknown-lang');
+            component.inputCode.set('some code');
+            component.autoUpdate.set(false);
             component.formatCode().then(() => {
                 expect(mockMessageService.add).toHaveBeenCalledWith(
                     jasmine.objectContaining({ severity: 'error', summary: 'Formatting Error' })
@@ -564,7 +554,7 @@ describe('CodeFormatter', () => {
             it(`'${filename}' → '${lang}'`, () => {
                 spyOn(component, 'onLanguageChange');
                 component.detectLanguageFromFile(filename);
-                expect(component.selectedLanguage).toBe(lang);
+                expect(component.selectedLanguage()).toBe(lang);
                 expect(component.onLanguageChange).toHaveBeenCalled();
             });
         }
@@ -592,44 +582,44 @@ describe('CodeFormatter', () => {
         });
 
         it('shows warn toast when output is empty', () => {
-            component.outputCode = '';
+            component.outputCode.set('');
             component.downloadCode(false);
             expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'warn' }));
         });
         it('warns when input is empty (isInput=true)', () => {
-            component.inputCode = '';
+            component.inputCode.set('');
             component.downloadCode(true);
             expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'warn' }));
         });
         it('clicks the anchor for non-empty output', () => {
-            component.outputCode = 'code';
-            component.selectedLanguage = 'typescript';
+            component.outputCode.set('code');
+            component.selectedLanguage.set('typescript');
             component.downloadCode(false);
             expect(anchorMock.click).toHaveBeenCalled();
         });
         it('revokes object URL after download', () => {
-            component.outputCode = 'code';
-            component.selectedLanguage = 'typescript';
+            component.outputCode.set('code');
+            component.selectedLanguage.set('typescript');
             component.downloadCode(false);
             expect(window.URL.revokeObjectURL).toHaveBeenCalledWith('blob:fake');
         });
         it('shows success toast after download', () => {
-            component.outputCode = 'content';
-            component.selectedLanguage = 'html';
+            component.outputCode.set('content');
+            component.selectedLanguage.set('html');
             component.downloadCode(false);
             expect(mockMessageService.add).toHaveBeenCalledWith(
                 jasmine.objectContaining({ severity: 'success', detail: 'File downloaded successfully!' })
             );
         });
         it('uses raw-code prefix when isInput=true', () => {
-            component.inputCode = 'raw code';
-            component.selectedLanguage = 'css';
+            component.inputCode.set('raw code');
+            component.selectedLanguage.set('css');
             component.downloadCode(true);
             expect(anchorMock.download).toContain('raw-code');
         });
         it('uses formatted-code prefix when isInput=false', () => {
-            component.outputCode = 'formatted';
-            component.selectedLanguage = 'css';
+            component.outputCode.set('formatted');
+            component.selectedLanguage.set('css');
             component.downloadCode(false);
             expect(anchorMock.download).toContain('formatted-code');
         });
@@ -640,8 +630,8 @@ describe('CodeFormatter', () => {
         ];
         for (const [lang, ext] of extCases) {
             it(`uses '${ext}' for '${lang}'`, () => {
-                component.outputCode = 'x';
-                component.selectedLanguage = lang;
+                component.outputCode.set('x');
+                component.selectedLanguage.set(lang);
                 component.downloadCode(false);
                 expect(anchorMock.download).toContain(ext);
             });
@@ -659,20 +649,20 @@ describe('CodeFormatter', () => {
 
         it('sets selectedLanguage to typescript', () => {
             component.loadSample();
-            expect(component.selectedLanguage).toBe('typescript');
+            expect(component.selectedLanguage()).toBe('typescript');
         });
         it('sets non-empty inputCode', () => {
             component.loadSample();
-            expect(component.inputCode.length).toBeGreaterThan(0);
+            expect(component.inputCode().length).toBeGreaterThan(0);
         });
         it('updates inputSize', () => {
             component.loadSample();
-            expect(component.inputSize).toBeGreaterThan(0);
+            expect(component.inputSize()).toBeGreaterThan(0);
         });
         it('closes settings drawer', () => {
-            component.displaySettings = true;
+            component.displaySettings.set(true);
             component.loadSample();
-            expect(component.displaySettings).toBe(false);
+            expect(component.displaySettings()).toBe(false);
         });
         it('shows info toast', () => {
             component.loadSample();
@@ -681,12 +671,12 @@ describe('CodeFormatter', () => {
             );
         });
         it('calls formatCode() when autoUpdate=true', () => {
-            component.autoUpdate = true;
+            component.autoUpdate.set(true);
             component.loadSample();
             expect(component.formatCode).toHaveBeenCalled();
         });
         it('does NOT call formatCode() when autoUpdate=false', () => {
-            component.autoUpdate = false;
+            component.autoUpdate.set(false);
             component.loadSample();
             expect(component.formatCode).not.toHaveBeenCalled();
         });
@@ -710,11 +700,11 @@ describe('CodeFormatter', () => {
             spyOn(e, 'preventDefault');
             spyOn(e, 'stopPropagation');
             component.onDragEnter(e);
-            expect(component.isDragging).toBe(true);
+            expect(component.isDragging()).toBe(true);
         });
 
         it('onDragLeave outside bounds sets isDragging = false', () => {
-            component.isDragging = true;
+            component.isDragging.set(true);
             const div = document.createElement('div');
             spyOn(div, 'getBoundingClientRect').and.returnValue({ left: 0, right: 100, top: 0, bottom: 100 } as DOMRect);
             const e = new DragEvent('dragleave', { clientX: 200, clientY: 200 });
@@ -722,11 +712,11 @@ describe('CodeFormatter', () => {
             spyOn(e, 'stopPropagation');
             Object.defineProperty(e, 'currentTarget', { value: div });
             component.onDragLeave(e);
-            expect(component.isDragging).toBe(false);
+            expect(component.isDragging()).toBe(false);
         });
 
         it('onDragLeave inside bounds keeps isDragging = true', () => {
-            component.isDragging = true;
+            component.isDragging.set(true);
             const div = document.createElement('div');
             spyOn(div, 'getBoundingClientRect').and.returnValue({ left: 0, right: 200, top: 0, bottom: 200 } as DOMRect);
             const e = new DragEvent('dragleave', { clientX: 100, clientY: 100 });
@@ -734,7 +724,7 @@ describe('CodeFormatter', () => {
             spyOn(e, 'stopPropagation');
             Object.defineProperty(e, 'currentTarget', { value: div });
             component.onDragLeave(e);
-            expect(component.isDragging).toBe(true);
+            expect(component.isDragging()).toBe(true);
         });
 
         it('onFileDrop resets isDragging and calls handleFile', () => {
@@ -745,9 +735,9 @@ describe('CodeFormatter', () => {
             const e = new DragEvent('drop', { dataTransfer: dt });
             spyOn(e, 'preventDefault');
             spyOn(e, 'stopPropagation');
-            component.isDragging = true;
+            component.isDragging.set(true);
             component.onFileDrop(e);
-            expect(component.isDragging).toBe(false);
+            expect(component.isDragging()).toBe(false);
             expect(component.handleFile).toHaveBeenCalledWith(file);
         });
 
@@ -777,14 +767,14 @@ describe('CodeFormatter', () => {
         it('sets vs-dark when isDarkTheme()=true', () => {
             mockLayoutService.isDarkTheme.set(true);
             TestBed.flushEffects();
-            expect(component.inputEditorOptions.theme).toBe('vs-dark');
-            expect(component.outputEditorOptions.theme).toBe('vs-dark');
+            expect(component.inputEditorOptions().theme).toBe('vs-dark');
+            expect(component.outputEditorOptions().theme).toBe('vs-dark');
         });
         it('sets vs-light when isDarkTheme()=false', () => {
             mockLayoutService.isDarkTheme.set(false);
             TestBed.flushEffects();
-            expect(component.inputEditorOptions.theme).toBe('vs-light');
-            expect(component.outputEditorOptions.theme).toBe('vs-light');
+            expect(component.inputEditorOptions().theme).toBe('vs-light');
+            expect(component.outputEditorOptions().theme).toBe('vs-light');
         });
     });
 
@@ -795,12 +785,12 @@ describe('CodeFormatter', () => {
         it('onInputEditorInit updates inputCursor', () => {
             const ed = { onDidChangeCursorPosition: jasmine.createSpy().and.callFake((cb: Function) => cb({ position: { lineNumber: 3, column: 7 } })) };
             component.onInputEditorInit(ed);
-            expect(component.inputCursor).toEqual({ line: 3, col: 7 });
+            expect(component.inputCursor()).toEqual({ line: 3, col: 7 });
         });
         it('onOutputEditorInit updates outputCursor', () => {
             const ed = { onDidChangeCursorPosition: jasmine.createSpy().and.callFake((cb: Function) => cb({ position: { lineNumber: 5, column: 2 } })) };
             component.onOutputEditorInit(ed);
-            expect(component.outputCursor).toEqual({ line: 5, col: 2 });
+            expect(component.outputCursor()).toEqual({ line: 5, col: 2 });
         });
     });
 

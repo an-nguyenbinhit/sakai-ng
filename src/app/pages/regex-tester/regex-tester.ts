@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -18,21 +18,22 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
     standalone: true,
     imports: [CommonModule, FormsModule, InputTextModule, ButtonModule, CheckboxModule, ToastModule, TextareaModule, TableModule, TooltipModule, DrawerModule, TabsModule],
     providers: [MessageService],
-    templateUrl: './regex-tester.html'
+    templateUrl: './regex-tester.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RegexTester {
-    pattern: string = '';
-    testString: string = '';
+    pattern = signal<string>('');
+    testString = signal<string>('');
 
-    flagG: boolean = true;
-    flagI: boolean = false;
-    flagM: boolean = false;
+    flagG = signal<boolean>(true);
+    flagI = signal<boolean>(false);
+    flagM = signal<boolean>(false);
 
-    matches: any[] = [];
-    highlightedHtml: SafeHtml = '';
-    regexError: string | null = null;
+    matches = signal<any[]>([]);
+    highlightedHtml = signal<SafeHtml>('');
+    regexError = signal<string | null>(null);
 
-    cheatSheetVisible: boolean = false;
+    cheatSheetVisible = signal<boolean>(false);
 
     cheatSheetItems = [
         { label: 'Email Address', pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$', desc: 'Match valid email addresses' },
@@ -62,44 +63,48 @@ export class RegexTester {
 
     getFlags(): string {
         let f = '';
-        if (this.flagG) f += 'g';
-        if (this.flagI) f += 'i';
-        if (this.flagM) f += 'm';
+        if (this.flagG()) f += 'g';
+        if (this.flagI()) f += 'i';
+        if (this.flagM()) f += 'm';
         return f;
     }
 
     evaluateRegex() {
-        this.regexError = null;
+        this.regexError.set(null);
 
-        if (!this.pattern) {
-            this.matches = [];
-            this.updateHighlightedHtml(this.testString);
+        const pat = this.pattern();
+        const testStr = this.testString();
+
+        if (!pat) {
+            this.matches.set([]);
+            this.updateHighlightedHtml(testStr);
             return;
         }
 
         try {
             const flagStr = this.getFlags();
-            const regex = new RegExp(this.pattern, flagStr);
+            const regex = new RegExp(pat, flagStr);
 
-            this.matches = [];
+            let newMatches: any[] = [];
 
-            if (!this.testString) {
+            if (!testStr) {
+                this.matches.set([]);
                 this.updateHighlightedHtml('');
                 return;
             }
 
             if (flagStr.includes('g')) {
-                const results = [...this.testString.matchAll(regex)];
-                this.matches = results.map((res: any, index) => ({
+                const results = [...testStr.matchAll(regex)];
+                newMatches = results.map((res: any, index) => ({
                     index: index + 1,
                     match: res[0],
                     start: res.index,
                     end: res.index + res[0].length
                 }));
             } else {
-                const res = this.testString.match(regex);
+                const res = testStr.match(regex);
                 if (res && res.index !== undefined) {
-                    this.matches = [
+                    newMatches = [
                         {
                             index: 1,
                             match: res[0],
@@ -107,37 +112,37 @@ export class RegexTester {
                             end: res.index + res[0].length
                         }
                     ];
-                } else {
-                    this.matches = [];
                 }
             }
+
+            this.matches.set(newMatches);
 
             let lastIdx = 0;
             let resultHtml = '';
 
-            if (this.matches.length > 0) {
-                for (let m of this.matches) {
-                    resultHtml += this.escapeHtml(this.testString.substring(lastIdx, m.start));
-                    resultHtml += `<mark class="bg-amber-200 dark:bg-amber-600/50 text-surface-900 dark:text-surface-0 px-1 rounded font-medium">` + this.escapeHtml(this.testString.substring(m.start, m.end)) + `</mark>`;
+            if (newMatches.length > 0) {
+                for (let m of newMatches) {
+                    resultHtml += this.escapeHtml(testStr.substring(lastIdx, m.start));
+                    resultHtml += `<mark class="bg-amber-300 dark:bg-amber-600/60 text-amber-900 dark:text-amber-50 px-1 rounded font-bold shadow-sm">` + this.escapeHtml(testStr.substring(m.start, m.end)) + `</mark>`;
                     lastIdx = m.end;
                 }
-                resultHtml += this.escapeHtml(this.testString.substring(lastIdx));
+                resultHtml += this.escapeHtml(testStr.substring(lastIdx));
                 this.updateHighlightedHtml(resultHtml, true);
             } else {
-                this.updateHighlightedHtml(this.testString);
+                this.updateHighlightedHtml(testStr);
             }
         } catch (e: any) {
-            this.matches = [];
-            this.updateHighlightedHtml(this.testString);
-            this.regexError = e.message;
+            this.matches.set([]);
+            this.updateHighlightedHtml(testStr);
+            this.regexError.set(e.message);
         }
     }
 
     updateHighlightedHtml(text: string, isAlreadyEscaped: boolean = false) {
         let safeStr = isAlreadyEscaped ? text : this.escapeHtml(text);
-        safeStr = safeStr.replace(/\n/g, '<br>');
-        if (!safeStr) safeStr = '<span class="text-surface-400 dark:text-surface-500 italic">No test string provided...</span>';
-        this.highlightedHtml = this.sanitizer.bypassSecurityTrustHtml(safeStr);
+        safeStr = safeStr.replace(/\\n/g, '<br>');
+        if (!safeStr) safeStr = '<span class="text-surface-400 dark:text-surface-500 italic flex items-center gap-2"><i class="pi pi-receipt"></i> No test string provided...</span>';
+        this.highlightedHtml.set(this.sanitizer.bypassSecurityTrustHtml(safeStr));
     }
 
     escapeHtml(unsafe: string) {
@@ -145,54 +150,55 @@ export class RegexTester {
     }
 
     clearInputs() {
-        this.pattern = '';
-        this.testString = '';
-        this.flagG = true;
-        this.flagI = false;
-        this.flagM = false;
+        this.pattern.set('');
+        this.testString.set('');
+        this.flagG.set(true);
+        this.flagI.set(false);
+        this.flagM.set(false);
         this.evaluateRegex();
         this.messageService.add({ severity: 'info', summary: 'Cleared', detail: 'Inputs cleared' });
     }
 
     copyRegex() {
-        if (!this.pattern) return;
-        const fullRegex = `/${this.pattern}/${this.getFlags()}`;
+        const pat = this.pattern();
+        if (!pat) return;
+        const fullRegex = `/${pat}/${this.getFlags()}`;
         navigator.clipboard.writeText(fullRegex).then(() => {
             this.messageService.add({ severity: 'success', summary: 'Copied', detail: 'Regex copied to clipboard' });
         });
     }
 
     copyMatches() {
-        if (this.matches.length === 0) return;
-        const text = this.matches.map((m) => m.match).join('\n');
+        const matchArr = this.matches();
+        if (matchArr.length === 0) return;
+        const text = matchArr.map((m) => m.match).join('\\n');
         navigator.clipboard.writeText(text).then(() => {
             this.messageService.add({ severity: 'success', summary: 'Copied', detail: 'Matches copied to clipboard' });
         });
     }
 
     selectRegexPattern(pattern: string) {
-        this.pattern = pattern;
+        this.pattern.set(pattern);
         this.evaluateRegex();
-        this.cheatSheetVisible = false;
+        this.cheatSheetVisible.set(false);
         this.messageService.add({ severity: 'info', summary: 'Pattern Applied', detail: 'Regex pattern inserted from Cheat Sheet' });
     }
 
     getJavaScriptSnippet(): string {
-        if (!this.pattern) return '// Insert a pattern to generate code';
+        const pat = this.pattern();
+        if (!pat) return '// Insert a pattern to generate code';
         const flags = this.getFlags();
-        // Cần double-escape cho constructor RegExp trong JS nếu xuất ra chuỗi
-        // Nhưng thường dev dùng literal /.../
-        return `const regex = /${this.pattern}/${flags};\nconst text = \`\${testString}\`;\n\nconst matches = text.match(regex);\nconsole.log(matches);`;
+        return `const regex = /${pat}/${flags};\nconst text = \`${this.testString()}\`;\n\nconst matches = text.match(regex);\nconsole.log(matches);`;
     }
 
     getDotNetSnippet(): string {
-        if (!this.pattern) return '// Insert a pattern to generate code';
+        const pat = this.pattern();
+        if (!pat) return '// Insert a pattern to generate code';
 
-        // Escape double quotes for C# verbatim string
-        const escapedPattern = this.pattern.replace(/"/g, '""');
+        const escapedPattern = pat.replace(/"/g, '""');
         const flagImports = [];
-        if (this.flagI) flagImports.push('RegexOptions.IgnoreCase');
-        if (this.flagM) flagImports.push('RegexOptions.Multiline');
+        if (this.flagI()) flagImports.push('RegexOptions.IgnoreCase');
+        if (this.flagM()) flagImports.push('RegexOptions.Multiline');
 
         let flagStr = flagImports.length > 0 ? `, ${flagImports.join(' | ')}` : '';
 
