@@ -196,6 +196,10 @@ export class JsonTools {
         }
     }
 
+    protected callPrettierFormat(code: string, options: object): Promise<string> {
+        return prettier.format(code, options as any);
+    }
+
     async formatJson() {
         if (!this.inputCode.trim()) {
             this.outputCode = '';
@@ -204,7 +208,7 @@ export class JsonTools {
         }
 
         try {
-            const formatted = await prettier.format(this.inputCode, {
+            const formatted = await this.callPrettierFormat(this.inputCode, {
                 parser: 'json',
                 plugins: [babelPlugin, estreePlugin],
                 tabWidth: Number(this.tabWidth),
