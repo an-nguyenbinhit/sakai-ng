@@ -376,9 +376,7 @@ describe('DiffEngine', () => {
             const result = service.compute(left, right, opts({ contextLines: 3 }));
 
             // Count visible (non-fold) unchanged rows around the changed line
-            const visibleUnchanged = result.inlineRows
-                .filter((r) => r.type !== 'fold')
-                .filter((r) => r.type === 'unchanged');
+            const visibleUnchanged = result.inlineRows.filter((r) => r.type !== 'fold').filter((r) => r.type === 'unchanged');
             // With 3 context lines on each side (max 6 visible unchanged)
             expect(visibleUnchanged.length).toBeLessThanOrEqual(6);
         });

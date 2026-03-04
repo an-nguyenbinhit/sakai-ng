@@ -62,14 +62,17 @@ export class JsonTools {
         private messageService: MessageService,
         private layoutService: LayoutService
     ) {
-        effect(() => {
-            const isDark = this.layoutService.isDarkTheme();
-            const theme = isDark ? 'vs-dark' : 'vs-light';
-            const currentIn = untracked(() => this.inputEditorOptions());
-            this.inputEditorOptions.set({ ...currentIn, theme });
-            const currentOut = untracked(() => this.outputEditorOptions());
-            this.outputEditorOptions.set({ ...currentOut, theme });
-        }, { allowSignalWrites: true });
+        effect(
+            () => {
+                const isDark = this.layoutService.isDarkTheme();
+                const theme = isDark ? 'vs-dark' : 'vs-light';
+                const currentIn = untracked(() => this.inputEditorOptions());
+                this.inputEditorOptions.set({ ...currentIn, theme });
+                const currentOut = untracked(() => this.outputEditorOptions());
+                this.outputEditorOptions.set({ ...currentOut, theme });
+            },
+            { allowSignalWrites: true }
+        );
     }
 
     onFormatConfigChange() {

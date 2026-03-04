@@ -17,11 +17,7 @@ describe('CodeCompareState', () => {
         mockSyntaxHighlight = jasmine.createSpyObj('SyntaxHighlight', ['loadLanguage', 'highlightLine', 'detectLanguage']);
 
         TestBed.configureTestingModule({
-            providers: [
-                CodeCompareState,
-                { provide: DiffEngine, useValue: mockDiffEngine },
-                { provide: SyntaxHighlight, useValue: mockSyntaxHighlight }
-            ]
+            providers: [CodeCompareState, { provide: DiffEngine, useValue: mockDiffEngine }, { provide: SyntaxHighlight, useValue: mockSyntaxHighlight }]
         });
 
         service = TestBed.inject(CodeCompareState);
@@ -48,20 +44,19 @@ describe('CodeCompareState', () => {
             // Set session storage BEFORE TestBed initialises the service,
             // so that the constructor's loadFromSession() picks it up.
             sessionStorage.clear();
-            sessionStorage.setItem('code-compare-session', JSON.stringify({
-                viewMode: 'inline',
-                fontSize: 18,
-                options: { ...DEFAULT_OPTIONS, ignoreWhitespace: true }
-            }));
+            sessionStorage.setItem(
+                'code-compare-session',
+                JSON.stringify({
+                    viewMode: 'inline',
+                    fontSize: 18,
+                    options: { ...DEFAULT_OPTIONS, ignoreWhitespace: true }
+                })
+            );
 
             // Re-configure TestBed so CodeCompareState is freshly instantiated
             TestBed.resetTestingModule();
             TestBed.configureTestingModule({
-                providers: [
-                    CodeCompareState,
-                    { provide: DiffEngine, useValue: mockDiffEngine },
-                    { provide: SyntaxHighlight, useValue: mockSyntaxHighlight }
-                ]
+                providers: [CodeCompareState, { provide: DiffEngine, useValue: mockDiffEngine }, { provide: SyntaxHighlight, useValue: mockSyntaxHighlight }]
             });
             service = TestBed.inject(CodeCompareState);
         });
@@ -160,8 +155,14 @@ describe('CodeCompareState', () => {
                     { raw: 'world', type: 'unchanged', highlightedHtml: 'world', lineNumber: 2, tokens: null },
                     { raw: 'hello again', type: 'unchanged', highlightedHtml: 'hello again', lineNumber: 3, tokens: null }
                 ],
-                flatLeft: [], flatRight: [], sideBySideRows: [],
-                totalAdded: 0, totalRemoved: 0, totalModified: 0, totalUnchanged: 3, similarityPercent: 100
+                flatLeft: [],
+                flatRight: [],
+                sideBySideRows: [],
+                totalAdded: 0,
+                totalRemoved: 0,
+                totalModified: 0,
+                totalUnchanged: 3,
+                similarityPercent: 100
             });
 
             // Trigger computed evaluation
@@ -326,13 +327,16 @@ describe('CodeCompareState', () => {
             sessionStorage.clear();
             const leftFile: FileContent = { name: 'left.ts', content: 'left content', language: 'typescript', encoding: 'utf-8', size: 12 };
             const rightFile: FileContent = { name: 'right.ts', content: 'right content', language: 'javascript', encoding: 'utf-8', size: 13 };
-            sessionStorage.setItem('code-compare-session', JSON.stringify({
-                leftFile,
-                rightFile,
-                viewMode: 'inline',
-                fontSize: 16,
-                options: { ignoreWhitespace: false, ignoreCase: false, ignoreBlankLines: false, ignoreComments: false, trimLines: false, wordDiff: true, charDiff: false, contextLines: 3 }
-            }));
+            sessionStorage.setItem(
+                'code-compare-session',
+                JSON.stringify({
+                    leftFile,
+                    rightFile,
+                    viewMode: 'inline',
+                    fontSize: 16,
+                    options: { ignoreWhitespace: false, ignoreCase: false, ignoreBlankLines: false, ignoreComments: false, trimLines: false, wordDiff: true, charDiff: false, contextLines: 3 }
+                })
+            );
 
             TestBed.resetTestingModule();
             TestBed.configureTestingModule({
@@ -345,11 +349,7 @@ describe('CodeCompareState', () => {
             // Re-import the actual service
             TestBed.resetTestingModule();
             TestBed.configureTestingModule({
-                providers: [
-                    CodeCompareState,
-                    { provide: DiffEngine, useValue: mockDiffEngine },
-                    { provide: SyntaxHighlight, useValue: mockSyntaxHighlight }
-                ]
+                providers: [CodeCompareState, { provide: DiffEngine, useValue: mockDiffEngine }, { provide: SyntaxHighlight, useValue: mockSyntaxHighlight }]
             });
             service = TestBed.inject(CodeCompareState);
         });
@@ -372,11 +372,7 @@ describe('CodeCompareState', () => {
 
             TestBed.resetTestingModule();
             TestBed.configureTestingModule({
-                providers: [
-                    CodeCompareState,
-                    { provide: DiffEngine, useValue: mockDiffEngine },
-                    { provide: SyntaxHighlight, useValue: mockSyntaxHighlight }
-                ]
+                providers: [CodeCompareState, { provide: DiffEngine, useValue: mockDiffEngine }, { provide: SyntaxHighlight, useValue: mockSyntaxHighlight }]
             });
             service = TestBed.inject(CodeCompareState);
         });

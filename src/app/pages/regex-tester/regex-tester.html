@@ -1,54 +1,47 @@
 <div class="flex flex-col gap-6 w-full animate-fadein pb-8">
-
     <!-- Hero / Header Section -->
     <div
-        class="flex flex-col items-center justify-center p-8 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-teal-500/10 dark:from-indigo-400/20 dark:via-purple-400/20 dark:to-teal-400/20 rounded-3xl border border-surface-200 dark:border-surface-700 backdrop-blur-sm shadow-sm transition-all hover:shadow-md mb-2">
-        <div
-            class="bg-primary/10 text-primary w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-inner">
+        class="flex flex-col items-center justify-center p-8 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-teal-500/10 dark:from-indigo-400/20 dark:via-purple-400/20 dark:to-teal-400/20 rounded-3xl border border-surface-200 dark:border-surface-700 backdrop-blur-sm shadow-sm transition-all hover:shadow-md mb-2"
+    >
+        <div class="bg-primary/10 text-primary w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-inner">
             <i class="pi pi-filter text-3xl"></i>
         </div>
-        <h1
-            class="text-3xl md:text-4xl font-extrabold text-surface-900 dark:text-surface-0 tracking-tight mb-2 text-center">
-            Regex <span class="text-primary font-light">Tester</span>
-        </h1>
-        <p class="text-surface-600 dark:text-surface-400 max-w-xl text-center text-lg leading-relaxed">
-            Test, debug, and learn regular expressions with live visual highlighting and code generation.
-        </p>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-surface-900 dark:text-surface-0 tracking-tight mb-2 text-center">Regex <span class="text-primary font-light">Tester</span></h1>
+        <p class="text-surface-600 dark:text-surface-400 max-w-xl text-center text-lg leading-relaxed">Test, debug, and learn regular expressions with live visual highlighting and code generation.</p>
     </div>
 
     <p-toast></p-toast>
 
     <!-- Cheat Sheet Sidebar -->
-    <p-drawer [visible]="cheatSheetVisible()" (visibleChange)="cheatSheetVisible.set($event)" position="right"
-        styleClass="w-full sm:w-[450px] [&_.p-drawer-content]:p-6">
+    <p-drawer [visible]="cheatSheetVisible()" (visibleChange)="cheatSheetVisible.set($event)" position="right" styleClass="w-full sm:w-[450px] [&_.p-drawer-content]:p-6">
         <ng-template pTemplate="header">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
                     <i class="pi pi-book text-xl"></i>
                 </div>
-                <span class="font-extrabold text-2xl tracking-tight text-surface-900 dark:text-surface-0">Regex
-                    Patterns</span>
+                <span class="font-extrabold text-2xl tracking-tight text-surface-900 dark:text-surface-0">Regex Patterns</span>
             </div>
         </ng-template>
         <ng-template pTemplate="content">
             <div class="flex flex-col gap-4">
-                <div
-                    class="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-xl text-sm font-medium border border-blue-100 dark:border-blue-900/50 flex items-center gap-2">
+                <div class="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-xl text-sm font-medium border border-blue-100 dark:border-blue-900/50 flex items-center gap-2">
                     <i class="pi pi-info-circle"></i>
                     Click any pattern below to instantly load it into the tester.
                 </div>
 
                 <div class="flex flex-col gap-3 overflow-y-auto pr-2 pb-6 custom-scrollbar">
                     @for (item of cheatSheetItems; track item.label) {
-                    <div class="p-4 border border-surface-200 dark:border-surface-700 rounded-2xl hover:border-primary cursor-pointer transition-all hover:-translate-y-1 hover:shadow-md bg-surface-0 dark:bg-surface-900 group"
-                        (click)="selectRegexPattern(item.pattern)">
+                    <div
+                        class="p-4 border border-surface-200 dark:border-surface-700 rounded-2xl hover:border-primary cursor-pointer transition-all hover:-translate-y-1 hover:shadow-md bg-surface-0 dark:bg-surface-900 group"
+                        (click)="selectRegexPattern(item.pattern)"
+                    >
                         <div class="font-bold text-lg text-primary mb-2 flex items-center justify-between">
                             {{item.label}}
-                            <i
-                                class="pi pi-arrow-right opacity-0 group-hover:opacity-100 transition-opacity text-sm"></i>
+                            <i class="pi pi-arrow-right opacity-0 group-hover:opacity-100 transition-opacity text-sm"></i>
                         </div>
-                        <code
-                            class="block text-sm bg-surface-50 dark:bg-surface-800 p-3 rounded-xl mb-3 text-surface-900 dark:text-surface-0 break-all font-mono border border-surface-100 dark:border-surface-700/50 shadow-inner select-all">{{item.pattern}}</code>
+                        <code class="block text-sm bg-surface-50 dark:bg-surface-800 p-3 rounded-xl mb-3 text-surface-900 dark:text-surface-0 break-all font-mono border border-surface-100 dark:border-surface-700/50 shadow-inner select-all"
+                            >{{item.pattern}}</code
+                        >
                         <div class="text-sm text-surface-600 dark:text-surface-400 leading-relaxed">{{item.desc}}</div>
                     </div>
                     }
@@ -60,85 +53,66 @@
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <!-- Left Side: Inputs & Visualization -->
         <div class="col-span-1 xl:col-span-8 flex flex-col gap-6">
-
             <!-- Pattern Configuration Section -->
-            <div
-                class="flex flex-col bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
-
+            <div class="flex flex-col bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
                 <!-- Toolbar -->
                 <div class="flex flex-wrap items-center justify-between mb-5 gap-4">
                     <div class="flex items-center gap-3">
-                        <div
-                            class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                             <i class="pi pi-code text-lg"></i>
                         </div>
-                        <h2 class="font-bold text-xl text-surface-900 dark:text-surface-0 tracking-tight m-0">Expression
-                            Editor</h2>
+                        <h2 class="font-bold text-xl text-surface-900 dark:text-surface-0 tracking-tight m-0">Expression Editor</h2>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
-                        <p-button icon="pi pi-book" label="Cheat Sheet" severity="info" [outlined]="true"
-                            styleClass="rounded-full shadow-sm" [raised]="true"
-                            (click)="cheatSheetVisible.set(true)"></p-button>
+                        <p-button icon="pi pi-book" label="Cheat Sheet" severity="info" [outlined]="true" styleClass="rounded-full shadow-sm" [raised]="true" (click)="cheatSheetVisible.set(true)"></p-button>
                         <div class="w-px h-6 bg-surface-300 dark:bg-surface-600 mx-2"></div>
-                        <p-button icon="pi pi-copy" [rounded]="true" [text]="true" severity="secondary"
-                            pTooltip="Copy Fully Formatted Regex" tooltipPosition="top"
-                            (click)="copyRegex()"></p-button>
-                        <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger"
-                            pTooltip="Clear Workspace" tooltipPosition="top" (click)="clearInputs()"></p-button>
+                        <p-button icon="pi pi-copy" [rounded]="true" [text]="true" severity="secondary" pTooltip="Copy Fully Formatted Regex" tooltipPosition="top" (click)="copyRegex()"></p-button>
+                        <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" pTooltip="Clear Workspace" tooltipPosition="top" (click)="clearInputs()"></p-button>
                     </div>
                 </div>
 
                 <!-- Input Field -->
                 <div class="flex items-stretch w-full mb-1 group">
-                    <div
-                        class="flex items-center px-4 bg-surface-100 dark:bg-surface-800 border border-r-0 border-surface-300 dark:border-surface-600 rounded-l-2xl group-focus-within:border-primary group-focus-within:bg-primary/5 transition-colors">
+                    <div class="flex items-center px-4 bg-surface-100 dark:bg-surface-800 border border-r-0 border-surface-300 dark:border-surface-600 rounded-l-2xl group-focus-within:border-primary group-focus-within:bg-primary/5 transition-colors">
                         <span class="text-2xl font-mono text-primary font-black">/</span>
                     </div>
-                    <input type="text" pInputText [ngModel]="pattern()"
+                    <input
+                        type="text"
+                        pInputText
+                        [ngModel]="pattern()"
                         (ngModelChange)="pattern.set($event); onInputChange()"
                         placeholder="Enter expression (e.g. ^[a-z]+$)"
-                        class="flex-1 font-mono text-lg p-4 border-l-0 border-r-0 rounded-none shadow-none focus:ring-0 group-focus-within:border-primary transition-colors bg-surface-0 dark:bg-surface-900" />
-                    <div
-                        class="flex items-center px-4 bg-surface-100 dark:bg-surface-800 border border-l-0 border-surface-300 dark:border-surface-600 rounded-r-2xl group-focus-within:border-primary group-focus-within:bg-primary/5 transition-colors">
+                        class="flex-1 font-mono text-lg p-4 border-l-0 border-r-0 rounded-none shadow-none focus:ring-0 group-focus-within:border-primary transition-colors bg-surface-0 dark:bg-surface-900"
+                    />
+                    <div class="flex items-center px-4 bg-surface-100 dark:bg-surface-800 border border-l-0 border-surface-300 dark:border-surface-600 rounded-r-2xl group-focus-within:border-primary group-focus-within:bg-primary/5 transition-colors">
                         <span class="text-xl font-mono text-primary font-black">/{{getFlags()}}</span>
                     </div>
                 </div>
 
                 <!-- Error Toast -->
                 @if (regexError()) {
-                <div
-                    class="text-red-600 dark:text-red-400 text-sm mt-3 bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-200 dark:border-red-800/50 flex items-center gap-2 animate-fadein">
+                <div class="text-red-600 dark:text-red-400 text-sm mt-3 bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-200 dark:border-red-800/50 flex items-center gap-2 animate-fadein">
                     <i class="pi pi-exclamation-triangle text-lg"></i>
                     <span class="font-medium">{{ regexError() }}</span>
                 </div>
                 }
 
                 <!-- Flags Configuration -->
-                <div
-                    class="flex flex-wrap items-center gap-6 mt-6 bg-surface-50 dark:bg-surface-800/50 p-4 rounded-2xl border border-surface-100 dark:border-surface-700/50">
+                <div class="flex flex-wrap items-center gap-6 mt-6 bg-surface-50 dark:bg-surface-800/50 p-4 rounded-2xl border border-surface-100 dark:border-surface-700/50">
                     <div class="text-sm font-bold text-surface-500 uppercase tracking-wider py-1">Flags Options</div>
                     <div class="w-px h-6 bg-surface-300 dark:bg-surface-600 hidden sm:block"></div>
                     <div class="flex items-center gap-6 flex-1">
                         <div class="flex items-center group cursor-pointer">
-                            <p-checkbox [ngModel]="flagG()" (ngModelChange)="flagG.set($event)" binary="true"
-                                inputId="flagG" (onChange)="onFlagChange()"></p-checkbox>
-                            <label for="flagG"
-                                class="ml-2 font-semibold text-surface-700 dark:text-surface-200 cursor-pointer group-hover:text-primary transition-colors">Global
-                                (g)</label>
+                            <p-checkbox [ngModel]="flagG()" (ngModelChange)="flagG.set($event)" binary="true" inputId="flagG" (onChange)="onFlagChange()"></p-checkbox>
+                            <label for="flagG" class="ml-2 font-semibold text-surface-700 dark:text-surface-200 cursor-pointer group-hover:text-primary transition-colors">Global (g)</label>
                         </div>
                         <div class="flex items-center group cursor-pointer">
-                            <p-checkbox [ngModel]="flagI()" (ngModelChange)="flagI.set($event)" binary="true"
-                                inputId="flagI" (onChange)="onFlagChange()"></p-checkbox>
-                            <label for="flagI"
-                                class="ml-2 font-semibold text-surface-700 dark:text-surface-200 cursor-pointer group-hover:text-primary transition-colors">Case
-                                Insensitive (i)</label>
+                            <p-checkbox [ngModel]="flagI()" (ngModelChange)="flagI.set($event)" binary="true" inputId="flagI" (onChange)="onFlagChange()"></p-checkbox>
+                            <label for="flagI" class="ml-2 font-semibold text-surface-700 dark:text-surface-200 cursor-pointer group-hover:text-primary transition-colors">Case Insensitive (i)</label>
                         </div>
                         <div class="flex items-center group cursor-pointer">
-                            <p-checkbox [ngModel]="flagM()" (ngModelChange)="flagM.set($event)" binary="true"
-                                inputId="flagM" (onChange)="onFlagChange()"></p-checkbox>
-                            <label for="flagM"
-                                class="ml-2 font-semibold text-surface-700 dark:text-surface-200 cursor-pointer group-hover:text-primary transition-colors">Multiline
-                                (m)</label>
+                            <p-checkbox [ngModel]="flagM()" (ngModelChange)="flagM.set($event)" binary="true" inputId="flagM" (onChange)="onFlagChange()"></p-checkbox>
+                            <label for="flagM" class="ml-2 font-semibold text-surface-700 dark:text-surface-200 cursor-pointer group-hover:text-primary transition-colors">Multiline (m)</label>
                         </div>
                     </div>
                 </div>
@@ -146,65 +120,59 @@
 
             <!-- Content Split View -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-
                 <!-- Original String Editor -->
-                <div
-                    class="flex flex-col bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex flex-col bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow">
                     <div class="flex items-center gap-3 mb-4">
-                        <div
-                            class="w-8 h-8 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-400 flex items-center justify-center">
+                        <div class="w-8 h-8 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-400 flex items-center justify-center">
                             <i class="pi pi-file-edit"></i>
                         </div>
                         <span class="font-bold text-lg">Test Content</span>
                     </div>
-                    <textarea pTextarea [ngModel]="testString()"
-                        (ngModelChange)="testString.set($event); onInputChange()" rows="12"
+                    <textarea
+                        pTextarea
+                        [ngModel]="testString()"
+                        (ngModelChange)="testString.set($event); onInputChange()"
+                        rows="12"
                         class="w-full font-mono text-base p-4 rounded-xl resize-y border-surface-200 dark:border-surface-700 focus:border-primary shadow-inner bg-surface-50 dark:bg-[#1e1e1e]"
-                        spellcheck="false" placeholder="Paste your unformatted text string here..."></textarea>
+                        spellcheck="false"
+                        placeholder="Paste your unformatted text string here..."
+                    ></textarea>
                 </div>
 
                 <!-- Live Highlight Preview -->
-                <div
-                    class="flex flex-col bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex flex-col bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow">
                     <div class="flex items-center gap-3 mb-4 text-primary">
                         <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shadow-inner">
                             <i class="pi pi-eye"></i>
                         </div>
                         <span class="font-bold text-lg">Live Highlight</span>
                     </div>
-                    <div class="flex-1 whitespace-pre-wrap break-all font-mono text-base text-surface-900 dark:text-surface-0 min-h-[300px] p-4 border border-surface-200 dark:border-surface-700 rounded-xl bg-surface-50 dark:bg-[#1e1e1e] overflow-auto shadow-inner leading-relaxed"
-                        [innerHTML]="highlightedHtml()"></div>
+                    <div
+                        class="flex-1 whitespace-pre-wrap break-all font-mono text-base text-surface-900 dark:text-surface-0 min-h-[300px] p-4 border border-surface-200 dark:border-surface-700 rounded-xl bg-surface-50 dark:bg-[#1e1e1e] overflow-auto shadow-inner leading-relaxed"
+                        [innerHTML]="highlightedHtml()"
+                    ></div>
                 </div>
             </div>
-
         </div>
 
         <!-- Right Side: Analytics & Extraction -->
         <div class="col-span-1 xl:col-span-4 flex flex-col gap-6">
-
-            <div
-                class="flex flex-col bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl shadow-sm hover:shadow-md transition-shadow h-[500px]">
+            <div class="flex flex-col bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl shadow-sm hover:shadow-md transition-shadow h-[500px]">
                 <div class="flex items-center justify-between p-5 border-b border-surface-100 dark:border-surface-800">
                     <div class="flex items-center gap-3">
-                        <div
-                            class="w-9 h-9 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 flex items-center justify-center">
+                        <div class="w-9 h-9 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 flex items-center justify-center">
                             <i class="pi pi-list"></i>
                         </div>
                         <span class="font-bold text-xl tracking-tight">Extracted Matches</span>
                     </div>
                     <div class="flex gap-2 items-center">
-                        <div
-                            class="px-3 py-1 bg-surface-100 dark:bg-surface-800 rounded-full font-black text-primary text-lg shadow-inner">
-                            {{matches().length}}</div>
-                        <p-button icon="pi pi-copy" [rounded]="true" [text]="true" severity="secondary"
-                            pTooltip="Copy All Extracted Matches" tooltipPosition="bottom" (click)="copyMatches()"
-                            [disabled]="matches().length === 0"></p-button>
+                        <div class="px-3 py-1 bg-surface-100 dark:bg-surface-800 rounded-full font-black text-primary text-lg shadow-inner">{{matches().length}}</div>
+                        <p-button icon="pi pi-copy" [rounded]="true" [text]="true" severity="secondary" pTooltip="Copy All Extracted Matches" tooltipPosition="bottom" (click)="copyMatches()" [disabled]="matches().length === 0"></p-button>
                     </div>
                 </div>
 
                 <div class="flex-1 overflow-auto p-2">
-                    <p-table [value]="matches()" [scrollable]="true" scrollHeight="flex"
-                        styleClass="p-datatable-sm w-full">
+                    <p-table [value]="matches()" [scrollable]="true" scrollHeight="flex" styleClass="p-datatable-sm w-full">
                         <ng-template pTemplate="header">
                             <tr>
                                 <th style="width: 15%" class="text-surface-500">#</th>
@@ -215,13 +183,10 @@
                         <ng-template pTemplate="body" let-m>
                             <tr class="hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors">
                                 <td class="font-bold text-surface-400">{{m.index}}</td>
-                                <td class="font-mono text-sm max-w-[150px] truncate py-3" pTooltip="{{m.match}}"
-                                    tooltipPosition="top">
-                                    <span
-                                        class="bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200 px-2 py-1 rounded shadow-sm border border-amber-200 dark:border-amber-800">{{m.match}}</span>
+                                <td class="font-mono text-sm max-w-[150px] truncate py-3" pTooltip="{{m.match}}" tooltipPosition="top">
+                                    <span class="bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200 px-2 py-1 rounded shadow-sm border border-amber-200 dark:border-amber-800">{{m.match}}</span>
                                 </td>
-                                <td class="text-xs font-mono text-surface-500 tracking-wider font-semibold">
-                                    {{m.start}}<span class="text-surface-300 mx-1">→</span>{{m.end}}</td>
+                                <td class="text-xs font-mono text-surface-500 tracking-wider font-semibold">{{m.start}}<span class="text-surface-300 mx-1">→</span>{{m.end}}</td>
                             </tr>
                         </ng-template>
                         <ng-template pTemplate="emptymessage">
@@ -229,8 +194,7 @@
                                 <td colspan="3" class="text-center p-12 text-surface-400 dark:text-surface-600">
                                     <div class="flex flex-col items-center gap-4">
                                         <i class="pi pi-inbox text-5xl opacity-50 drop-shadow-sm"></i>
-                                        <span class="text-lg">No matches extracted.<br>Adjust your expression or
-                                            text.</span>
+                                        <span class="text-lg">No matches extracted.<br />Adjust your expression or text.</span>
                                     </div>
                                 </td>
                             </tr>
@@ -240,11 +204,9 @@
             </div>
 
             <!-- Snippet Generator Card -->
-            <div
-                class="flex flex-col bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow mt-auto">
+            <div class="flex flex-col bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow mt-auto">
                 <div class="flex items-center gap-3 mb-4">
-                    <div
-                        class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 flex items-center justify-center">
+                    <div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 flex items-center justify-center">
                         <i class="pi pi-bolt"></i>
                     </div>
                     <div>
@@ -261,26 +223,33 @@
                     <p-tabpanels styleClass="p-0 pt-4">
                         <p-tabpanel value="0">
                             <div class="relative group">
-                                <pre
-                                    class="m-0 p-4 bg-[#1e1e1e] text-orange-100 rounded-xl overflow-x-auto text-sm font-mono border border-surface-700 shadow-inner max-h-[180px] custom-scrollbar">{{getJavaScriptSnippet()}}</pre>
-                                <p-button icon="pi pi-copy" [rounded]="true" [text]="true" severity="secondary"
+                                <pre class="m-0 p-4 bg-[#1e1e1e] text-orange-100 rounded-xl overflow-x-auto text-sm font-mono border border-surface-700 shadow-inner max-h-[180px] custom-scrollbar">{{getJavaScriptSnippet()}}</pre>
+                                <p-button
+                                    icon="pi pi-copy"
+                                    [rounded]="true"
+                                    [text]="true"
+                                    severity="secondary"
                                     class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-800/80 hover:bg-surface-700 text-surface-0 shadow-md backdrop-blur-sm"
-                                    (click)="copyCodeSnippet('js')"></p-button>
+                                    (click)="copyCodeSnippet('js')"
+                                ></p-button>
                             </div>
                         </p-tabpanel>
                         <p-tabpanel value="1">
                             <div class="relative group">
-                                <pre
-                                    class="m-0 p-4 bg-[#1e1e1e] text-blue-100 rounded-xl overflow-x-auto text-sm font-mono border border-surface-700 shadow-inner max-h-[180px] custom-scrollbar">{{getDotNetSnippet()}}</pre>
-                                <p-button icon="pi pi-copy" [rounded]="true" [text]="true" severity="secondary"
+                                <pre class="m-0 p-4 bg-[#1e1e1e] text-blue-100 rounded-xl overflow-x-auto text-sm font-mono border border-surface-700 shadow-inner max-h-[180px] custom-scrollbar">{{getDotNetSnippet()}}</pre>
+                                <p-button
+                                    icon="pi pi-copy"
+                                    [rounded]="true"
+                                    [text]="true"
+                                    severity="secondary"
                                     class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-800/80 hover:bg-surface-700 text-surface-0 shadow-md backdrop-blur-sm"
-                                    (click)="copyCodeSnippet('dotnet')"></p-button>
+                                    (click)="copyCodeSnippet('dotnet')"
+                                ></p-button>
                             </div>
                         </p-tabpanel>
                     </p-tabpanels>
                 </p-tabs>
             </div>
-
         </div>
     </div>
 </div>

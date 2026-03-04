@@ -16,19 +16,19 @@ import { DiffMinimap } from './components/diff-minimap/diff-minimap';
 // interfere with the host-component tests.
 
 @Component({ selector: 'p-code-input', standalone: true, template: '' })
-class CodeInputStub { }
+class CodeInputStub {}
 
 @Component({ selector: 'p-diff-toolbar', standalone: true, template: '' })
-class DiffToolbarStub { }
+class DiffToolbarStub {}
 
 @Component({ selector: 'p-diff-summary', standalone: true, template: '' })
-class DiffSummaryStub { }
+class DiffSummaryStub {}
 
 @Component({ selector: 'p-diff-viewer', standalone: true, template: '' })
-class DiffViewerStub { }
+class DiffViewerStub {}
 
 @Component({ selector: 'p-diff-minimap', standalone: true, template: '' })
-class DiffMinimapStub { }
+class DiffMinimapStub {}
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -59,14 +59,7 @@ describe('CodeCompare Component', () => {
                 // Also add NO_ERRORS_SCHEMA here — for standalone components, schemas
                 // must be declared on the component itself, not on the TestBed module.
                 set: {
-                    imports: [
-                        CommonModule,
-                        CodeInputStub,
-                        DiffToolbarStub,
-                        DiffSummaryStub,
-                        DiffViewerStub,
-                        DiffMinimapStub
-                    ],
+                    imports: [CommonModule, CodeInputStub, DiffToolbarStub, DiffSummaryStub, DiffViewerStub, DiffMinimapStub],
                     schemas: [NO_ERRORS_SCHEMA]
                 }
             })

@@ -23,7 +23,6 @@ if (!navigator.clipboard) {
     (navigator as any).clipboard = { writeText: () => Promise.resolve() };
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 function build() {
     const msgSvc = jasmine.createSpyObj<MessageService>('MessageService', ['add']);
@@ -301,23 +300,23 @@ describe('CodeFormatter', () => {
             component.outputCode.set('code');
             component.copyCode(false);
             // Wait 2 microtasks: clipboard writeText resolves, then .then() callback runs
-            Promise.resolve().then(() => Promise.resolve()).then(() => {
-                expect(mockMessageService.add).toHaveBeenCalledWith(
-                    jasmine.objectContaining({ severity: 'success', summary: 'Success' })
-                );
-                done();
-            });
+            Promise.resolve()
+                .then(() => Promise.resolve())
+                .then(() => {
+                    expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'success', summary: 'Success' }));
+                    done();
+                });
         });
         it('shows error toast when clipboard fails', (done) => {
             clipboardSpy.and.returnValue(Promise.reject('denied'));
             component.outputCode.set('code');
             component.copyCode(false);
-            Promise.resolve().then(() => Promise.resolve()).then(() => {
-                expect(mockMessageService.add).toHaveBeenCalledWith(
-                    jasmine.objectContaining({ severity: 'error', summary: 'Error' })
-                );
-                done();
-            });
+            Promise.resolve()
+                .then(() => Promise.resolve())
+                .then(() => {
+                    expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'error', summary: 'Error' }));
+                    done();
+                });
         });
     });
 
@@ -433,9 +432,7 @@ describe('CodeFormatter', () => {
             component.inputCode.set('const x=1');
             component.autoUpdate.set(false);
             component.formatCode().then(() => {
-                expect(mockMessageService.add).toHaveBeenCalledWith(
-                    jasmine.objectContaining({ severity: 'success', detail: 'Code formatted!' })
-                );
+                expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'success', detail: 'Code formatted!' }));
                 done();
             });
         });
@@ -458,10 +455,7 @@ describe('CodeFormatter', () => {
             component.useTabs.set(true);
             component.singleQuote.set(false);
             component.formatCode().then(() => {
-                expect(prettierSpy).toHaveBeenCalledWith(
-                    jasmine.any(String),
-                    jasmine.objectContaining({ tabWidth: 2, printWidth: 120, useTabs: true, singleQuote: false })
-                );
+                expect(prettierSpy).toHaveBeenCalledWith(jasmine.any(String), jasmine.objectContaining({ tabWidth: 2, printWidth: 120, useTabs: true, singleQuote: false }));
                 done();
             });
         });
@@ -499,9 +493,7 @@ describe('CodeFormatter', () => {
             component.inputCode.set('invalid!!!');
             component.autoUpdate.set(false);
             component.formatCode().then(() => {
-                expect(mockMessageService.add).toHaveBeenCalledWith(
-                    jasmine.objectContaining({ severity: 'error', summary: 'Formatting Error' })
-                );
+                expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'error', summary: 'Formatting Error' }));
                 done();
             });
         });
@@ -522,9 +514,7 @@ describe('CodeFormatter', () => {
             component.inputCode.set('some code');
             component.autoUpdate.set(false);
             component.formatCode().then(() => {
-                expect(mockMessageService.add).toHaveBeenCalledWith(
-                    jasmine.objectContaining({ severity: 'error', summary: 'Formatting Error' })
-                );
+                expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'error', summary: 'Formatting Error' }));
                 done();
             });
         });
@@ -607,9 +597,7 @@ describe('CodeFormatter', () => {
             component.outputCode.set('content');
             component.selectedLanguage.set('html');
             component.downloadCode(false);
-            expect(mockMessageService.add).toHaveBeenCalledWith(
-                jasmine.objectContaining({ severity: 'success', detail: 'File downloaded successfully!' })
-            );
+            expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'success', detail: 'File downloaded successfully!' }));
         });
         it('uses raw-code prefix when isInput=true', () => {
             component.inputCode.set('raw code');
@@ -625,8 +613,13 @@ describe('CodeFormatter', () => {
         });
 
         const extCases: [string, string][] = [
-            ['typescript', '.ts'], ['json', '.json'], ['html', '.html'],
-            ['css', '.css'], ['markdown', '.md'], ['xml', '.xml'], ['sql', '.sql']
+            ['typescript', '.ts'],
+            ['json', '.json'],
+            ['html', '.html'],
+            ['css', '.css'],
+            ['markdown', '.md'],
+            ['xml', '.xml'],
+            ['sql', '.sql']
         ];
         for (const [lang, ext] of extCases) {
             it(`uses '${ext}' for '${lang}'`, () => {
@@ -666,9 +659,7 @@ describe('CodeFormatter', () => {
         });
         it('shows info toast', () => {
             component.loadSample();
-            expect(mockMessageService.add).toHaveBeenCalledWith(
-                jasmine.objectContaining({ severity: 'info', summary: 'Sample Loaded' })
-            );
+            expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'info', summary: 'Sample Loaded' }));
         });
         it('calls formatCode() when autoUpdate=true', () => {
             component.autoUpdate.set(true);

@@ -27,7 +27,7 @@ export class EncodeDecode {
         { label: 'HTML', value: 'HTML' }
     ];
 
-    constructor(private messageService: MessageService) { }
+    constructor(private messageService: MessageService) {}
 
     encode() {
         const input = this.inputString();

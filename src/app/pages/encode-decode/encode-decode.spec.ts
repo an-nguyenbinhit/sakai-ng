@@ -60,13 +60,13 @@ describe('EncodeDecode', () => {
         it('should default to Base64 operation', () => expect(component.operation()).toBe('Base64'));
         it('should expose 3 operations', () => expect(component.operations.length).toBe(3));
         it('should expose Base64 operation', () => {
-            expect(component.operations.find(op => op.value === 'Base64')).toBeTruthy();
+            expect(component.operations.find((op) => op.value === 'Base64')).toBeTruthy();
         });
         it('should expose URL operation', () => {
-            expect(component.operations.find(op => op.value === 'URL')).toBeTruthy();
+            expect(component.operations.find((op) => op.value === 'URL')).toBeTruthy();
         });
         it('should expose HTML operation', () => {
-            expect(component.operations.find(op => op.value === 'HTML')).toBeTruthy();
+            expect(component.operations.find((op) => op.value === 'HTML')).toBeTruthy();
         });
     });
 
@@ -87,7 +87,9 @@ describe('EncodeDecode', () => {
     // 3. encode() — Base64
     // ─────────────────────────────────────────────────────────────────────────
     describe('encode() — Base64', () => {
-        beforeEach(() => { component.operation.set('Base64'); });
+        beforeEach(() => {
+            component.operation.set('Base64');
+        });
 
         it('encodes simple ASCII string', () => {
             component.inputString.set('Hello');
@@ -118,7 +120,9 @@ describe('EncodeDecode', () => {
     // 4. encode() — URL
     // ─────────────────────────────────────────────────────────────────────────
     describe('encode() — URL', () => {
-        beforeEach(() => { component.operation.set('URL'); });
+        beforeEach(() => {
+            component.operation.set('URL');
+        });
 
         it('encodes spaces as %20', () => {
             component.inputString.set('hello world');
@@ -143,7 +147,9 @@ describe('EncodeDecode', () => {
     // 5. encode() — HTML
     // ─────────────────────────────────────────────────────────────────────────
     describe('encode() — HTML', () => {
-        beforeEach(() => { component.operation.set('HTML'); });
+        beforeEach(() => {
+            component.operation.set('HTML');
+        });
 
         it('encodes <, >, & and " to HTML entities', () => {
             component.inputString.set('<div>&"test"</div>');
@@ -187,7 +193,9 @@ describe('EncodeDecode', () => {
     // 7. decode() — Base64
     // ─────────────────────────────────────────────────────────────────────────
     describe('decode() — Base64', () => {
-        beforeEach(() => { component.operation.set('Base64'); });
+        beforeEach(() => {
+            component.operation.set('Base64');
+        });
 
         it('round-trips ASCII encode → decode', () => {
             component.inputString.set('Hello World');
@@ -210,9 +218,7 @@ describe('EncodeDecode', () => {
         it('shows error toast for invalid Base64', () => {
             component.inputString.set('!!!not-base64!!!');
             component.decode();
-            expect(mockMessageService.add).toHaveBeenCalledWith(
-                jasmine.objectContaining({ severity: 'error', summary: 'Decoding Error' })
-            );
+            expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'error', summary: 'Decoding Error' }));
         });
     });
 
@@ -220,7 +226,9 @@ describe('EncodeDecode', () => {
     // 8. decode() — URL
     // ─────────────────────────────────────────────────────────────────────────
     describe('decode() — URL', () => {
-        beforeEach(() => { component.operation.set('URL'); });
+        beforeEach(() => {
+            component.operation.set('URL');
+        });
 
         it('decodes %20 back to space', () => {
             component.inputString.set('hello%20world');
@@ -240,9 +248,7 @@ describe('EncodeDecode', () => {
         it('shows error toast for invalid URL encoding', () => {
             component.inputString.set('%GG'); // invalid percent sequence
             component.decode();
-            expect(mockMessageService.add).toHaveBeenCalledWith(
-                jasmine.objectContaining({ severity: 'error', summary: 'Decoding Error' })
-            );
+            expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'error', summary: 'Decoding Error' }));
         });
     });
 
@@ -250,7 +256,9 @@ describe('EncodeDecode', () => {
     // 9. decode() — HTML (uses document.createElement('textarea'))
     // ─────────────────────────────────────────────────────────────────────────
     describe('decode() — HTML', () => {
-        beforeEach(() => { component.operation.set('HTML'); });
+        beforeEach(() => {
+            component.operation.set('HTML');
+        });
 
         it('delegates to decodeHTML()', () => {
             spyOn(component, 'decodeHTML').and.returnValue('decoded text');
@@ -287,7 +295,7 @@ describe('EncodeDecode', () => {
         it('converts " to &#34;', () => {
             expect(component.encodeHTML('"')).toBe('&#34;');
         });
-        it('converts \' to &#39;', () => {
+        it("converts ' to &#39;", () => {
             expect(component.encodeHTML("'")).toBe('&#39;');
         });
         it('leaves plain alphanumeric unchanged', () => {
@@ -357,9 +365,7 @@ describe('EncodeDecode', () => {
             Promise.resolve()
                 .then(() => Promise.resolve())
                 .then(() => {
-                    expect(mockMessageService.add).toHaveBeenCalledWith(
-                        jasmine.objectContaining({ severity: 'success', summary: 'Copied' })
-                    );
+                    expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'success', summary: 'Copied' }));
                     done();
                 });
         });
@@ -370,9 +376,7 @@ describe('EncodeDecode', () => {
             Promise.resolve()
                 .then(() => Promise.resolve())
                 .then(() => {
-                    expect(mockMessageService.add).toHaveBeenCalledWith(
-                        jasmine.objectContaining({ detail: 'Result copied to clipboard' })
-                    );
+                    expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ detail: 'Result copied to clipboard' }));
                     done();
                 });
         });
@@ -387,9 +391,7 @@ describe('EncodeDecode', () => {
             component.inputString.set('test');
             spyOn(component, 'encodeHTML').and.throwError('Unexpected error');
             component.encode();
-            expect(mockMessageService.add).toHaveBeenCalledWith(
-                jasmine.objectContaining({ severity: 'error', summary: 'Encoding Error' })
-            );
+            expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'error', summary: 'Encoding Error' }));
         });
     });
 

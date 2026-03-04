@@ -255,23 +255,23 @@ describe('JsonTools', () => {
         it('shows success toast after copy', (done) => {
             component.outputCode.set('{"data":1}');
             component.copyCode(false);
-            Promise.resolve().then(() => Promise.resolve()).then(() => {
-                expect(mockMessageService.add).toHaveBeenCalledWith(
-                    jasmine.objectContaining({ severity: 'success', summary: 'Success' })
-                );
-                done();
-            });
+            Promise.resolve()
+                .then(() => Promise.resolve())
+                .then(() => {
+                    expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'success', summary: 'Success' }));
+                    done();
+                });
         });
         it('shows error toast when clipboard fails', (done) => {
             clipboardSpy.and.returnValue(Promise.reject('denied'));
             component.outputCode.set('{"x":1}');
             component.copyCode(false);
-            Promise.resolve().then(() => Promise.resolve()).then(() => {
-                expect(mockMessageService.add).toHaveBeenCalledWith(
-                    jasmine.objectContaining({ severity: 'error', summary: 'Error' })
-                );
-                done();
-            });
+            Promise.resolve()
+                .then(() => Promise.resolve())
+                .then(() => {
+                    expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'error', summary: 'Error' }));
+                    done();
+                });
         });
     });
 
@@ -296,9 +296,7 @@ describe('JsonTools', () => {
             component.inputCode.set('[1,2,3]');
             component.autoUpdate.set(false);
             component.validateJson();
-            expect(mockMessageService.add).toHaveBeenCalledWith(
-                jasmine.objectContaining({ severity: 'success', summary: 'Valid JSON' })
-            );
+            expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'success', summary: 'Valid JSON' }));
         });
         it('returns false for invalid JSON', () => {
             component.inputCode.set('{bad json}');
@@ -308,9 +306,7 @@ describe('JsonTools', () => {
             component.inputCode.set('{bad json}');
             component.autoUpdate.set(false);
             component.validateJson();
-            expect(mockMessageService.add).toHaveBeenCalledWith(
-                jasmine.objectContaining({ severity: 'error', summary: 'Invalid JSON' })
-            );
+            expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'error', summary: 'Invalid JSON' }));
         });
         it('does NOT show toast when autoUpdate=true (valid or invalid)', () => {
             component.inputCode.set('{bad}');
@@ -399,9 +395,7 @@ describe('JsonTools', () => {
             component.inputCode.set('{"a":1}');
             component.autoUpdate.set(false);
             component.formatJson().then(() => {
-                expect(mockMessageService.add).toHaveBeenCalledWith(
-                    jasmine.objectContaining({ severity: 'success', detail: 'JSON formatted!' })
-                );
+                expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'success', detail: 'JSON formatted!' }));
                 done();
             });
         });
@@ -425,9 +419,7 @@ describe('JsonTools', () => {
             component.inputCode.set('{bad json}');
             component.autoUpdate.set(false);
             component.formatJson().then(() => {
-                expect(mockMessageService.add).toHaveBeenCalledWith(
-                    jasmine.objectContaining({ severity: 'error', summary: 'Formatting Error' })
-                );
+                expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'error', summary: 'Formatting Error' }));
                 done();
             });
         });
@@ -468,9 +460,7 @@ describe('JsonTools', () => {
             component.inputCode.set('{"a":1}');
             component.autoUpdate.set(false);
             component.minifyJson();
-            expect(mockMessageService.add).toHaveBeenCalledWith(
-                jasmine.objectContaining({ severity: 'success', detail: 'JSON minified!' })
-            );
+            expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'success', detail: 'JSON minified!' }));
         });
         it('does NOT show toast when autoUpdate=true', () => {
             component.inputCode.set('{"a":1}');
@@ -482,9 +472,7 @@ describe('JsonTools', () => {
             component.inputCode.set('{bad json}');
             component.autoUpdate.set(false);
             component.minifyJson();
-            expect(mockMessageService.add).toHaveBeenCalledWith(
-                jasmine.objectContaining({ severity: 'error', summary: 'Minification Error' })
-            );
+            expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'error', summary: 'Minification Error' }));
         });
     });
 
@@ -517,9 +505,7 @@ describe('JsonTools', () => {
             component.transformFn.set('return data');
             component.autoUpdate.set(false);
             component.transformJson();
-            expect(mockMessageService.add).toHaveBeenCalledWith(
-                jasmine.objectContaining({ severity: 'success', detail: 'JSON transformed!' })
-            );
+            expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'success', detail: 'JSON transformed!' }));
         });
         it('closes the transform drawer after success', () => {
             component.inputCode.set('{"a":1}');
@@ -532,18 +518,14 @@ describe('JsonTools', () => {
             component.inputCode.set('{bad json}');
             component.autoUpdate.set(false);
             component.transformJson();
-            expect(mockMessageService.add).toHaveBeenCalledWith(
-                jasmine.objectContaining({ severity: 'error', summary: 'Transform Error' })
-            );
+            expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'error', summary: 'Transform Error' }));
         });
         it('shows error toast for invalid transform function', () => {
             component.inputCode.set('{"a":1}');
             component.transformFn.set('this is not valid JS');
             component.autoUpdate.set(false);
             component.transformJson();
-            expect(mockMessageService.add).toHaveBeenCalledWith(
-                jasmine.objectContaining({ severity: 'error', summary: 'Transform Error' })
-            );
+            expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'error', summary: 'Transform Error' }));
         });
     });
 
@@ -570,9 +552,7 @@ describe('JsonTools', () => {
         });
         it('shows info toast', () => {
             component.loadSample();
-            expect(mockMessageService.add).toHaveBeenCalledWith(
-                jasmine.objectContaining({ severity: 'info', summary: 'Sample Loaded' })
-            );
+            expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'info', summary: 'Sample Loaded' }));
         });
         it('calls formatJson() when autoUpdate=true', () => {
             component.autoUpdate.set(true);
@@ -706,9 +686,7 @@ describe('JsonTools', () => {
         it('shows success toast after download', () => {
             component.outputCode.set('{"a":1}');
             component.downloadCode(false);
-            expect(mockMessageService.add).toHaveBeenCalledWith(
-                jasmine.objectContaining({ severity: 'success', detail: 'File downloaded successfully!' })
-            );
+            expect(mockMessageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'success', detail: 'File downloaded successfully!' }));
         });
 
         it('uses "raw-json" prefix when isInput=true', () => {
