@@ -1,4 +1,0 @@
-﻿src/app/pages/code-formatter/code-formatter.ts(210,24): error TS1127: Invalid character.
-src/app/pages/code-formatter/code-formatter.ts(210,25): error TS1134: Variable declaration expected.
-src/app/pages/code-formatter/code-formatter.ts(296,53): error TS1005: ';' expected.
-src/app/pages/code-formatter/code-formatter.ts(435,1): error TS1160: Unterminated template literal.
