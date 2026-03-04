@@ -6,6 +6,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { MessageModule } from 'primeng/message';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
+import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { CodeCompareState } from '../../services/code-compare-state.service';
 import { SyntaxHighlight } from '../../services/syntax-highlight.service';
 import { FileContent } from '../../models/diff.models';
@@ -56,7 +57,7 @@ const SUPPORTED_EXTENSIONS = [
 @Component({
     selector: 'p-code-input',
     standalone: true,
-    imports: [CommonModule, FormsModule, ButtonModule, TextareaModule, MessageModule, TagModule, TooltipModule],
+    imports: [CommonModule, FormsModule, ButtonModule, MessageModule, TagModule, TooltipModule, MonacoEditorModule],
     templateUrl: './code-input.html',
     styleUrl: './code-input.scss'
 })
@@ -80,8 +81,22 @@ export class CodeInput {
         return t ? t.split('\n').length : 0;
     });
 
-    readonly supportedExtensions = SUPPORTED_EXTENSIONS.join(',');
+    editorOptions = computed(() => {
+        return {
+            theme: document.documentElement.classList.contains('dark') ? 'vs-dark' : 'vs',
+            language: this.mapLanguageToMonaco(this.detectedLanguage()),
+            minimap: { enabled: false },
+            fontSize: 14,
+            readOnly: false,
+            wordWrap: 'off',
+            automaticLayout: true,
+            scrollBeyondLastLine: false,
+            lineNumbersMinChars: 4,
+            padding: { top: 16, bottom: 16 }
+        };
+    });
 
+    readonly supportedExtensions = SUPPORTED_EXTENSIONS.join(',');
     private debounceTimer: ReturnType<typeof setTimeout> | null = null;
     private skipNextSync = false;
 
@@ -114,6 +129,10 @@ export class CodeInput {
         });
     }
 
+    onModelChange(text: string): void {
+        this.text.set(text);
+    }
+
     private syncToState(text: string): void {
         if (!text.trim()) {
             this.state.clearFile(this.side());
@@ -126,6 +145,27 @@ export class CodeInput {
             language: this.detectedLanguage(),
             size: text.length
         });
+    }
+
+    private mapLanguageToMonaco(lang: string): string {
+        const map: Record<string, string> = {
+            js: 'javascript',
+            ts: 'typescript',
+            jsx: 'javascript',
+            tsx: 'typescript',
+            py: 'python',
+            rb: 'ruby',
+            cs: 'csharp',
+            cpp: 'cpp',
+            c: 'c',
+            h: 'cpp',
+            yml: 'yaml',
+            sh: 'shell',
+            bat: 'bat',
+            md: 'markdown',
+            dockerfile: 'dockerfile'
+        };
+        return map[lang] || lang || 'plaintext';
     }
 
     clear(): void {

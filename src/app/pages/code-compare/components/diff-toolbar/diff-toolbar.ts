@@ -10,6 +10,7 @@ import { DividerModule } from 'primeng/divider';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { ToastModule } from 'primeng/toast';
+import { PopoverModule } from 'primeng/popover';
 import { MessageService } from 'primeng/api';
 import { CodeCompareState } from '../../services/code-compare-state.service';
 import { ExportService } from '../../services/export.service';
@@ -19,7 +20,7 @@ import { ViewMode } from '../../models/diff.models';
 @Component({
     selector: 'p-diff-toolbar',
     standalone: true,
-    imports: [CommonModule, FormsModule, ButtonModule, SelectButtonModule, CheckboxModule, InputTextModule, TooltipModule, DividerModule, IconFieldModule, InputIconModule, ToastModule],
+    imports: [CommonModule, FormsModule, ButtonModule, SelectButtonModule, CheckboxModule, InputTextModule, TooltipModule, DividerModule, IconFieldModule, InputIconModule, ToastModule, PopoverModule],
     providers: [MessageService],
     templateUrl: './diff-toolbar.html',
     styleUrl: './diff-toolbar.scss'
