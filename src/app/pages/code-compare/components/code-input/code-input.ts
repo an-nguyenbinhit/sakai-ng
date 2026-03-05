@@ -10,6 +10,7 @@ import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { CodeCompareState } from '../../services/code-compare-state.service';
 import { SyntaxHighlight } from '../../services/syntax-highlight.service';
 import { FileContent } from '../../models/diff.models';
+import { LayoutService } from '@/app/layout/service/layout.service';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -66,6 +67,7 @@ export class CodeInput {
 
     state = inject(CodeCompareState);
     syntaxHighlight = inject(SyntaxHighlight);
+    layoutService = inject(LayoutService);
 
     fileInputRef = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
@@ -83,7 +85,7 @@ export class CodeInput {
 
     editorOptions = computed(() => {
         return {
-            theme: document.documentElement.classList.contains('dark') ? 'vs-dark' : 'vs',
+            theme: this.layoutService.isDarkTheme() ? 'vs-dark' : 'vs',
             language: this.mapLanguageToMonaco(this.detectedLanguage()),
             minimap: { enabled: false },
             fontSize: 14,

@@ -104,7 +104,7 @@
         background: linear-gradient(to top, var(--p-surface-50), transparent);
         pointer-events: none;
 
-        :global(.app-dark) & {
+        :host-context(.app-dark) & {
             background: linear-gradient(to top, var(--p-surface-950), transparent);
         }
     }
@@ -155,7 +155,7 @@
         border: 1.5px solid var(--p-surface-200);
         color: var(--p-surface-700);
 
-        :global(.app-dark) & {
+        :host-context(.app-dark) & {
             background: var(--p-surface-800);
             border-color: var(--p-surface-700);
             color: var(--p-surface-100);
@@ -189,7 +189,7 @@
         font-size: 0.65rem;
         transition: all 0.15s;
 
-        :global(.app-dark) & {
+        :host-context(.app-dark) & {
             background: var(--p-surface-600);
             color: var(--p-surface-300);
         }
@@ -216,7 +216,7 @@
     overflow: hidden;
     animation: cardEntrance 0.4s ease both;
 
-    :global(.app-dark) & {
+    :host-context(.app-dark) & {
         background: var(--p-surface-900);
         border-color: var(--p-surface-700);
     }
@@ -293,7 +293,7 @@
     color: var(--p-surface-600);
     border: 1px solid var(--p-surface-200);
 
-    :global(.app-dark) & {
+    :host-context(.app-dark) & {
         background: var(--p-surface-800);
         color: var(--p-surface-300);
         border-color: var(--p-surface-700);

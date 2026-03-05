@@ -1,6 +1,7 @@
 import { Component, inject, effect, viewChild, ElementRef, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CodeCompareState } from '../../services/code-compare-state.service';
+import { LayoutService } from '@/app/layout/service/layout.service';
 import { DiffLineType, SideBySideRow } from '../../models/diff.models';
 
 const COLOR_MAP: Record<DiffLineType, string> = {
@@ -28,6 +29,7 @@ const DARK_COLOR_MAP: Record<DiffLineType, string> = {
 })
 export class DiffMinimap {
     private state = inject(CodeCompareState);
+    layoutService = inject(LayoutService);
 
     minimapCanvas = viewChild<ElementRef<HTMLCanvasElement>>('minimapCanvas');
 
@@ -41,14 +43,12 @@ export class DiffMinimap {
         return Math.min(1, visibleLines / totalLines);
     });
 
-    private isDark = false;
-
     constructor() {
-        this.isDark = document.documentElement.classList.contains('app-dark');
-
         effect(() => {
             const result = this.state.diffResult();
             const _mode = this.state.viewMode(); // redraw when view mode changes
+            const _isDark = this.layoutService.isDarkTheme(); // redraw when theme changes
+
             if (result) {
                 setTimeout(() => this.drawMinimap(), 0);
             }
@@ -76,7 +76,7 @@ export class DiffMinimap {
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const colorMap = this.isDark ? DARK_COLOR_MAP : COLOR_MAP;
+        const colorMap = this.layoutService.isDarkTheme() ? DARK_COLOR_MAP : COLOR_MAP;
         const lineH = canvas.height / lineTypes.length;
 
         lineTypes.forEach((type, i) => {
