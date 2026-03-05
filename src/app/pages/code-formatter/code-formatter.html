@@ -1,5 +1,8 @@
-<div class="flex flex-col xl:flex-row gap-6 relative h-[calc(100vh-8rem)] min-h-[600px] w-full animate-fadein" (drop)="onFileDrop($event)" (dragover)="onDragOver($event)" (dragenter)="onDragEnter($event)" (dragleave)="onDragLeave($event)">
-    <div *ngIf="isDragging()" class="absolute inset-0 bg-primary/10 dark:bg-primary/20 border-4 border-primary border-dashed rounded-3xl flex items-center justify-center z-50 pointer-events-none transition-all backdrop-blur-sm">
+<div class="flex flex-col xl:flex-row gap-4 xl:gap-6 relative w-full animate-fadein"
+    style="height: calc(100vh - 8rem); min-height: 0;" (drop)="onFileDrop($event)" (dragover)="onDragOver($event)"
+    (dragenter)="onDragEnter($event)" (dragleave)="onDragLeave($event)">
+    <div *ngIf="isDragging()"
+        class="absolute inset-0 bg-primary/10 dark:bg-primary/20 border-4 border-primary border-dashed rounded-3xl flex items-center justify-center z-50 pointer-events-none transition-all backdrop-blur-sm">
         <div class="flex flex-col items-center gap-4 text-primary">
             <i class="pi pi-cloud-upload text-6xl"></i>
             <span class="text-3xl font-black tracking-tight">Drop file to load</span>
@@ -9,172 +12,288 @@
     <p-toast></p-toast>
 
     <!-- Left Pane: Input -->
-    <div class="flex-1 flex flex-col min-w-0 border border-surface-200 dark:border-surface-700 rounded-3xl overflow-hidden bg-surface-0 dark:bg-surface-900 shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between px-6 py-4 bg-surface-50 dark:bg-surface-800/80 border-b border-surface-200 dark:border-surface-700">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                    <i class="pi pi-file-edit"></i>
+    <div
+        class="flex flex-col min-w-0 border border-surface-200 dark:border-surface-700 rounded-3xl overflow-hidden bg-surface-0 dark:bg-surface-900 shadow-sm hover:shadow-md transition-shadow editor-pane">
+        <!-- Header -->
+        <div
+            class="flex items-center justify-between px-4 xl:px-6 py-3 xl:py-4 bg-surface-50 dark:bg-surface-800/80 border-b border-surface-200 dark:border-surface-700 flex-shrink-0 min-w-0">
+            <div class="flex items-center gap-2 xl:gap-3 flex-shrink-0">
+                <div
+                    class="w-7 h-7 xl:w-8 xl:h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
+                    <i class="pi pi-file-edit text-sm"></i>
                 </div>
-                <span class="font-bold text-lg text-surface-900 dark:text-surface-100 tracking-tight">Raw Source</span>
+                <span class="font-bold text-base xl:text-lg text-surface-900 dark:text-surface-100 tracking-tight">Raw
+                    Source</span>
             </div>
-            <div class="flex items-center gap-1">
-                <p-button icon="pi pi-history" [rounded]="true" [text]="true" severity="secondary" pTooltip="Undo" tooltipPosition="bottom" (click)="undoInput()"></p-button>
-                <div class="w-px h-6 bg-surface-300 dark:bg-surface-600 mx-2"></div>
-                <p-button icon="pi pi-folder-open" [rounded]="true" [text]="true" severity="secondary" pTooltip="Load File" tooltipPosition="bottom" (click)="fileInput.click()"></p-button>
+            <div class="flex items-center gap-0.5 xl:gap-1 flex-shrink-0">
+                <p-button icon="pi pi-history" [rounded]="true" [text]="true" severity="secondary" pTooltip="Undo"
+                    tooltipPosition="bottom" (click)="undoInput()"></p-button>
+                <div class="w-px h-5 bg-surface-300 dark:bg-surface-600 mx-1 xl:mx-2"></div>
+                <p-button icon="pi pi-folder-open" [rounded]="true" [text]="true" severity="secondary"
+                    pTooltip="Load File" tooltipPosition="bottom" (click)="fileInput.click()"></p-button>
                 <input type="file" #fileInput class="hidden" (change)="onFileSelected($event)" />
-                <p-button icon="pi pi-save" [rounded]="true" [text]="true" severity="secondary" pTooltip="Save File" tooltipPosition="bottom" (click)="downloadCode(true)"></p-button>
-                <div class="w-px h-6 bg-surface-300 dark:bg-surface-600 mx-2"></div>
-                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" pTooltip="Clear" tooltipPosition="bottom" (click)="clearInput()"></p-button>
-                <p-button icon="pi pi-copy" [rounded]="true" [text]="true" severity="secondary" pTooltip="Copy" tooltipPosition="bottom" (click)="copyCode(true)"></p-button>
-                <p-button icon="pi pi-window-maximize" [rounded]="true" [text]="true" severity="secondary" pTooltip="Fullscreen" tooltipPosition="bottom" (click)="toggleFullscreen(inputContainer)"></p-button>
+                <p-button icon="pi pi-save" [rounded]="true" [text]="true" severity="secondary" pTooltip="Save File"
+                    tooltipPosition="bottom" (click)="downloadCode(true)"></p-button>
+                <div class="w-px h-5 bg-surface-300 dark:bg-surface-600 mx-1 xl:mx-2"></div>
+                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" pTooltip="Clear"
+                    tooltipPosition="bottom" (click)="clearInput()"></p-button>
+                <p-button icon="pi pi-copy" [rounded]="true" [text]="true" severity="secondary" pTooltip="Copy"
+                    tooltipPosition="bottom" (click)="copyCode(true)"></p-button>
+                <p-button icon="pi pi-window-maximize" [rounded]="true" [text]="true" severity="secondary"
+                    pTooltip="Fullscreen" tooltipPosition="bottom"
+                    (click)="toggleFullscreen(inputContainer)"></p-button>
             </div>
         </div>
-        <div #inputContainer class="flex-1 relative bg-surface-0 dark:bg-[#1e1e1e]">
-            <ngx-monaco-editor class="absolute inset-0 w-full h-full" [options]="inputEditorOptions()" [ngModel]="inputCode()" (ngModelChange)="onInputChange($event)" (onInit)="onInputEditorInit($event)"></ngx-monaco-editor>
+        <!-- Editor -->
+        <div #inputContainer class="relative bg-surface-0 dark:bg-[#1e1e1e] editor-body">
+            <ngx-monaco-editor class="absolute inset-0 w-full h-full" [options]="inputEditorOptions()"
+                [ngModel]="inputCode()" (ngModelChange)="onInputChange($event)"
+                (onInit)="onInputEditorInit($event)"></ngx-monaco-editor>
         </div>
-        <div class="flex items-center justify-between px-5 py-3 bg-surface-50 dark:bg-surface-800/80 border-t border-surface-200 dark:border-surface-700 text-xs text-surface-500 font-medium">
-            <div class="font-mono bg-surface-200 dark:bg-surface-700 px-2 py-1 rounded">Ln: {{inputCursor().line}} Col: {{inputCursor().col}}</div>
-            <div class="flex items-center gap-5">
-                <div class="font-mono">Size: <span class="font-bold text-surface-700 dark:text-surface-300">{{inputSize()}} B</span></div>
+        <!-- Footer -->
+        <div
+            class="flex items-center justify-between px-4 xl:px-5 py-2 xl:py-3 bg-surface-50 dark:bg-surface-800/80 border-t border-surface-200 dark:border-surface-700 text-xs text-surface-500 font-medium flex-shrink-0">
+            <div class="font-mono bg-surface-200 dark:bg-surface-700 px-2 py-1 rounded">Ln: {{inputCursor().line}} Col:
+                {{inputCursor().col}}</div>
+            <div class="flex items-center gap-3 xl:gap-5">
+                <div class="font-mono hidden sm:block">Size: <span
+                        class="font-bold text-surface-700 dark:text-surface-300">{{inputSize()}} B</span></div>
                 <div class="flex gap-1 bg-surface-200 dark:bg-surface-700 p-1 rounded-lg">
-                    <button class="w-6 h-6 flex items-center justify-center hover:text-primary transition-colors hover:bg-surface-0 dark:hover:bg-surface-600 rounded" (click)="increaseFontSize()"><i class="pi pi-plus text-[10px]"></i></button>
-                    <button class="w-6 h-6 flex items-center justify-center hover:text-primary transition-colors hover:bg-surface-0 dark:hover:bg-surface-600 rounded" (click)="decreaseFontSize()"><i class="pi pi-minus text-[10px]"></i></button>
+                    <button
+                        class="w-6 h-6 flex items-center justify-center hover:text-primary transition-colors hover:bg-surface-0 dark:hover:bg-surface-600 rounded"
+                        (click)="increaseFontSize()"><i class="pi pi-plus text-[10px]"></i></button>
+                    <button
+                        class="w-6 h-6 flex items-center justify-center hover:text-primary transition-colors hover:bg-surface-0 dark:hover:bg-surface-600 rounded"
+                        (click)="decreaseFontSize()"><i class="pi pi-minus text-[10px]"></i></button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Middle Pane: Controls -->
-    <div class="xl:w-72 flex flex-col gap-5 shrink-0 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow items-center self-start xl:self-center">
-        <div class="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-2">
-            <i class="pi pi-sparkles text-3xl"></i>
-        </div>
-        <h3 class="font-bold text-xl text-surface-900 dark:text-surface-0 text-center m-0 mb-2 tracking-tight">Configuration</h3>
+    <div
+        class="xl:w-72 flex-shrink-0 bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl shadow-sm hover:shadow-md transition-shadow control-pane">
+        <!-- Mobile/Tablet: horizontal compact layout -->
+        <!-- Desktop xl: vertical layout -->
+        <div class="flex xl:flex-col gap-3 xl:gap-5 p-4 xl:p-6 items-center xl:items-center">
 
-        <div class="w-full flex justify-center">
-            <p-select [options]="languages" [ngModel]="selectedLanguage()" (ngModelChange)="selectedLanguage.set($event); onLanguageChange()" optionLabel="name" optionValue="code" placeholder="Select Data Type" styleClass="w-full rounded-xl">
-                <ng-template pTemplate="selectedItem" let-selectedOption>
-                    <div class="flex items-center gap-3 font-semibold">
-                        <i class="pi pi-file-code text-primary"></i>
-                        <span>{{selectedOption.name}}</span>
-                    </div>
-                </ng-template>
-            </p-select>
-        </div>
-
-        <div class="flex items-center gap-3 w-full justify-between mt-2 p-3 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
-            <div class="flex flex-col">
-                <label for="autoUpdateSwitch" class="text-sm font-bold text-surface-900 dark:text-surface-100 cursor-pointer">Live Format</label>
-                <span class="text-xs text-surface-500">Format while typing</span>
+            <!-- Icon + title: hidden on mobile, shown on xl -->
+            <div class="hidden xl:flex flex-col items-center gap-0">
+                <div class="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-2">
+                    <i class="pi pi-sparkles text-3xl"></i>
+                </div>
+                <h3 class="font-bold text-xl text-surface-900 dark:text-surface-0 text-center m-0 mb-2 tracking-tight">
+                    Configuration</h3>
             </div>
-            <p-toggleswitch inputId="autoUpdateSwitch" [ngModel]="autoUpdate()" (ngModelChange)="autoUpdate.set($event); onAutoUpdateChange()"></p-toggleswitch>
-        </div>
 
-        <div class="flex items-center gap-3 w-full p-3 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 cursor-pointer hover:border-primary transition-colors">
-            <p-checkbox [ngModel]="formatCssJs()" (ngModelChange)="formatCssJs.set($event)" binary="true" inputId="formatCssJs"></p-checkbox>
-            <label for="formatCssJs" class="text-sm font-bold text-surface-900 dark:text-surface-100 cursor-pointer flex-1">Format CSS & JS</label>
-        </div>
+            <!-- Language select -->
+            <div class="flex-1 xl:w-full xl:flex-none">
+                <p-select [options]="languages" [ngModel]="selectedLanguage()"
+                    (ngModelChange)="selectedLanguage.set($event); onLanguageChange()" optionLabel="name"
+                    optionValue="code" placeholder="Select Language" styleClass="w-full rounded-xl">
+                    <ng-template pTemplate="selectedItem" let-selectedOption>
+                        <div class="flex items-center gap-2 font-semibold">
+                            <i class="pi pi-file-code text-primary"></i>
+                            <span class="hidden sm:inline">{{selectedOption.name}}</span>
+                            <span class="sm:hidden">{{selectedOption.code | uppercase}}</span>
+                        </div>
+                    </ng-template>
+                </p-select>
+            </div>
 
-        <p-button [label]="'Format ' + getLanguageLabel()" icon="pi pi-caret-right" styleClass="w-full py-3 font-bold mt-4 shadow-sm rounded-xl" (click)="formatCode()"></p-button>
+            <!-- Live Format toggle -->
+            <div
+                class="flex items-center gap-2 xl:gap-3 xl:w-full xl:justify-between p-2 xl:p-3 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 flex-shrink-0">
+                <div class="flex flex-col xl:flex-col">
+                    <label for="autoUpdateSwitch"
+                        class="text-xs xl:text-sm font-bold text-surface-900 dark:text-surface-100 cursor-pointer whitespace-nowrap">Live
+                        Format</label>
+                    <span class="text-xs text-surface-500 hidden xl:block">Format while typing</span>
+                </div>
+                <p-toggleswitch inputId="autoUpdateSwitch" [ngModel]="autoUpdate()"
+                    (ngModelChange)="autoUpdate.set($event); onAutoUpdateChange()"></p-toggleswitch>
+            </div>
 
-        <div class="w-full border-t border-surface-200 dark:border-surface-700 my-2"></div>
+            <!-- Tab space: hidden on mobile, shown sm+ -->
+            <div
+                class="hidden sm:flex items-center gap-2 xl:gap-3 xl:w-full xl:justify-between p-2 xl:p-3 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 flex-shrink-0">
+                <label
+                    class="text-xs xl:text-sm font-bold text-surface-900 dark:text-surface-100 whitespace-nowrap">Tab</label>
+                <p-select [options]="tabSizeOptions" [ngModel]="tabWidth()"
+                    (ngModelChange)="tabWidth.set($event); onFormatConfigChange()" optionLabel="name" optionValue="code"
+                    styleClass="w-[70px] xl:w-[80px] text-sm border-none shadow-none bg-surface-100 dark:bg-surface-900 rounded-lg font-bold text-center">
+                </p-select>
+            </div>
 
-        <div class="w-full flex items-center justify-between p-3 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700">
-            <label class="text-sm font-bold text-surface-900 dark:text-surface-100">Tab Space</label>
-            <p-select
-                [options]="tabSizeOptions"
-                [ngModel]="tabWidth()"
-                (ngModelChange)="tabWidth.set($event); onFormatConfigChange()"
-                optionLabel="name"
-                optionValue="code"
-                styleClass="w-[80px] text-sm border-none shadow-none bg-surface-100 dark:bg-surface-900 rounded-lg font-bold text-center"
-            >
-            </p-select>
-        </div>
+            <!-- Format button -->
+            <p-button [label]="'Format'" icon="pi pi-caret-right"
+                styleClass="xl:w-full py-2 xl:py-3 font-bold xl:mt-4 shadow-sm rounded-xl flex-shrink-0"
+                (click)="formatCode()"></p-button>
 
-        <div class="flex xl:flex-col gap-3 w-full mt-2">
-            <p-button label="Download" icon="pi pi-download" severity="secondary" styleClass="w-full rounded-xl" (click)="downloadCode(false)"></p-button>
-            <p-button label="Settings" icon="pi pi-cog" severity="secondary" styleClass="w-full rounded-xl" [outlined]="true" ariaLabel="Settings" (click)="displaySettings.set(true)"></p-button>
+            <!-- Separator: only on xl -->
+            <div class="hidden xl:block w-full border-t border-surface-200 dark:border-surface-700 my-0"></div>
+
+            <!-- Format CSS&JS checkbox: only on xl -->
+            <div
+                class="hidden xl:flex items-center gap-3 w-full p-3 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 cursor-pointer hover:border-primary transition-colors">
+                <p-checkbox [ngModel]="formatCssJs()" (ngModelChange)="formatCssJs.set($event)" binary="true"
+                    inputId="formatCssJs"></p-checkbox>
+                <label for="formatCssJs"
+                    class="text-sm font-bold text-surface-900 dark:text-surface-100 cursor-pointer flex-1">Format CSS &
+                    JS</label>
+            </div>
+
+            <!-- Download + Settings buttons -->
+            <div class="flex xl:flex-col gap-2 xl:gap-3 xl:w-full xl:mt-2 flex-shrink-0">
+                <p-button icon="pi pi-download" pTooltip="Download" tooltipPosition="bottom" severity="secondary"
+                    styleClass="xl:w-full rounded-xl" (click)="downloadCode(false)">
+                    <span class="hidden xl:inline ml-2">Download</span>
+                </p-button>
+                <p-button icon="pi pi-cog" pTooltip="Settings" tooltipPosition="bottom" severity="secondary"
+                    styleClass="xl:w-full rounded-xl" [outlined]="true" ariaLabel="Settings"
+                    (click)="displaySettings.set(true)">
+                    <span class="hidden xl:inline ml-2">Settings</span>
+                </p-button>
+            </div>
         </div>
     </div>
 
     <!-- Right Pane: Output -->
-    <div class="flex-1 flex flex-col min-w-0 border border-surface-200 dark:border-surface-700 rounded-3xl overflow-hidden bg-surface-0 dark:bg-surface-900 shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between px-6 py-4 bg-surface-50 dark:bg-surface-800/80 border-b border-surface-200 dark:border-surface-700">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 flex items-center justify-center">
-                    <i class="pi pi-check-circle"></i>
+    <div
+        class="flex flex-col min-w-0 border border-surface-200 dark:border-surface-700 rounded-3xl overflow-hidden bg-surface-0 dark:bg-surface-900 shadow-sm hover:shadow-md transition-shadow editor-pane">
+        <!-- Header -->
+        <div
+            class="flex items-center justify-between px-4 xl:px-6 py-3 xl:py-4 bg-surface-50 dark:bg-surface-800/80 border-b border-surface-200 dark:border-surface-700 flex-shrink-0">
+            <div class="flex items-center gap-2 xl:gap-3">
+                <div
+                    class="w-7 h-7 xl:w-8 xl:h-8 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 flex items-center justify-center flex-shrink-0">
+                    <i class="pi pi-check-circle text-sm"></i>
                 </div>
-                <span class="font-bold text-lg text-surface-900 dark:text-surface-100 tracking-tight">Formatted Result</span>
+                <span
+                    class="font-bold text-base xl:text-lg text-surface-900 dark:text-surface-100 tracking-tight">Formatted
+                    Result</span>
             </div>
-            <div class="flex items-center gap-1">
-                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="secondary" pTooltip="Clear" tooltipPosition="bottom" (click)="clearOutput()"></p-button>
-                <div class="w-px h-6 bg-surface-300 dark:bg-surface-600 mx-2"></div>
-                <p-button icon="pi pi-download" [rounded]="true" [text]="true" severity="secondary" pTooltip="Download" tooltipPosition="bottom" (click)="downloadCode(false)"></p-button>
-                <p-button icon="pi pi-copy" [rounded]="true" [text]="true" severity="secondary" pTooltip="Copy" tooltipPosition="bottom" (click)="copyCode(false)"></p-button>
-                <p-button icon="pi pi-window-maximize" [rounded]="true" [text]="true" severity="secondary" pTooltip="Fullscreen" tooltipPosition="bottom" (click)="toggleFullscreen(outputContainer)"></p-button>
+            <div class="flex items-center gap-0.5 xl:gap-1">
+                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="secondary" pTooltip="Clear"
+                    tooltipPosition="bottom" (click)="clearOutput()"></p-button>
+                <div class="w-px h-5 bg-surface-300 dark:bg-surface-600 mx-1 xl:mx-2"></div>
+                <p-button icon="pi pi-download" [rounded]="true" [text]="true" severity="secondary" pTooltip="Download"
+                    tooltipPosition="bottom" (click)="downloadCode(false)"></p-button>
+                <p-button icon="pi pi-copy" [rounded]="true" [text]="true" severity="secondary" pTooltip="Copy"
+                    tooltipPosition="bottom" (click)="copyCode(false)"></p-button>
+                <p-button icon="pi pi-window-maximize" [rounded]="true" [text]="true" severity="secondary"
+                    pTooltip="Fullscreen" tooltipPosition="bottom"
+                    (click)="toggleFullscreen(outputContainer)"></p-button>
             </div>
         </div>
-        <div #outputContainer class="flex-1 relative bg-surface-0 dark:bg-[#1e1e1e]">
-            <ngx-monaco-editor class="absolute inset-0 w-full h-full" [options]="outputEditorOptions()" [ngModel]="outputCode()" (onInit)="onOutputEditorInit($event)"></ngx-monaco-editor>
+        <!-- Editor -->
+        <div #outputContainer class="relative bg-surface-0 dark:bg-[#1e1e1e] editor-body">
+            <ngx-monaco-editor class="absolute inset-0 w-full h-full" [options]="outputEditorOptions()"
+                [ngModel]="outputCode()" (onInit)="onOutputEditorInit($event)"></ngx-monaco-editor>
         </div>
-        <div class="flex items-center justify-between px-5 py-3 bg-surface-50 dark:bg-surface-800/80 border-t border-surface-200 dark:border-surface-700 text-xs text-surface-500 font-medium">
-            <div class="font-mono bg-surface-200 dark:bg-surface-700 px-2 py-1 rounded">Ln: {{outputCursor().line}} Col: {{outputCursor().col}}</div>
-            <div class="flex items-center gap-5">
-                <div class="font-mono">Size: <span class="font-bold text-surface-700 dark:text-surface-300">{{outputSize()}} B</span></div>
+        <!-- Footer -->
+        <div
+            class="flex items-center justify-between px-4 xl:px-5 py-2 xl:py-3 bg-surface-50 dark:bg-surface-800/80 border-t border-surface-200 dark:border-surface-700 text-xs text-surface-500 font-medium flex-shrink-0">
+            <div class="font-mono bg-surface-200 dark:bg-surface-700 px-2 py-1 rounded">Ln: {{outputCursor().line}} Col:
+                {{outputCursor().col}}</div>
+            <div class="flex items-center gap-3 xl:gap-5">
+                <div class="font-mono hidden sm:block">Size: <span
+                        class="font-bold text-surface-700 dark:text-surface-300">{{outputSize()}} B</span></div>
                 <div class="flex gap-1 bg-surface-200 dark:bg-surface-700 p-1 rounded-lg">
-                    <button class="w-6 h-6 flex items-center justify-center hover:text-primary transition-colors hover:bg-surface-0 dark:hover:bg-surface-600 rounded" (click)="increaseFontSize()"><i class="pi pi-plus text-[10px]"></i></button>
-                    <button class="w-6 h-6 flex items-center justify-center hover:text-primary transition-colors hover:bg-surface-0 dark:hover:bg-surface-600 rounded" (click)="decreaseFontSize()"><i class="pi pi-minus text-[10px]"></i></button>
+                    <button
+                        class="w-6 h-6 flex items-center justify-center hover:text-primary transition-colors hover:bg-surface-0 dark:hover:bg-surface-600 rounded"
+                        (click)="increaseFontSize()"><i class="pi pi-plus text-[10px]"></i></button>
+                    <button
+                        class="w-6 h-6 flex items-center justify-center hover:text-primary transition-colors hover:bg-surface-0 dark:hover:bg-surface-600 rounded"
+                        (click)="decreaseFontSize()"><i class="pi pi-minus text-[10px]"></i></button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Advanced Settings Drawer -->
-    <p-drawer [visible]="displaySettings()" (visibleChange)="displaySettings.set($event)" position="right" styleClass="w-full sm:w-[400px] [&_.p-drawer-content]:p-6">
+    <p-drawer [visible]="displaySettings()" (visibleChange)="displaySettings.set($event)" position="right"
+        styleClass="w-full sm:w-[400px] [&_.p-drawer-content]:p-6">
         <ng-template pTemplate="header">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
                     <i class="pi pi-cog text-xl"></i>
                 </div>
-                <span class="font-extrabold text-2xl tracking-tight text-surface-900 dark:text-surface-0">Settings</span>
+                <span
+                    class="font-extrabold text-2xl tracking-tight text-surface-900 dark:text-surface-0">Settings</span>
             </div>
         </ng-template>
         <ng-template pTemplate="content">
             <div class="flex flex-col gap-8">
                 <div class="flex flex-col gap-4">
-                    <label class="font-bold text-surface-900 dark:text-surface-100 flex items-center gap-2"> <i class="pi pi-file-import text-primary"></i> Template Data </label>
-                    <p-button label="Load Demo Snippet" icon="pi pi-bolt" severity="secondary" styleClass="w-full rounded-xl shadow-sm" (click)="loadSample()"></p-button>
+                    <label class="font-bold text-surface-900 dark:text-surface-100 flex items-center gap-2"> <i
+                            class="pi pi-file-import text-primary"></i> Template Data </label>
+                    <p-button label="Load Demo Snippet" icon="pi pi-bolt" severity="secondary"
+                        styleClass="w-full rounded-xl shadow-sm" (click)="loadSample()"></p-button>
                 </div>
 
                 <div class="w-full border-t border-surface-200 dark:border-surface-700"></div>
 
+                <!-- Format CSS&JS: shown in drawer for all breakpoints -->
+                <div
+                    class="flex items-center gap-3 w-full p-3 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 cursor-pointer hover:border-primary transition-colors xl:hidden">
+                    <p-checkbox [ngModel]="formatCssJs()" (ngModelChange)="formatCssJs.set($event)" binary="true"
+                        inputId="formatCssJsDrawer"></p-checkbox>
+                    <label for="formatCssJsDrawer"
+                        class="text-sm font-bold text-surface-900 dark:text-surface-100 cursor-pointer flex-1">Format
+                        CSS & JS (HTML)</label>
+                </div>
+
+                <!-- Tab size: shown in drawer on mobile -->
+                <div
+                    class="flex items-center justify-between p-3 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 sm:hidden">
+                    <label class="text-sm font-bold text-surface-900 dark:text-surface-100">Tab Space</label>
+                    <p-select [options]="tabSizeOptions" [ngModel]="tabWidth()"
+                        (ngModelChange)="tabWidth.set($event); onFormatConfigChange()" optionLabel="name"
+                        optionValue="code"
+                        styleClass="w-[80px] text-sm border-none shadow-none bg-surface-100 dark:bg-surface-900 rounded-lg font-bold text-center">
+                    </p-select>
+                </div>
+
                 <div class="flex flex-col gap-6">
-                    <label class="font-bold text-surface-900 dark:text-surface-100 flex items-center gap-2"> <i class="pi pi-sliders-h text-primary"></i> Prettier Options </label>
+                    <label class="font-bold text-surface-900 dark:text-surface-100 flex items-center gap-2"> <i
+                            class="pi pi-sliders-h text-primary"></i> Prettier Options </label>
 
                     <div class="flex flex-col gap-3">
                         <div class="flex justify-between items-center">
-                            <label class="font-semibold text-surface-700 dark:text-surface-300 text-sm">Print Width Limits</label>
-                            <span class="font-mono font-bold text-primary bg-primary/10 px-2 py-1 rounded text-xs">{{printWidth()}}</span>
+                            <label class="font-semibold text-surface-700 dark:text-surface-300 text-sm">Print Width
+                                Limits</label>
+                            <span
+                                class="font-mono font-bold text-primary bg-primary/10 px-2 py-1 rounded text-xs">{{printWidth()}}</span>
                         </div>
-                        <input pInputText type="number" [ngModel]="printWidth()" (ngModelChange)="printWidth.set($event); onFormatConfigChange()" class="w-full rounded-xl" />
+                        <input pInputText type="number" [ngModel]="printWidth()"
+                            (ngModelChange)="printWidth.set($event); onFormatConfigChange()"
+                            class="w-full rounded-xl" />
                         <small class="text-surface-500">Specify the line length that the printer will wrap on.</small>
                     </div>
 
-                    <div class="flex items-center justify-between p-4 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 cursor-pointer hover:border-primary transition-colors">
+                    <div
+                        class="flex items-center justify-between p-4 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 cursor-pointer hover:border-primary transition-colors">
                         <div class="flex flex-col gap-1">
-                            <label for="useTabsDrawer" class="font-bold text-surface-900 dark:text-surface-100 cursor-pointer">Use Hard Tabs</label>
+                            <label for="useTabsDrawer"
+                                class="font-bold text-surface-900 dark:text-surface-100 cursor-pointer">Use Hard
+                                Tabs</label>
                             <span class="text-xs text-surface-500">Indent lines with tabs instead of spaces</span>
                         </div>
-                        <p-checkbox [ngModel]="useTabs()" (ngModelChange)="useTabs.set($event)" binary="true" inputId="useTabsDrawer" (onChange)="onFormatConfigChange()"></p-checkbox>
+                        <p-checkbox [ngModel]="useTabs()" (ngModelChange)="useTabs.set($event)" binary="true"
+                            inputId="useTabsDrawer" (onChange)="onFormatConfigChange()"></p-checkbox>
                     </div>
 
-                    <div class="flex items-center justify-between p-4 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 cursor-pointer hover:border-primary transition-colors">
+                    <div
+                        class="flex items-center justify-between p-4 bg-surface-50 dark:bg-surface-800 rounded-xl border border-surface-200 dark:border-surface-700 cursor-pointer hover:border-primary transition-colors">
                         <div class="flex flex-col gap-1">
-                            <label for="singleQuoteDrawer" class="font-bold text-surface-900 dark:text-surface-100 cursor-pointer">Use Single Quotes</label>
+                            <label for="singleQuoteDrawer"
+                                class="font-bold text-surface-900 dark:text-surface-100 cursor-pointer">Use Single
+                                Quotes</label>
                             <span class="text-xs text-surface-500">Use single quotes instead of double</span>
                         </div>
-                        <p-checkbox [ngModel]="singleQuote()" (ngModelChange)="singleQuote.set($event)" binary="true" inputId="singleQuoteDrawer" (onChange)="onFormatConfigChange()"></p-checkbox>
+                        <p-checkbox [ngModel]="singleQuote()" (ngModelChange)="singleQuote.set($event)" binary="true"
+                            inputId="singleQuoteDrawer" (onChange)="onFormatConfigChange()"></p-checkbox>
                     </div>
                 </div>
             </div>

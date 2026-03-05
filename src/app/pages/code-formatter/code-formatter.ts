@@ -29,6 +29,7 @@ import { format as sqlFormat } from 'sql-formatter';
     imports: [CommonModule, FormsModule, SelectModule, ButtonModule, ToastModule, TextareaModule, EditorComponent, DrawerModule, CheckboxModule, InputTextModule, ToggleSwitchModule, TooltipModule],
     providers: [MessageService],
     templateUrl: './code-formatter.html',
+    styleUrl: './code-formatter.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CodeFormatter {
@@ -186,14 +187,27 @@ export class CodeFormatter {
         const content = isInput ? this.inputCode() : this.outputCode();
         if (!content) return;
 
-        navigator.clipboard.writeText(content).then(
-            () => {
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(content).then(
+                () => this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Copied to clipboard' }),
+                () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to copy to clipboard' })
+            );
+        } else {
+            // Fallback for non-HTTPS / dev environments
+            const ta = document.createElement('textarea');
+            ta.value = content;
+            ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                document.execCommand('copy');
                 this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Copied to clipboard' });
-            },
-            () => {
+            } catch {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to copy to clipboard' });
             }
-        );
+            document.body.removeChild(ta);
+        }
     }
 
     toggleFullscreen(container: HTMLElement) {
