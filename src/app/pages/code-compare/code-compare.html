@@ -3,7 +3,7 @@
     @if (hasBothFiles()) {
     <!-- Unified card: header + collapsible panels -->
     <div
-        class="bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+        class="bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
         <!-- Clickable toggle header -->
         <div class="flex items-center px-4 md:px-6 py-3 md:py-4 bg-surface-50 dark:bg-surface-800/80 cursor-pointer select-none border-b border-surface-200 dark:border-surface-700 group transition-colors hover:bg-surface-100 dark:hover:bg-surface-800 relative"
             (click)="inputCollapsed.set(!inputCollapsed())">
@@ -52,11 +52,11 @@
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 p-5 bg-surface-50/50 dark:bg-surface-900/50">
                     <div
                         class="h-full bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-2xl shadow-sm">
-                        <p-code-input side="left" />
+                        <p-code-input side="left" class="block h-full" />
                     </div>
                     <div
                         class="h-full bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-2xl shadow-sm">
-                        <p-code-input side="right" />
+                        <p-code-input side="right" class="block h-full" />
                     </div>
                 </div>
             </div>
@@ -66,33 +66,33 @@
     <!-- No card wrapper when both files not loaded yet -->
     <div class="overflow-hidden" (focusout)="onInputPanelBlur($event)">
         <div
-            class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 bg-surface-0 dark:bg-surface-900 p-4 md:p-6 rounded-3xl border border-surface-200 dark:border-surface-700 shadow-sm hover:shadow-md transition-shadow">
+            class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 bg-surface-0 dark:bg-surface-900 p-4 md:p-6 rounded-xl border border-surface-200 dark:border-surface-700 shadow-sm hover:shadow-md transition-shadow">
             <div
-                class="p-5 bg-surface-50 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700/50 rounded-2xl">
-                <div class="flex items-center gap-3 mb-4">
+                class="flex flex-col p-5 bg-surface-50 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700/50 rounded-lg">
+                <div class="flex items-center gap-3 mb-4 shrink-0">
                     <div
                         class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                         <i class="pi pi-file"></i>
                     </div>
                     <span class="font-bold text-lg text-surface-900 dark:text-surface-100">Original Data</span>
                 </div>
-                <p-code-input side="left" />
+                <p-code-input side="left" class="block flex-1 min-h-[300px]" />
             </div>
             <div
-                class="p-5 bg-surface-50 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700/50 rounded-2xl">
-                <div class="flex items-center gap-3 mb-4">
+                class="flex flex-col p-5 bg-surface-50 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700/50 rounded-lg">
+                <div class="flex items-center gap-3 mb-4 shrink-0">
                     <div
                         class="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 flex items-center justify-center">
                         <i class="pi pi-file-edit"></i>
                     </div>
                     <span class="font-bold text-lg text-surface-900 dark:text-surface-100">Modified Data</span>
                 </div>
-                <p-code-input side="right" />
+                <p-code-input side="right" class="block flex-1 min-h-[300px]" />
             </div>
         </div>
         @if (hasAnyFile()) {
         <div
-            class="flex items-center justify-center mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-2xl text-sm font-medium border border-blue-100 dark:border-blue-900/50 gap-3 animate-fadein">
+            class="flex items-center justify-center mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-xl text-sm font-medium border border-blue-100 dark:border-blue-900/50 gap-3 animate-fadein">
             <i class="pi pi-info-circle text-xl"></i>
             <span>Add code to the {{ state.leftFile() ? 'right (Modified Data)' : 'left (Original Data)' }} panel to
                 activate the comparison engine.</span>
@@ -103,15 +103,18 @@
 
     <!-- Diff section -->
     @if (hasBothFiles()) {
-    <div class="flex flex-col gap-4 mt-2 animate-fadein">
+    <div
+        class="flex flex-col mt-2 animate-fadein bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl overflow-hidden shadow-sm w-full">
+        <!-- Unified Toolbar & Summary -->
         <div
-            class="bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl overflow-hidden shadow-sm flex flex-col mx-auto w-full">
+            class="flex flex-col w-full border-b border-surface-200 dark:border-surface-700 sticky top-0 z-10 shadow-sm">
             <p-diff-toolbar [diffViewer]="diffViewerRef" class="w-full block" />
             <div class="w-full h-px bg-surface-200 dark:bg-surface-700 hidden lg:block opacity-50"></div>
             <p-diff-summary class="w-full block bg-surface-50/50 dark:bg-surface-800/20" />
         </div>
 
-        <div class="flex gap-4 transition-[height] duration-500 ease-in-out relative border border-surface-200 dark:border-surface-700 rounded-3xl bg-surface-0 dark:bg-surface-900 shadow-sm overflow-hidden"
+        <!-- Viewer & Minimap -->
+        <div class="flex transition-[height] duration-500 ease-in-out relative w-full overflow-hidden bg-surface-0 dark:bg-surface-900"
             [style.height]="inputCollapsed() ? 'calc(100vh - 12rem)' : '65vh'">
             <div class="flex-1 min-w-0 h-full">
                 <p-diff-viewer #diffViewerRef class="block h-full" />

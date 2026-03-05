@@ -95,14 +95,11 @@
     <div class="flex flex-wrap items-center justify-center xl:justify-end gap-3 flex-1 mt-2 xl:mt-0">
 
         <div class="flex flex-wrap items-center gap-2">
-            <!-- Export -->
-            <p-button icon="pi pi-file-export" label="Export HTML" severity="secondary" [outlined]="true" size="small"
-                (onClick)="onExportHtml()" pTooltip="Download diff as HTML" tooltipPosition="top"
+            <!-- Export Menu -->
+            <p-button icon="pi pi-download" label="Export" severity="secondary" [outlined]="true" size="small"
+                (onClick)="exportMenu.toggle($event)"
                 styleClass="rounded-lg bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 hover:border-primary hidden xl:inline-flex shadow-sm" />
-            <p-button icon="pi pi-image" [label]="imageLabel()" severity="secondary" [outlined]="true" size="small"
-                (onClick)="onExportImage()" [loading]="imageStatus() === 'exporting'"
-                pTooltip="Download diff as PNG image" tooltipPosition="top"
-                styleClass="rounded-lg bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 hover:border-primary hidden xl:inline-flex shadow-sm" />
+            <p-menu #exportMenu [model]="exportMenuItems" [popup]="true" appendTo="body" />
 
             <div class="w-px h-8 bg-surface-200 dark:bg-surface-700 hidden sm:block mx-1"></div>
 
