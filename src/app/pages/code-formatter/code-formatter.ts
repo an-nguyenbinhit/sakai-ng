@@ -20,7 +20,7 @@ import * as estreePlugin from 'prettier/plugins/estree';
 import * as htmlPlugin from 'prettier/plugins/html';
 import * as postcssPlugin from 'prettier/plugins/postcss';
 import * as markdownPlugin from 'prettier/plugins/markdown';
-import * as xmlPlugin from '@prettier/plugin-xml';
+
 import { format as sqlFormat } from 'sql-formatter';
 
 @Component({
@@ -254,10 +254,12 @@ export class CodeFormatter {
                     plugins = [markdownPlugin];
                     parser = 'markdown';
                     break;
-                case 'xml':
-                    plugins = [xmlPlugin];
+                case 'xml': {
+                    const xmlPlugin = await import('@prettier/plugin-xml');
+                    plugins = [xmlPlugin.default ?? xmlPlugin];
                     parser = 'xml';
                     break;
+                }
                 case 'sql':
                     const formattedSql = sqlFormat(code, {
                         language: 'sql',
