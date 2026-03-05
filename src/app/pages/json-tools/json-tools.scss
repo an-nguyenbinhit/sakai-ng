@@ -1,6 +1,57 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// JSON Tools – Responsive layout
+// ─────────────────────────────────────────────────────────────────────────────
+
+// The outer wrapper uses height: calc(100vh - 8rem). On xl the two editor panes
+// fill that height via flex-1/flex-col. On smaller screens we switch to a
+// vertical stack so we assign explicit heights instead.
+
 :host {
     display: block;
     width: 100%;
+}
+
+// Editor body: takes remaining space inside its flex-col pane
+.editor-body {
+    flex: 1 1 0;
+    min-height: 0;
+}
+
+// Editor panes: on xl they grow to fill the row height via flex-1.
+// On smaller screens, give them a fixed pixel height so the Monaco editor
+// gets a real container size.
+.editor-pane {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+
+    // Mobile – stack vertically, each pane gets a usable height
+    height: 340px;
+
+    @media (min-width: 640px) {
+        height: 400px;
+    }
+
+    @media (min-width: 768px) {
+        height: 440px;
+    }
+
+    // xl – let flex-1 take over; height is driven by the parent row
+    @media (min-width: 1280px) {
+        height: auto;
+        flex: 1 1 0;
+    }
+}
+
+// Controls pane: on xl it centres itself vertically in the row.
+// On smaller screens it's auto-height (content-driven).
+.control-pane {
+    flex-shrink: 0;
+
+    @media (min-width: 1280px) {
+        width: 16rem; // 256px ~ w-64
+        align-self: center;
+    }
 }
 
 ::ng-deep {
