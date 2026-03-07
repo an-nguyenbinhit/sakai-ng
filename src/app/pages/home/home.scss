@@ -17,29 +17,6 @@
     }
 }
 
-@keyframes floatIcon {
-
-    0%,
-    100% {
-        transform: translateY(0px);
-    }
-
-    50% {
-        transform: translateY(-6px);
-    }
-}
-
-@keyframes pulseGlow {
-
-    0%,
-    100% {
-        box-shadow: 0 0 20px 4px rgba(var(--p-primary-400), 0.25);
-    }
-
-    50% {
-        box-shadow: 0 0 35px 8px rgba(var(--p-primary-500), 0.45);
-    }
-}
 
 @keyframes cardEntrance {
     from {
@@ -67,69 +44,75 @@
 .hero-wrapper {
     position: relative;
     overflow: hidden;
-    border-radius: 1.5rem;
-    padding: 1.5rem 1rem;
-    background: linear-gradient(135deg,
-            oklch(0.15 0.04 280),
-            oklch(0.18 0.05 250),
-            oklch(0.14 0.06 300),
-            oklch(0.17 0.04 270));
-    background-size: 300% 300%;
-    animation: gradientShift 8s ease infinite;
+    border-radius: 1.25rem;
+    padding: 2.25rem 1.5rem;
 
-    @media (min-width: 480px) {
-        padding: 2rem 1.5rem;
+    /* Default Light Mode Gradient */
+    background: linear-gradient(135deg,
+            #eef2ff 0%,
+            #c7d2fe 50%,
+            #e0e7ff 100%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow:
+        inset 0 1px 3px rgba(255, 255, 255, 0.5),
+        0 4px 20px -6px rgba(0, 0, 0, 0.05);
+
+    /* Dark Mode Override */
+    :host-context(.app-dark) & {
+        background: linear-gradient(145deg,
+                var(--p-surface-900) 0%,
+                var(--p-surface-800) 50%,
+                var(--p-surface-950) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow:
+            inset 0 1px 1px rgba(255, 255, 255, 0.03),
+            0 8px 32px -8px rgba(0, 0, 0, 0.5);
     }
 
     @media (min-width: 768px) {
         padding: 3rem 2rem;
     }
 
+    /* Subtle dot pattern overlay */
     &::before {
         content: '';
         position: absolute;
         inset: 0;
-        background: radial-gradient(ellipse at 30% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
-            radial-gradient(ellipse at 70% 30%, rgba(168, 85, 247, 0.12) 0%, transparent 55%);
-        pointer-events: none;
-    }
-
-    &::after {
-        content: '';
-        position: absolute;
-        bottom: -1px;
-        left: 0;
-        right: 0;
-        height: 60px;
-        background: linear-gradient(to top, var(--p-surface-50), transparent);
+        background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+        background-size: 24px 24px;
+        opacity: 0.8;
         pointer-events: none;
 
         :host-context(.app-dark) & {
-            background: linear-gradient(to top, var(--p-surface-950), transparent);
+            background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
         }
     }
-}
 
-/* Hero icon */
-.hero-icon-wrap {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 3.5rem;
-    height: 3.5rem;
-    border-radius: 1rem;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(168, 85, 247, 0.3));
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(12px);
-    animation: floatIcon 3s ease-in-out infinite, pulseGlow 3s ease-in-out infinite;
+    /* Vibrant abstract glows */
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        /* Light mode glows */
+        background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.15) 0%, transparent 40%);
+        pointer-events: none;
+        z-index: 0;
 
-    @media (min-width: 768px) {
-        width: 5rem;
-        height: 5rem;
-        border-radius: 1.25rem;
+        /* Dark mode glows */
+        :host-context(.app-dark) & {
+            background: radial-gradient(circle at 15% 10%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 85% 90%, rgba(168, 85, 247, 0.15) 0%, transparent 50%);
+        }
+    }
+
+    /* Ensure text is above the background effects */
+    >* {
+        position: relative;
+        z-index: 10;
     }
 }
+
 
 /* Search bar */
 .search-wrap {
