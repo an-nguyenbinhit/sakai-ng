@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm start          # Dev server at http://localhost:4200 (auto-reloads on changes)
+npm start          # Dev server at http://localhost:4201 (auto-reloads on changes)
 npm run build      # Production build to dist/devworkspace/
 npm run watch      # Dev build with file watching
 npm test           # Unit tests via Karma/Jasmine

@@ -9,7 +9,7 @@ This skill provides essential guidelines, architectural choices, and commands fo
 
 ## Commands
 
-- **Start Dev Server**: `npm start` (Runs on http://localhost:4200 with auto-reload)
+- **Start Dev Server**: `npm start` (Runs on http://localhost:4201 with auto-reload)
 - **Production Build**: `npm run build` (Builds to `dist/sakai-ng/`)
 - **Dev Build with Watch**: `npm run watch`
 - **Run Unit Tests**: `npm test` (via Karma/Jasmine)
