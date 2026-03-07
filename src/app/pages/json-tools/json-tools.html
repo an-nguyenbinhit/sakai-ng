@@ -121,18 +121,29 @@
                     styleClass="xl:w-full py-2 xl:py-3 font-bold xl:mt-2 shadow-sm rounded-xl flex-shrink-0"
                     (click)="formatJson()">
                 </p-button>
-                <p-button icon="pi pi-compress" pTooltip="Minify" tooltipPosition="bottom" severity="secondary"
-                    [outlined]="true" styleClass="xl:w-full rounded-xl flex-shrink-0" (click)="minifyJson()">
-                    <span class="hidden xl:inline ml-2">Minify</span>
+                <p-button pTooltip="Minify" tooltipPosition="bottom" severity="secondary" [outlined]="true"
+                    styleClass="w-10 h-10 xl:w-full xl:h-auto xl:py-3 rounded-xl flex-shrink-0 p-0"
+                    (click)="minifyJson()">
+                    <div class="flex items-center justify-center w-full">
+                        <i class="pi pi-compress"></i>
+                        <span class="hidden xl:inline ml-2">Minify</span>
+                    </div>
                 </p-button>
-                <p-button icon="pi pi-check-circle" pTooltip="Validate" tooltipPosition="bottom" severity="secondary"
-                    [outlined]="true" styleClass="xl:w-full rounded-xl flex-shrink-0" (click)="validateJson()">
-                    <span class="hidden xl:inline ml-2">Validate</span>
+                <p-button pTooltip="Validate" tooltipPosition="bottom" severity="secondary" [outlined]="true"
+                    styleClass="w-10 h-10 xl:w-full xl:h-auto xl:py-3 rounded-xl flex-shrink-0 p-0"
+                    (click)="validateJson()">
+                    <div class="flex items-center justify-center w-full">
+                        <i class="pi pi-check-circle"></i>
+                        <span class="hidden xl:inline ml-2">Validate</span>
+                    </div>
                 </p-button>
-                <p-button icon="pi pi-code" pTooltip="Transform" tooltipPosition="bottom" severity="secondary"
-                    [outlined]="true" styleClass="xl:w-full rounded-xl flex-shrink-0"
+                <p-button pTooltip="Transform" tooltipPosition="bottom" severity="secondary" [outlined]="true"
+                    styleClass="w-10 h-10 xl:w-full xl:h-auto xl:py-3 rounded-xl flex-shrink-0 p-0"
                     (click)="displayTransformSettings.set(true)">
-                    <span class="hidden xl:inline ml-2">Transform</span>
+                    <div class="flex items-center justify-center w-full">
+                        <i class="pi pi-code"></i>
+                        <span class="hidden xl:inline ml-2">Transform</span>
+                    </div>
                 </p-button>
             </div>
 
@@ -142,14 +153,21 @@
 
             <!-- Download + Settings buttons -->
             <div class="flex xl:flex-col gap-2 xl:gap-3 xl:w-full xl:mt-2 flex-shrink-0">
-                <p-button icon="pi pi-download" pTooltip="Download" tooltipPosition="bottom" severity="secondary"
-                    styleClass="xl:w-full rounded-xl" (click)="downloadCode(false)">
-                    <span class="hidden xl:inline ml-2">Download</span>
+                <p-button pTooltip="Download" tooltipPosition="bottom" severity="secondary"
+                    styleClass="w-10 h-10 xl:w-full xl:h-auto xl:py-3 rounded-xl flex-shrink-0 p-0"
+                    (click)="downloadCode(false)">
+                    <div class="flex items-center justify-center w-full">
+                        <i class="pi pi-download"></i>
+                        <span class="hidden xl:inline ml-2">Download</span>
+                    </div>
                 </p-button>
-                <p-button icon="pi pi-cog" pTooltip="Settings" tooltipPosition="bottom" severity="secondary"
-                    [outlined]="true" styleClass="xl:w-full rounded-xl" ariaLabel="Settings"
+                <p-button pTooltip="Settings" tooltipPosition="bottom" severity="secondary" [outlined]="true"
+                    styleClass="w-10 h-10 xl:w-full xl:h-auto xl:py-3 rounded-xl flex-shrink-0 p-0" ariaLabel="Settings"
                     (click)="displaySettings.set(true)">
-                    <span class="hidden xl:inline ml-2">Settings</span>
+                    <div class="flex items-center justify-center w-full">
+                        <i class="pi pi-cog"></i>
+                        <span class="hidden xl:inline ml-2">Settings</span>
+                    </div>
                 </p-button>
             </div>
         </div>

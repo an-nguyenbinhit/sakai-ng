@@ -46,8 +46,8 @@
         </div>
         <!-- Editor -->
         <div #inputContainer class="relative bg-surface-0 dark:bg-[#1e1e1e] editor-body">
-            <ngx-monaco-editor class="absolute inset-0 w-full h-full" [options]="inputEditorOptions()"
-                [ngModel]="inputCode()" (ngModelChange)="onInputChange($event)"
+            <ngx-monaco-editor class="absolute inset-0 w-full h-full" style="height: 100%;"
+                [options]="inputEditorOptions()" [ngModel]="inputCode()" (ngModelChange)="onInputChange($event)"
                 (onInit)="onInputEditorInit($event)"></ngx-monaco-editor>
         </div>
         <!-- Footer -->
@@ -144,15 +144,25 @@
             </div>
 
             <!-- Download + Settings buttons -->
-            <div class="flex xl:flex-col gap-2 xl:gap-3 xl:w-full xl:mt-2 flex-shrink-0">
+            <div class="flex xl:flex-col gap-2 xl:gap-3 xl:w-full w-full xl:mt-2 flex-shrink-0">
+                <!-- Desktop Buttons with Labels -->
+                <p-button label="Download" icon="pi pi-download" pTooltip="Download" tooltipPosition="bottom"
+                    severity="secondary" styleClass="w-full rounded-xl flex items-center justify-center font-bold"
+                    class="hidden xl:block w-full" (click)="downloadCode(false)">
+                </p-button>
+                <p-button label="Settings" icon="pi pi-cog" pTooltip="Settings" tooltipPosition="bottom"
+                    severity="secondary" styleClass="w-full rounded-xl flex items-center justify-center font-bold"
+                    [outlined]="true" ariaLabel="Settings" class="hidden xl:block w-full"
+                    (click)="displaySettings.set(true)">
+                </p-button>
+
+                <!-- Mobile Buttons Icon Only -->
                 <p-button icon="pi pi-download" pTooltip="Download" tooltipPosition="bottom" severity="secondary"
-                    styleClass="xl:w-full rounded-xl" (click)="downloadCode(false)">
-                    <span class="hidden xl:inline ml-2">Download</span>
+                    styleClass="rounded-xl w-10 h-10" class="flex xl:hidden" (click)="downloadCode(false)">
                 </p-button>
                 <p-button icon="pi pi-cog" pTooltip="Settings" tooltipPosition="bottom" severity="secondary"
-                    styleClass="xl:w-full rounded-xl" [outlined]="true" ariaLabel="Settings"
+                    styleClass="rounded-xl w-10 h-10" [outlined]="true" ariaLabel="Settings" class="flex xl:hidden"
                     (click)="displaySettings.set(true)">
-                    <span class="hidden xl:inline ml-2">Settings</span>
                 </p-button>
             </div>
         </div>
@@ -188,8 +198,9 @@
         </div>
         <!-- Editor -->
         <div #outputContainer class="relative bg-surface-0 dark:bg-[#1e1e1e] editor-body">
-            <ngx-monaco-editor class="absolute inset-0 w-full h-full" [options]="outputEditorOptions()"
-                [ngModel]="outputCode()" (onInit)="onOutputEditorInit($event)"></ngx-monaco-editor>
+            <ngx-monaco-editor class="absolute inset-0 w-full h-full" style="height: 100%;"
+                [options]="outputEditorOptions()" [ngModel]="outputCode()"
+                (onInit)="onOutputEditorInit($event)"></ngx-monaco-editor>
         </div>
         <!-- Footer -->
         <div

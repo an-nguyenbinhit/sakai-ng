@@ -10,6 +10,16 @@
 .editor-body {
     flex: 1 1 0;
     min-height: 0;
+
+    ngx-monaco-editor,
+    ::ng-deep ngx-monaco-editor {
+        height: 100%;
+        display: block;
+
+        .editor-container {
+            height: 100%;
+        }
+    }
 }
 
 // Editor panes: on xl they grow to fill the row height via flex-1.
