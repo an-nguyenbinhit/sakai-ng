@@ -1,4 +1,5 @@
-import { Component, computed, effect, ElementRef, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter, Subject, takeUntil } from 'rxjs';
 import { AppMenu } from './app.menu';
@@ -20,6 +21,7 @@ export class AppSidebar implements OnInit, OnDestroy {
     router = inject(Router);
 
     el = inject(ElementRef);
+    platformId = inject(PLATFORM_ID);
 
     private outsideClickListener: ((event: MouseEvent) => void) | null = null;
 
@@ -77,6 +79,8 @@ export class AppSidebar implements OnInit, OnDestroy {
     }
 
     private bindOutsideClickListener() {
+        if (!isPlatformBrowser(this.platformId)) return;
+
         if (!this.outsideClickListener) {
             this.outsideClickListener = (event: MouseEvent) => {
                 if (this.isOutsideClicked(event)) {
@@ -95,6 +99,8 @@ export class AppSidebar implements OnInit, OnDestroy {
     }
 
     private unbindOutsideClickListener() {
+        if (!isPlatformBrowser(this.platformId)) return;
+
         if (this.outsideClickListener) {
             document.removeEventListener('click', this.outsideClickListener);
             this.outsideClickListener = null;
@@ -102,6 +108,8 @@ export class AppSidebar implements OnInit, OnDestroy {
     }
 
     private isOutsideClicked(event: MouseEvent): boolean {
+        if (!isPlatformBrowser(this.platformId)) return false;
+
         const topbarButtonEl = document.querySelector('.topbar-start > button');
         const sidebarEl = this.el.nativeElement;
 
