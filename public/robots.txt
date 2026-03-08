@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://an-nguyenbinhit.github.io/DevWorkspace/sitemap.xml
