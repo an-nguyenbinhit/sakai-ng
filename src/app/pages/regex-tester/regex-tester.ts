@@ -128,7 +128,7 @@ export class RegexTester {
             if (newMatches.length > 0) {
                 for (let m of newMatches) {
                     resultHtml += this.escapeHtml(testStr.substring(lastIdx, m.start));
-                    resultHtml += `<mark class="bg-amber-300 dark:bg-amber-600/60 text-amber-900 dark:text-amber-50 px-1 rounded font-bold shadow-sm">` + this.escapeHtml(testStr.substring(m.start, m.end)) + `</mark>`;
+                    resultHtml += `<span class="bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200 px-1 rounded font-bold shadow-sm border border-amber-200 dark:border-amber-800">` + this.escapeHtml(testStr.substring(m.start, m.end)) + `</span>`;
                     lastIdx = m.end;
                 }
                 resultHtml += this.escapeHtml(testStr.substring(lastIdx));
