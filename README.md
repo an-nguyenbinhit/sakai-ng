@@ -1,59 +1,81 @@
-# Sakai19
+# DevWorkspace
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.
+**DevWorkspace** is a collection of essential tools designed to streamline everyday development tasks for software engineers and developers. Built with **Angular 21**, **PrimeNG**, and **Tailwind CSS**, it offers a fast, modern, and intuitive interface for various code manipulation and formatting needs.
 
-## Development server
+🌍 **Live Demo:** [https://an-nguyenbinhit.github.io/DevWorkspace/](https://an-nguyenbinhit.github.io/DevWorkspace/)
 
-To start a local development server, run:
+---
+
+## 🚀 Features
+
+DevWorkspace currently includes the following tools:
+
+- **JSON Tools**: Format, validate, and minify JSON data easily.
+- **Code Formatter**: Beautify your code snippets.
+- **Code Compare (Diff Tool)**: Compare two blocks of code or plain text to instantly spot differences.
+- **Encode / Decode**: Quickly encode or decode Base64, URL strings, and more.
+- **Regex Tester**: Test regular expressions against text with live highlights and real-time execution.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Angular 21](https://angular.dev/)
+- **UI Components**: [PrimeNG](https://primeng.org/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Editors**: [Monaco Editor](https://microsoft.github.io/monaco-editor/)
+- **Other Utilities**: Chart.js, SQL Formatter, Prettier, PrismJS, Diff
+
+---
+
+## 💻 Local Development
+
+To run this project on your local machine, follow these steps:
+
+### Prerequisites
+- **Node.js**: Ensure you have Node.js installed (v20+ recommended).
+- **Angular CLI**: Install the Angular CLI globally if you haven't already (`npm install -g @angular/cli`).
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/an-nguyenbinhit/DevWorkspace.git
+   cd DevWorkspace
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server:**
+   ```bash
+   npm start
+   # or
+   ng serve --port 4201
+   ```
+
+4. Open your browser and navigate to `http://localhost:4201/` (or the port specified). The application will automatically reload if you change any of the source files.
+
+---
+
+## 📦 Build for Production
+
+To build the project for production, run:
 
 ```bash
-ng serve
+npm run build
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+This will compile the project into the `dist/` directory, optimized for performance and speed. The current deployment leverages GitHub Pages for hosting.
 
-## Code scaffolding
+---
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## 🤝 Contributing
 
-```bash
-ng generate component component-name
-```
+Contributions, issues, and feature requests are welcome! Feel free to check the issues page if you want to contribute.
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## 📝 License
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+This project is open-source and available under the MIT License.
