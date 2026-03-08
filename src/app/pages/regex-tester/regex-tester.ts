@@ -22,8 +22,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RegexTester {
-    pattern = signal<string>('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
-    testString = signal<string>('user.name+tag@example.com\nadmin@my-domain.co.uk\ninvalid.email@com\ntest@sub.domain.org');
+    pattern = signal<string>('');
+    testString = signal<string>('');
 
     flagG = signal<boolean>(true);
     flagI = signal<boolean>(false);
