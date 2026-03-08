@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AppTopbar } from './app.topbar';
 import { AppSidebar } from './app.sidebar';
@@ -24,14 +24,15 @@ import { LayoutService } from '@/app/layout/service/layout.service';
 })
 export class AppLayout {
     layoutService = inject(LayoutService);
+    document = inject(DOCUMENT);
 
     constructor() {
         effect(() => {
             const state = this.layoutService.layoutState();
             if (state.mobileMenuActive) {
-                document.body.classList.add('blocked-scroll');
+                this.document.body.classList.add('blocked-scroll');
             } else {
-                document.body.classList.remove('blocked-scroll');
+                this.document.body.classList.remove('blocked-scroll');
             }
         });
     }

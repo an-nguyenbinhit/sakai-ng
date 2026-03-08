@@ -21,7 +21,7 @@ export class SeoStrategy extends TitleStrategy {
     // We walk through the state tree to find the deepest data
     let currentRoute = routerState.root;
     let description = 'Free online developer tools including regex tester, code formatter, JSON tools, and code comparison.';
-    let ogImage = 'https://an-nguyenbinhit.github.io/DevWorkspace/assets/layout/images/logo.svg';
+    let ogImage = 'https://an-nguyenbinhit.github.io/DevWorkspace/favicon.svg';
 
     while (currentRoute.firstChild) {
       currentRoute = currentRoute.firstChild;
