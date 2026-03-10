@@ -53,6 +53,14 @@ export const appRoutes: Routes = [
                 data: {
                     description: 'Free online tools to encode and decode text strings using Base64 or URL encoding.'
                 }
+            },
+            {
+                path: 'dummy-file-generator',
+                loadComponent: () => import('./app/pages/dummy-file-generator/dummy-file-generator').then((m) => m.DummyFileGeneratorComponent),
+                title: 'Dummy File Generator',
+                data: {
+                    description: 'Generate dummy files for testing purposes, specifying size, extension, and content.'
+                }
             }
         ]
     },

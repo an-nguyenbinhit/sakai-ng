@@ -51,6 +51,10 @@ import { LayoutService } from '@/app/layout/service/layout.service';
                 <i class="pi pi-lock"></i>
                 <span>Encode / Decode</span>
             </a>
+            <a routerLink="/dummy-file-generator" routerLinkActive="topnav-active" class="topnav-item">
+                <i class="pi pi-file-plus"></i>
+                <span>File Generator</span>
+            </a>
         </nav>
 
         <div class="layout-topbar-actions">

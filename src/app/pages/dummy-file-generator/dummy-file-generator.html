@@ -1,0 +1,46 @@
+<div class="grid">
+    <div class="col-12 md:col-8 md:col-offset-2">
+        <div class="card">
+            <div class="flex flex-column align-items-center mb-5">
+                <i class="pi pi-file-plus text-primary text-5xl mb-3"></i>
+                <div class="text-900 text-3xl font-medium mb-1">Dummy File Generator</div>
+                <div class="text-600 text-center">Generate random files of any size for testing upload limits, storage
+                    usage, and performance. All generated files have valid structure/headers to bypass format
+                    validation.</div>
+            </div>
+
+            <div class="p-fluid">
+                <div class="field">
+                    <label htmlFor="fileType">File Type</label>
+                    <p-select id="fileType" [options]="fileTypes" [(ngModel)]="selectedFileType" optionLabel="label"
+                        optionValue="value" placeholder="Select a File Type"></p-select>
+                </div>
+
+                <div class="field">
+                    <label htmlFor="fileSize">File Size (MB)</label>
+                    <div class="p-inputgroup">
+                        <p-inputNumber id="fileSize" [(ngModel)]="fileSizeInMb" [min]="1" [max]="200"
+                            [showButtons]="true" buttonLayout="horizontal" spinnerMode="horizontal"
+                            decrementButtonClass="p-button-secondary" incrementButtonClass="p-button-secondary"
+                            incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
+                            inputId="horizontal"></p-inputNumber>
+                        <span class="p-inputgroup-addon">MB</span>
+                    </div>
+                    <small class="text-600 mt-1 block">Maximum 200MB to prevent browser memory issues.</small>
+                </div>
+
+                <div class="field">
+                    <label htmlFor="sampleText">Sample Text (Padding Content)</label>
+                    <textarea id="sampleText" pTextarea [(ngModel)]="sampleText" rows="4"
+                        placeholder="Enter text that will be repeated to fill the remaining file size..."></textarea>
+                </div>
+
+                <div class="flex justify-content-end mt-4">
+                    <p-button label="Generate & Download" icon="pi pi-download" (onClick)="generateFile()"
+                        [loading]="isGenerating" styleClass="p-button-lg px-5"></p-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<p-toast></p-toast>

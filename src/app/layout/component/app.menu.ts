@@ -34,7 +34,8 @@ export class AppMenu {
                     { label: 'Code Formatter', icon: 'pi pi-fw pi-align-left', routerLink: ['/code-formatter'] },
                     { label: 'JSON Tools', icon: 'pi pi-fw pi-wrench', routerLink: ['/json-tools'] },
                     { label: 'Regex Tester', icon: 'pi pi-fw pi-search', routerLink: ['/regex-tester'] },
-                    { label: 'Encode / Decode', icon: 'pi pi-fw pi-sync', routerLink: ['/encode-decode'] }
+                    { label: 'Encode / Decode', icon: 'pi pi-fw pi-sync', routerLink: ['/encode-decode'] },
+                    { label: 'Dummy File Generator', icon: 'pi pi-fw pi-file-plus', routerLink: ['/dummy-file-generator'] }
                 ]
             }
         ];
