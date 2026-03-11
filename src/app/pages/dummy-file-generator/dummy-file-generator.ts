@@ -90,6 +90,12 @@ export class DummyFileGeneratorComponent {
 
     constructor(private messageService: MessageService) { }
 
+    private decodeHtmlEntities(html: string): string {
+        const txt = document.createElement('textarea');
+        txt.innerHTML = html;
+        return txt.value;
+    }
+
     generateFile() {
         if (!this.fileSizeInMb || this.fileSizeInMb < 1) {
             this.messageService.add({ severity: 'error', summary: 'Invalid Size', detail: 'File size must be at least 1 MB.' });
@@ -110,9 +116,10 @@ export class DummyFileGeneratorComponent {
                 this.messageService.add({ severity: 'error', summary: 'Missing Content', detail: 'Sample Text cannot be empty.' });
                 return;
             }
-            if (!this.isRichTextFormat()) {
-                // Strip HTML tags for plain-text formats
-                cleanedText = cleanedText.replace(/<[^>]*>?/gm, '');
+            if (this.selectedFileType !== 'html') {
+                // Strip HTML tags then decode entities (e.g. &nbsp; → space)
+                const stripped = cleanedText.replace(/<[^>]*>?/gm, '');
+                cleanedText = this.decodeHtmlEntities(stripped).trim();
             }
         }
 
