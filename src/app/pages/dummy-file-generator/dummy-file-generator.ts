@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextModule } from 'primeng/inputtext';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { TextareaModule } from 'primeng/textarea';
@@ -24,7 +25,7 @@ export interface JsonField {
 
 @Component({
     selector: 'app-dummy-file-generator',
-    imports: [CommonModule, FormsModule, SelectModule, InputNumberModule, EditorModule, CheckboxModule, ProgressBarModule, ButtonModule, ToastModule],
+    imports: [CommonModule, FormsModule, SelectModule, InputNumberModule, InputTextModule, EditorModule, CheckboxModule, ProgressBarModule, ButtonModule, ToastModule],
     providers: [MessageService],
     templateUrl: './dummy-file-generator.html',
     styleUrl: './dummy-file-generator.scss'
@@ -46,6 +47,28 @@ export class DummyFileGeneratorComponent {
     sampleText: string = 'Generated Dummy Padding Content - ';
     addRandomNoise: boolean = false;
     progressValue: number = 0;
+
+    // --- Format helpers ---
+    isPlainTextFormat(): boolean {
+        return ['txt', 'log', 'csv'].includes(this.selectedFileType);
+    }
+    isRichTextFormat(): boolean {
+        return ['html', 'pdf'].includes(this.selectedFileType);
+    }
+    isImageFormat(): boolean {
+        return ['jpg', 'png'].includes(this.selectedFileType);
+    }
+
+    onFileTypeChange(): void {
+        // Reset sampleText with a sensible default per format group
+        if (this.isImageFormat()) {
+            this.sampleText = 'Dummy Image Content';
+        } else if (this.isRichTextFormat()) {
+            this.sampleText = '<p>Generated Dummy Padding Content</p>';
+        } else if (this.isPlainTextFormat()) {
+            this.sampleText = 'Generated Dummy Padding Content - ';
+        }
+    }
     
     // JSON Schema Builder
     jsonSchema: JsonField[] = [
@@ -79,14 +102,18 @@ export class DummyFileGeneratorComponent {
         }
 
         let cleanedText = this.sampleText;
-        if (!cleanedText?.trim() || cleanedText === '<p><br></p>') {
-            this.messageService.add({ severity: 'error', summary: 'Missing Content', detail: 'Sample Text cannot be empty.' });
-            return;
-        }
-
-        if (this.selectedFileType !== 'html') {
-            // Strip HTML tags for non-html formats
-            cleanedText = cleanedText.replace(/<[^>]*>?/gm, '');
+        // Image formats accept empty/short captions — use a fallback instead of blocking
+        if (this.isImageFormat()) {
+            cleanedText = cleanedText?.trim() || 'Dummy Image Content';
+        } else {
+            if (!cleanedText?.trim() || cleanedText === '<p><br></p>') {
+                this.messageService.add({ severity: 'error', summary: 'Missing Content', detail: 'Sample Text cannot be empty.' });
+                return;
+            }
+            if (!this.isRichTextFormat()) {
+                // Strip HTML tags for plain-text formats
+                cleanedText = cleanedText.replace(/<[^>]*>?/gm, '');
+            }
         }
 
         this.isGenerating = true;
