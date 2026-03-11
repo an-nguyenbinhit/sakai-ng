@@ -33,8 +33,8 @@
                     </div>
                     <p-inputNumber id="fileSize" [(ngModel)]="fileSizeInMb" [min]="1" [max]="500" [showButtons]="true"
                         buttonLayout="horizontal" spinnerMode="horizontal" decrementButtonClass="p-button-secondary"
-                        incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-minus"
-                        decrementButtonIcon="pi pi-plus" inputId="horizontal" styleClass="w-full"
+                        incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus"
+                        decrementButtonIcon="pi pi-minus" inputId="horizontal" styleClass="w-full"
                         (ngModelChange)="syncDefaultFileName()"></p-inputNumber>
                     <div class="flex items-center gap-2 mt-2">
                         <p-checkbox [(ngModel)]="addRandomNoise" [binary]="true" inputId="randomNoise"></p-checkbox>
