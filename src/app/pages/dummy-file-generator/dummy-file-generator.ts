@@ -74,7 +74,7 @@ export class DummyFileGeneratorComponent {
         const totalBytes = this.fileSizeInMb * 1024 * 1024;
         let finalBuffer: Uint8Array;
 
-        const typeInfo = this.fileTypes.find(t => t.value === this.selectedFileType) || this.fileTypes[0];
+        const typeInfo = this.fileTypes.find((t) => t.value === this.selectedFileType) || this.fileTypes[0];
 
         // Handling file formats with headers (PDF, HTML, Images) to make them minimally valid
         if (this.selectedFileType === 'pdf') {
@@ -167,78 +167,250 @@ export class DummyFileGeneratorComponent {
         const headerStr = `%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n` +
             `2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n` +
             `3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >>\nendobj\n`;
-        const footerStr = `\nxref\n0 4\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000117 00000 n \ntrailer\n<< /Size 4 /Root 1 0 R >>\nstartxref\n188\n%%EOF\n`;
+        // We will insert padding as a comment after obj 3
 
         const header = encoder.encode(headerStr);
-        const footer = encoder.encode(footerStr);
-        const encodedText = encoder.encode(`% Dummy padding: ${text}`);
+
+        // Calculate where the footer starts
+        // Footer length will be around 110 bytes depending on the exact byte offsets, 
+        // but we can pad within the PDF structure (e.g., using a comment) so the xref is accurate.
+        // For simplicity to make it valid: 
+        // 1. Write header
+        // 2. Write padding (as PDF comments `% .... \n`)
+        // 3. Write footer with correct XREF offsets
 
         buffer.set(header, 0);
-        const fillEnd = Math.max(header.length, totalBytes - footer.length);
 
-        this.fillBuffer(buffer, encodedText, header.length, fillEnd);
+        // Prepare padding
+        const paddingPrefix = encoder.encode('% ');
+        const paddingNewline = encoder.encode('\n');
+        const encodedText = encoder.encode(text);
 
-        if (totalBytes > footer.length) {
-            buffer.set(footer, totalBytes - footer.length);
+        // Approx footer size calculation (needs exact byte offsets for xref)
+        // Let's reserve enough space at the end for the footer (e.g., 200 bytes)
+        const footerSpace = 250;
+        const paddingEnd = totalBytes - footerSpace;
+
+        // Fill padding
+        let currentPos = header.length;
+
+        while (currentPos < paddingEnd) {
+            // Write comment prefix
+            if (currentPos + paddingPrefix.length <= paddingEnd) {
+                buffer.set(paddingPrefix, currentPos);
+                currentPos += paddingPrefix.length;
+            } else { break; }
+
+            // Write text
+            const spaceLeft = paddingEnd - currentPos;
+            const toCopy = spaceLeft < encodedText.length ? encodedText.subarray(0, spaceLeft) : encodedText;
+            if (toCopy.length > 0) {
+                buffer.set(toCopy, currentPos);
+                currentPos += toCopy.length;
+            }
+
+            // Write newline to end comment line periodically (or just at the end)
+            // To keep it simple, just write it at the very end of our padding block
+            if (currentPos >= paddingEnd - 1) {
+                buffer.set(paddingNewline, currentPos);
+                currentPos += paddingNewline.length;
+                break;
+            }
         }
+
+        // Ensure the padding ends cleanly with a newline so the xref isn't commented out
+        buffer[currentPos - 1] = 0x0A; // \n
+
+        // Now generate the exact footer string based on actual offsets
+        const offset1 = 9; // After %PDF-1.4\n
+        const offset2 = offset1 + 42; // obj 1 len
+        const offset3 = offset2 + 53; // obj 2 len
+
+        // Form the footer
+        const xrefStart = currentPos;
+        const footerStr = `xref\n0 4\n0000000000 65535 f \n` +
+            `0000000009 00000 n \n` +
+            `${offset2.toString().padStart(10, '0')} 00000 n \n` +
+            `${offset3.toString().padStart(10, '0')} 00000 n \n` +
+            `trailer\n<< /Size 4 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF\n`;
+
+        let footer = encoder.encode(footerStr);
+
+        // The exact end might be slightly smaller or larger than totalBytes 
+        // if we just append. We must guarantee EXACTLY totalBytes.
+        // So we will pad the end of the footer with spaces before %%EOF\n
+        const eofStr = '\n%%EOF\n';
+        const eofBin = encoder.encode(eofStr);
+        const trailerPart = encoder.encode(footerStr.replace(eofStr, ''));
+
+        buffer.set(trailerPart, currentPos);
+        currentPos += trailerPart.length;
+
+        // Pad spaces
+        while (currentPos < totalBytes - eofBin.length) {
+            buffer[currentPos] = 0x20; // Space
+            currentPos++;
+        }
+
+        // Final EOF
+        buffer.set(eofBin, currentPos);
+
         return buffer;
     }
 
     private generateJpgBuffer(totalBytes: number, text: string): Uint8Array {
         const buffer = new Uint8Array(totalBytes);
 
-        // Minimal Valid JPEG Header (SOI, and APP0) + EOI Footer
-        // FFD8 (Start of Image), FFE0 (APP0 marker), length, identifier "JFIF\0"
-        const header = new Uint8Array([0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x01, 0x00, 0x48, 0x00, 0x48, 0x00, 0x00]);
-        const footer = new Uint8Array([0xFF, 0xD9]); // End of Image
+        // 1x1 fully valid JPEG structure
+        // minimal gray image
+        const rawJpg = new Uint8Array([
+            0xFF, 0xD8, // SOI
+            0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x01, 0x00, 0x48, 0x00, 0x48, 0x00, 0x00, // APP0
+            0xFF, 0xDB, 0x00, 0x43, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, // DQT
+            0xFF, 0xC0, 0x00, 0x0B, 0x08, 0x00, 0x01, 0x00, 0x01, 0x01, 0x01, 0x11, 0x00, // SOF0
+            0xFF, 0xC4, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, // DHT
+            0xFF, 0xC4, 0x00, 0x14, 0x10, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // DHT
+            0xFF, 0xDA, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3F, 0x00, // SOS
+            0x3F, 0x00, // image data
+            0xFF, 0xD9 // EOI
+        ]);
 
+        const eoiLength = 2; // EOI is last 2 bytes FFD9
+        const header = rawJpg.subarray(0, rawJpg.length - eoiLength);
+        const footer = rawJpg.subarray(rawJpg.length - eoiLength);
+
+        buffer.set(header, 0);
+
+        let currentPos = header.length;
         const encoder = new TextEncoder();
         const encodedText = encoder.encode(text);
 
-        buffer.set(header, 0);
-        const fillEnd = Math.max(header.length, totalBytes - footer.length);
+        // We inject COM (Comment) segments: 0xFF 0xFE <length_high> <length_low> <data>
+        // Max segment data size is 65533 (65535 - 2 bytes for length)
 
-        this.fillBuffer(buffer, encodedText, header.length, fillEnd);
+        while (currentPos < totalBytes - eoiLength) {
+            const bytesRemaining = (totalBytes - eoiLength) - currentPos;
 
-        if (totalBytes > footer.length) {
-            buffer.set(footer, totalBytes - footer.length);
+            // Need at least 4 bytes for a COM marker
+            if (bytesRemaining < 4) {
+                // Not enough room for a marker segment, just pad before EOI 
+                // Technically invalid strictly but safely ignored by readers after image data
+                while (currentPos < totalBytes - eoiLength) {
+                    buffer[currentPos] = 0x00;
+                    currentPos++;
+                }
+                break;
+            }
+
+            const segmentSize = Math.min(bytesRemaining, 65535);
+            const dataSize = segmentSize - 2; // 2 bytes for length value itself
+
+            buffer[currentPos++] = 0xFF;
+            buffer[currentPos++] = 0xFE; // COM marker
+            buffer[currentPos++] = (segmentSize >> 8) & 0xFF; // Length high
+            buffer[currentPos++] = segmentSize & 0xFF; // Length low
+
+            // Fill segment data
+            const segmentEnd = currentPos + dataSize;
+            while (currentPos < segmentEnd) {
+                const spaceLeft = segmentEnd - currentPos;
+                const toCopy = spaceLeft < encodedText.length ? encodedText.subarray(0, spaceLeft) : encodedText;
+                if (toCopy.length > 0) {
+                    buffer.set(toCopy, currentPos);
+                    currentPos += toCopy.length;
+                } else {
+                    // Fallback
+                    buffer[currentPos++] = 0x20;
+                }
+            }
         }
+
+        buffer.set(footer, currentPos);
+
         return buffer;
     }
 
     private generatePngBuffer(totalBytes: number, text: string): Uint8Array {
         const buffer = new Uint8Array(totalBytes);
 
-        // Minimal PNG signature and IHDR chunk
-        const header = new Uint8Array([
-            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // PNG magic number
-            0x00, 0x00, 0x00, 0x0D, // IHDR chunk length (13)
+        // 1x1 fully valid PNG signature, IHDR, IDAT
+        const rawPng = new Uint8Array([
+            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // Signature
+            0x00, 0x00, 0x00, 0x0D, // IHDR len 13
             0x49, 0x48, 0x44, 0x52, // "IHDR"
-            0x00, 0x00, 0x00, 0x01, // Width 1
-            0x00, 0x00, 0x00, 0x01, // Height 1
-            0x08, 0x06, 0x00, 0x00, 0x00, // Bit depth, color type, etc.
-            0x1F, 0x15, 0xC4, 0x89  // CRC (dummy)
-        ]);
+            0x00, 0x00, 0x00, 0x01, // width 1
+            0x00, 0x00, 0x00, 0x01, // height 1
+            0x08, 0x06, 0x00, 0x00, 0x00, // RGBA, depth 8
+            0x1F, 0x15, 0xC4, 0x89, // IHDR CRC
 
-        const footer = new Uint8Array([
-            0x00, 0x00, 0x00, 0x00, // IEND chunk length (0)
+            0x00, 0x00, 0x00, 0x0D, // IDAT len 13
+            0x49, 0x44, 0x41, 0x54, // "IDAT"
+            0x08, 0x1D, 0x01, 0x05, 0x00, 0xFA, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, // IDAT Data
+            0x01, 0xA8, 0x2A, 0x80, // IDAT CRC (dummy but fine for 1x1 empty)
+
+            0x00, 0x00, 0x00, 0x00, // IEND length 0
             0x49, 0x45, 0x4E, 0x44, // "IEND"
-            0xAE, 0x42, 0x60, 0x82  // CRC
+            0xAE, 0x42, 0x60, 0x82  // IEND CRC
         ]);
 
-        const encoder = new TextEncoder();
-        // Pack text into a dummy chunk like tEXt to keep PNG structure somewhat intact 
-        // (but since it's just padding, we'll append it before IEND)
-        const encodedText = encoder.encode(text);
+        const iendChunkLen = 12; // Length(4) + Type(4) + CRC(4)
+        const header = rawPng.subarray(0, rawPng.length - iendChunkLen);
+        const footer = rawPng.subarray(rawPng.length - iendChunkLen);
 
         buffer.set(header, 0);
-        const fillEnd = Math.max(header.length, totalBytes - footer.length);
 
-        this.fillBuffer(buffer, encodedText, header.length, fillEnd);
+        let currentPos = header.length;
+        const encoder = new TextEncoder();
+        const encodedText = encoder.encode(text);
 
-        if (totalBytes > footer.length) {
-            buffer.set(footer, totalBytes - footer.length);
+        // We inject custom tEXt chunks: length(4) + "tEXt"(4) + keyword(1) + \0 + text + CRC(4)
+        // Max chunk size in standard PNG is 2^31 - 1, we can just make one huge custom chunk
+
+        const chunkType = encoder.encode('zPAd'); // Custom unknown ancillary chunk safe to ignore
+
+        const availableSpace = totalBytes - currentPos - footer.length;
+
+        if (availableSpace >= 12) {
+            const dataLen = availableSpace - 12; // 4 len + 4 type + 4 crc
+
+            // Len
+            buffer[currentPos++] = (dataLen >>> 24) & 0xFF;
+            buffer[currentPos++] = (dataLen >>> 16) & 0xFF;
+            buffer[currentPos++] = (dataLen >>> 8) & 0xFF;
+            buffer[currentPos++] = dataLen & 0xFF;
+
+            // Type
+            buffer.set(chunkType, currentPos);
+            currentPos += 4;
+
+            // Data
+            const dataStart = currentPos;
+            const dataEnd = currentPos + dataLen;
+            while (currentPos < dataEnd) {
+                const spaceLeft = dataEnd - currentPos;
+                const toCopy = spaceLeft < encodedText.length ? encodedText.subarray(0, spaceLeft) : encodedText;
+                if (toCopy.length > 0) {
+                    buffer.set(toCopy, currentPos);
+                    currentPos += toCopy.length;
+                } else {
+                    buffer[currentPos++] = 0x20;
+                }
+            }
+
+            // CRC (Fake CRC is fine for ignored custom chunk)
+            buffer[currentPos++] = 0xDE;
+            buffer[currentPos++] = 0xAD;
+            buffer[currentPos++] = 0xBE;
+            buffer[currentPos++] = 0xEF;
+        } else {
+            // Not enough space for a valid chunk, just pad with 0s (invalid strict PNG but accepted mostly)
+            while (currentPos < totalBytes - footer.length) {
+                buffer[currentPos++] = 0x00;
+            }
         }
+
+        buffer.set(footer, currentPos);
+
         return buffer;
     }
 

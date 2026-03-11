@@ -37,17 +37,47 @@ export class RegexTester {
 
     cheatSheetItems = [
         { label: 'Email Address', pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$', desc: 'Match valid email addresses', sample: 'user@example.com\nadmin@my-domain.co.uk\ninvalid-email@com\ntest@sub.domain.org' },
-        { label: 'URL', pattern: '^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$', desc: 'Match URLs (http/https optional)', sample: 'https://www.google.com\nhttp://my-site.net/path?query=1\ninvalid-url\nexample.org/about' },
+        {
+            label: 'URL',
+            pattern: '^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$',
+            desc: 'Match URLs (http/https optional)',
+            sample: 'https://www.google.com\nhttp://my-site.net/path?query=1\ninvalid-url\nexample.org/about'
+        },
         { label: 'IPv4 Address', pattern: '^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', desc: 'Match IPv4 addresses', sample: '192.168.1.1\n10.0.0.255\n256.1.2.3\n127.0.0.1' },
-        { label: 'Strong Password', pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$', desc: 'At least 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char', sample: 'Password123!\nweakpass\nNoSpecialChar123\nS0per$ecureP@ass' },
+        {
+            label: 'Strong Password',
+            pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$',
+            desc: 'At least 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char',
+            sample: 'Password123!\nweakpass\nNoSpecialChar123\nS0per$ecureP@ass'
+        },
         { label: 'Vietnamese Phone Number', pattern: '^(0|\\+84)(3|5|7|8|9)[0-9]{8}$', desc: 'Match valid Vietnamese mobile numbers', sample: '0912345678\n+84987654321\n02431234567\n0123456789' },
-        { label: 'UUID', pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$', desc: 'Match standard UUID string', sample: '123e4567-e89b-12d3-a456-426614174000\n550e8400-e29b-41d4-a716-446655440000\ninvalid-uuid-here' },
+        {
+            label: 'UUID',
+            pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+            desc: 'Match standard UUID string',
+            sample: '123e4567-e89b-12d3-a456-426614174000\n550e8400-e29b-41d4-a716-446655440000\ninvalid-uuid-here'
+        },
         { label: 'Extract Hashtags', pattern: '#(\\w+)', desc: 'Find all hashtags in a text', sample: 'Check out the new #Angular features! #WebDev #TypeScript is awesome.' },
-        { label: 'HTML Tags', pattern: '<\\/?\\w+((\\s+\\w+(\\s*=\\s*(?:".*?"|\'.*?\'|[\\^"\'>\\s]+))?)+\\s*|\\s*)\\/?>', desc: 'Match opening and closing HTML tags', sample: '<div class="container">\n  <p>Hello <b>World</b>!</p>\n  <img src="test.png" alt="Test" />\n</div>' },
+        {
+            label: 'HTML Tags',
+            pattern: '<\\/?\\w+((\\s+\\w+(\\s*=\\s*(?:".*?"|\'.*?\'|[\\^"\'>\\s]+))?)+\\s*|\\s*)\\/?>',
+            desc: 'Match opening and closing HTML tags',
+            sample: '<div class="container">\n  <p>Hello <b>World</b>!</p>\n  <img src="test.png" alt="Test" />\n</div>'
+        },
         { label: 'Dates (YYYY-MM-DD)', pattern: '^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$', desc: 'Match dates in YYYY-MM-DD format', sample: '2023-10-15\n2024-02-29\n2023-13-45\n1999-12-31' },
         { label: 'Hex Colors', pattern: '^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$', desc: 'Match 3 or 6 digit hex color codes', sample: '#fff\n#1a2b3c\n#FF0000\ninvalid-color\nf0f' },
-        { label: 'JWT Token', pattern: '^[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]*$', desc: 'Match JSON Web Tokens (JWT)', sample: 'eyJhbGciOiJIUzI1NiIsInR5cCI.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZTEifQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\ninvalid.jwt.string' },
-        { label: 'Credit Card', pattern: '^(?:4[0-9]{12}(?:[0-9]{3})?|[25][1-7][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$', desc: 'Match major credit card numbers', sample: '4123456789012345 (Visa)\n5123456789012345 (Mastercard)\n1234567890123456 (Invalid)' },
+        {
+            label: 'JWT Token',
+            pattern: '^[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]*$',
+            desc: 'Match JSON Web Tokens (JWT)',
+            sample: 'eyJhbGciOiJIUzI1NiIsInR5cCI.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZTEifQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\ninvalid.jwt.string'
+        },
+        {
+            label: 'Credit Card',
+            pattern: '^(?:4[0-9]{12}(?:[0-9]{3})?|[25][1-7][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$',
+            desc: 'Match major credit card numbers',
+            sample: '4123456789012345 (Visa)\n5123456789012345 (Mastercard)\n1234567890123456 (Invalid)'
+        },
         { label: 'Currency (USD)', pattern: '^\\$[0-9]{1,3}(,[0-9]{3})*(\\.[0-9]{2})?$', desc: 'Match US currency formats', sample: '$1,234.56\n$10.00\n$5\n100.00' }
     ];
 
@@ -128,7 +158,10 @@ export class RegexTester {
             if (newMatches.length > 0) {
                 for (let m of newMatches) {
                     resultHtml += this.escapeHtml(testStr.substring(lastIdx, m.start));
-                    resultHtml += `<span class="bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200 px-1 rounded font-bold shadow-sm border border-amber-200 dark:border-amber-800">` + this.escapeHtml(testStr.substring(m.start, m.end)) + `</span>`;
+                    resultHtml +=
+                        `<span class="bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200 px-1 rounded font-bold shadow-sm border border-amber-200 dark:border-amber-800">` +
+                        this.escapeHtml(testStr.substring(m.start, m.end)) +
+                        `</span>`;
                     lastIdx = m.end;
                 }
                 resultHtml += this.escapeHtml(testStr.substring(lastIdx));

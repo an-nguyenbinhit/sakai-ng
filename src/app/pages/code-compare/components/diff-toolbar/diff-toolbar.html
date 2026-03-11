@@ -1,25 +1,18 @@
-<div
-    class="flex flex-col xl:flex-row flex-wrap items-center justify-between gap-4 p-4 lg:px-6 lg:py-3 bg-surface-0 dark:bg-surface-900 w-full transition-all">
+<div class="flex flex-col xl:flex-row flex-wrap items-center justify-between gap-4 p-4 lg:px-6 lg:py-3 bg-surface-0 dark:bg-surface-900 w-full transition-all">
     <!-- View & Search Group -->
     <div class="flex flex-wrap items-center justify-center xl:justify-start gap-4 flex-1">
         <!-- View mode -->
-        <p-selectbutton [options]="viewOptions" optionLabel="label" optionValue="value" [ngModel]="viewMode()"
-            (ngModelChange)="onViewModeChange($event)" size="small" styleClass="shadow-sm" />
+        <p-selectbutton [options]="viewOptions" optionLabel="label" optionValue="value" [ngModel]="viewMode()" (ngModelChange)="onViewModeChange($event)" size="small" styleClass="shadow-sm" />
 
         <div class="w-px h-8 bg-surface-200 dark:bg-surface-700 hidden sm:block mx-1"></div>
 
         <!-- Navigation -->
-        <div
-            class="flex items-center gap-1 bg-surface-50 dark:bg-surface-800 p-1 rounded-lg border border-surface-200 dark:border-surface-700 shadow-sm">
-            <p-button icon="pi pi-angle-up" severity="secondary" [text]="true" size="small" (onClick)="prevDiff()"
-                pTooltip="Previous diff (Alt+↑)" tooltipPosition="top" aria-label="Previous diff" />
+        <div class="flex items-center gap-1 bg-surface-50 dark:bg-surface-800 p-1 rounded-lg border border-surface-200 dark:border-surface-700 shadow-sm">
+            <p-button icon="pi pi-angle-up" severity="secondary" [text]="true" size="small" (onClick)="prevDiff()" pTooltip="Previous diff (Alt+↑)" tooltipPosition="top" aria-label="Previous diff" />
             @if (diffResult()) {
-            <span
-                class="text-xs font-bold text-surface-600 dark:text-surface-300 px-2 min-w-[3rem] text-center font-mono">
-                {{ currentDiffIndex() + 1 }}/{{ totalDiffBlocks() }} </span>
+            <span class="text-xs font-bold text-surface-600 dark:text-surface-300 px-2 min-w-[3rem] text-center font-mono"> {{ currentDiffIndex() + 1 }}/{{ totalDiffBlocks() }} </span>
             }
-            <p-button icon="pi pi-angle-down" severity="secondary" [text]="true" size="small" (onClick)="nextDiff()"
-                pTooltip="Next diff (Alt+↓)" tooltipPosition="top" aria-label="Next diff" />
+            <p-button icon="pi pi-angle-down" severity="secondary" [text]="true" size="small" (onClick)="nextDiff()" pTooltip="Next diff (Alt+↓)" tooltipPosition="top" aria-label="Next diff" />
         </div>
 
         <div class="w-px h-8 bg-surface-200 dark:bg-surface-700 hidden lg:block mx-1"></div>
@@ -28,64 +21,51 @@
         <div class="flex items-center gap-2">
             <p-iconfield styleClass="shadow-sm">
                 <p-inputicon class="pi pi-search text-surface-400" />
-                <input pInputText type="text" size="small" placeholder="Search... (Ctrl+F)" [value]="searchQuery()"
-                    (input)="onSearch($event)" class="!text-sm rounded-lg w-full sm:w-[160px] md:w-[200px]"
-                    aria-label="Search in diff" />
+                <input pInputText type="text" size="small" placeholder="Search... (Ctrl+F)" [value]="searchQuery()" (input)="onSearch($event)" class="!text-sm rounded-lg w-full sm:w-[160px] md:w-[200px]" aria-label="Search in diff" />
             </p-iconfield>
 
             @if (searchState().matchIndices.length > 0) {
-            <span class="text-xs font-bold bg-primary/10 text-primary px-2 py-1.5 rounded-md font-mono shrink-0"> {{
-                searchState().currentMatchIndex + 1 }}/{{ searchState().matchIndices.length }} </span>
+            <span class="text-xs font-bold bg-primary/10 text-primary px-2 py-1.5 rounded-md font-mono shrink-0"> {{ searchState().currentMatchIndex + 1 }}/{{ searchState().matchIndices.length }} </span>
             }
         </div>
     </div>
 
     <!-- Middle Group: Ignore options -->
     <div class="flex items-center justify-center mt-2 xl:mt-0">
-        <p-button icon="pi pi-sliders-h" label="Options" severity="secondary" [outlined]="true" size="small"
+        <p-button
+            icon="pi pi-sliders-h"
+            label="Options"
+            severity="secondary"
+            [outlined]="true"
+            size="small"
             (onClick)="op.toggle($event)"
-            styleClass="rounded-lg shadow-sm font-bold bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 hover:border-primary" />
+            styleClass="rounded-lg shadow-sm font-bold bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 hover:border-primary"
+        />
 
         <p-popover #op styleClass="w-[220px]">
             <div class="flex flex-col p-2 gap-4">
-                <span
-                    class="font-black text-sm text-surface-900 dark:text-surface-0 tracking-tight uppercase border-b border-surface-200 dark:border-surface-700 pb-2 inline-flex items-center gap-2"><i
-                        class="pi pi-filter"></i> Diff Filters</span>
+                <span class="font-black text-sm text-surface-900 dark:text-surface-0 tracking-tight uppercase border-b border-surface-200 dark:border-surface-700 pb-2 inline-flex items-center gap-2"><i class="pi pi-filter"></i> Diff Filters</span>
 
                 <label class="flex items-center gap-3 cursor-pointer group">
-                    <p-checkbox [binary]="true" [ngModel]="options().ignoreWhitespace"
-                        (ngModelChange)="state.updateOptions({ ignoreWhitespace: $event })"
-                        inputId="ignoreWS"></p-checkbox>
-                    <span
-                        class="text-sm font-medium text-surface-700 dark:text-surface-300 group-hover:text-primary transition-colors">Ignore
-                        Whitespace</span>
+                    <p-checkbox [binary]="true" [ngModel]="options().ignoreWhitespace" (ngModelChange)="state.updateOptions({ ignoreWhitespace: $event })" inputId="ignoreWS"></p-checkbox>
+                    <span class="text-sm font-medium text-surface-700 dark:text-surface-300 group-hover:text-primary transition-colors">Ignore Whitespace</span>
                 </label>
 
                 <label class="flex items-center gap-3 cursor-pointer group">
-                    <p-checkbox [binary]="true" [ngModel]="options().ignoreCase"
-                        (ngModelChange)="state.updateOptions({ ignoreCase: $event })" inputId="ignoreCase"></p-checkbox>
-                    <span
-                        class="text-sm font-medium text-surface-700 dark:text-surface-300 group-hover:text-primary transition-colors">Ignore
-                        Case</span>
+                    <p-checkbox [binary]="true" [ngModel]="options().ignoreCase" (ngModelChange)="state.updateOptions({ ignoreCase: $event })" inputId="ignoreCase"></p-checkbox>
+                    <span class="text-sm font-medium text-surface-700 dark:text-surface-300 group-hover:text-primary transition-colors">Ignore Case</span>
                 </label>
 
                 <label class="flex items-center gap-3 cursor-pointer group">
-                    <p-checkbox [binary]="true" [ngModel]="options().ignoreBlankLines"
-                        (ngModelChange)="state.updateOptions({ ignoreBlankLines: $event })"
-                        inputId="ignoreBlank"></p-checkbox>
-                    <span
-                        class="text-sm font-medium text-surface-700 dark:text-surface-300 group-hover:text-primary transition-colors">Ignore
-                        Empty Lines</span>
+                    <p-checkbox [binary]="true" [ngModel]="options().ignoreBlankLines" (ngModelChange)="state.updateOptions({ ignoreBlankLines: $event })" inputId="ignoreBlank"></p-checkbox>
+                    <span class="text-sm font-medium text-surface-700 dark:text-surface-300 group-hover:text-primary transition-colors">Ignore Empty Lines</span>
                 </label>
 
                 <div class="border-t border-surface-200 dark:border-surface-700 my-1"></div>
 
                 <label class="flex items-center gap-3 cursor-pointer group">
-                    <p-checkbox [binary]="true" [ngModel]="options().wordDiff"
-                        (ngModelChange)="state.updateOptions({ wordDiff: $event })" inputId="wordDiff"></p-checkbox>
-                    <span
-                        class="text-sm font-bold bg-gradient-to-r from-primary to-primary-600 bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">Toggle
-                        Word Diff</span>
+                    <p-checkbox [binary]="true" [ngModel]="options().wordDiff" (ngModelChange)="state.updateOptions({ wordDiff: $event })" inputId="wordDiff"></p-checkbox>
+                    <span class="text-sm font-bold bg-gradient-to-r from-primary to-primary-600 bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">Toggle Word Diff</span>
                 </label>
             </div>
         </p-popover>
@@ -93,23 +73,42 @@
 
     <!-- Actions Group -->
     <div class="flex flex-wrap items-center justify-center xl:justify-end gap-3 flex-1 mt-2 xl:mt-0">
-
         <div class="flex flex-wrap items-center gap-2">
             <!-- Export Menu -->
-            <p-button icon="pi pi-download" label="Export" severity="secondary" [outlined]="true" size="small"
+            <p-button
+                icon="pi pi-download"
+                label="Export"
+                severity="secondary"
+                [outlined]="true"
+                size="small"
                 (onClick)="exportMenu.toggle($event)"
-                styleClass="rounded-lg bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 hover:border-primary hidden xl:inline-flex shadow-sm" />
+                styleClass="rounded-lg bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-700 hover:border-primary hidden xl:inline-flex shadow-sm"
+            />
             <p-menu #exportMenu [model]="exportMenuItems" [popup]="true" appendTo="body" />
 
             <div class="w-px h-8 bg-surface-200 dark:bg-surface-700 hidden sm:block mx-1"></div>
 
             <!-- Swap & Clear -->
-            <p-button icon="pi pi-arrows-h" label="Swap" severity="secondary" [outlined]="true" size="small"
-                (onClick)="state.swapFiles()" pTooltip="Swap panels"
-                styleClass="rounded-lg font-bold hover:bg-surface-100 dark:hover:bg-surface-800 border-surface-200 dark:border-surface-700 shadow-sm" />
-            <p-button icon="pi pi-times" label="Clear" severity="danger" [outlined]="true" size="small"
-                (onClick)="state.clearAll()" pTooltip="Clear all"
-                styleClass="rounded-lg font-bold bg-red-50 dark:bg-red-900/20 shadow-sm border-red-200 dark:border-red-800/50" />
+            <p-button
+                icon="pi pi-arrows-h"
+                label="Swap"
+                severity="secondary"
+                [outlined]="true"
+                size="small"
+                (onClick)="state.swapFiles()"
+                pTooltip="Swap panels"
+                styleClass="rounded-lg font-bold hover:bg-surface-100 dark:hover:bg-surface-800 border-surface-200 dark:border-surface-700 shadow-sm"
+            />
+            <p-button
+                icon="pi pi-times"
+                label="Clear"
+                severity="danger"
+                [outlined]="true"
+                size="small"
+                (onClick)="state.clearAll()"
+                pTooltip="Clear all"
+                styleClass="rounded-lg font-bold bg-red-50 dark:bg-red-900/20 shadow-sm border-red-200 dark:border-red-800/50"
+            />
         </div>
     </div>
 </div>

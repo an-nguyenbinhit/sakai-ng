@@ -2,60 +2,42 @@
     <!-- Input panels section -->
     @if (hasBothFiles()) {
     <!-- Unified card: header + collapsible panels -->
-    <div
-        class="bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <div class="bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
         <!-- Clickable toggle header -->
-        <div class="flex items-center px-4 md:px-6 py-3 md:py-4 bg-surface-50 dark:bg-surface-800/80 cursor-pointer select-none border-b border-surface-200 dark:border-surface-700 group transition-colors hover:bg-surface-100 dark:hover:bg-surface-800 relative"
-            (click)="inputCollapsed.set(!inputCollapsed())">
-            <div
-                class="flex-1 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 min-w-0 pr-10 md:pr-0">
-                <div
-                    class="flex items-center gap-2 bg-surface-0 dark:bg-surface-900 px-3 py-1.5 rounded-lg border border-surface-200 dark:border-surface-700 shadow-sm md:w-[320px] max-w-full overflow-hidden w-full">
-                    <i
-                        class="pi pi-file text-primary shrink-0 opacity-80 group-hover:opacity-100 transition-opacity"></i>
-                    <span
-                        class="text-sm font-bold text-surface-900 dark:text-surface-100 truncate flex-1 md:text-center text-left">{{
-                        state.leftFile()?.name ?? 'untitled' }}</span>
-                    <span
-                        class="text-xs font-mono text-surface-500 shrink-0 bg-surface-100 dark:bg-surface-800 px-2 py-0.5 rounded">{{
-                        leftLineCount() }} lines</span>
+        <div
+            class="flex items-center px-4 md:px-6 py-3 md:py-4 bg-surface-50 dark:bg-surface-800/80 cursor-pointer select-none border-b border-surface-200 dark:border-surface-700 group transition-colors hover:bg-surface-100 dark:hover:bg-surface-800 relative"
+            (click)="inputCollapsed.set(!inputCollapsed())"
+        >
+            <div class="flex-1 flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 min-w-0 pr-10 md:pr-0">
+                <div class="flex items-center gap-2 bg-surface-0 dark:bg-surface-900 px-3 py-1.5 rounded-lg border border-surface-200 dark:border-surface-700 shadow-sm md:w-[320px] max-w-full overflow-hidden w-full">
+                    <i class="pi pi-file text-primary shrink-0 opacity-80 group-hover:opacity-100 transition-opacity"></i>
+                    <span class="text-sm font-bold text-surface-900 dark:text-surface-100 truncate flex-1 md:text-center text-left">{{ state.leftFile()?.name ?? 'untitled' }}</span>
+                    <span class="text-xs font-mono text-surface-500 shrink-0 bg-surface-100 dark:bg-surface-800 px-2 py-0.5 rounded">{{ leftLineCount() }} lines</span>
                 </div>
 
-                <div
-                    class="hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-400 dark:text-surface-500 shrink-0 shadow-inner">
+                <div class="hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-400 dark:text-surface-500 shrink-0 shadow-inner">
                     <i class="pi pi-arrows-h text-sm"></i>
                 </div>
 
-                <div
-                    class="flex items-center gap-2 bg-surface-0 dark:bg-surface-900 px-3 py-1.5 rounded-lg border border-surface-200 dark:border-surface-700 shadow-sm md:w-[320px] max-w-full overflow-hidden w-full">
-                    <i
-                        class="pi pi-file text-primary shrink-0 opacity-80 group-hover:opacity-100 transition-opacity"></i>
-                    <span
-                        class="text-sm font-bold text-surface-900 dark:text-surface-100 truncate flex-1 md:text-center text-left">{{
-                        state.rightFile()?.name ?? 'untitled' }}</span>
-                    <span
-                        class="text-xs font-mono text-surface-500 shrink-0 bg-surface-100 dark:bg-surface-800 px-2 py-0.5 rounded">{{
-                        rightLineCount() }} lines</span>
+                <div class="flex items-center gap-2 bg-surface-0 dark:bg-surface-900 px-3 py-1.5 rounded-lg border border-surface-200 dark:border-surface-700 shadow-sm md:w-[320px] max-w-full overflow-hidden w-full">
+                    <i class="pi pi-file text-primary shrink-0 opacity-80 group-hover:opacity-100 transition-opacity"></i>
+                    <span class="text-sm font-bold text-surface-900 dark:text-surface-100 truncate flex-1 md:text-center text-left">{{ state.rightFile()?.name ?? 'untitled' }}</span>
+                    <span class="text-xs font-mono text-surface-500 shrink-0 bg-surface-100 dark:bg-surface-800 px-2 py-0.5 rounded">{{ rightLineCount() }} lines</span>
                 </div>
             </div>
-            <div
-                class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-100 dark:bg-surface-800 text-surface-500 group-hover:text-primary group-hover:bg-primary/10 transition-colors shrink-0 absolute right-4 md:right-6">
-                <i class="pi text-sm transition-transform duration-300" [class.pi-chevron-up]="!inputCollapsed()"
-                    [class.pi-chevron-down]="inputCollapsed()"></i>
+            <div class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-100 dark:bg-surface-800 text-surface-500 group-hover:text-primary group-hover:bg-primary/10 transition-colors shrink-0 absolute right-4 md:right-6">
+                <i class="pi text-sm transition-transform duration-300" [class.pi-chevron-up]="!inputCollapsed()" [class.pi-chevron-down]="inputCollapsed()"></i>
             </div>
         </div>
 
         <!-- Collapsible content -->
-        <div class="grid transition-[grid-template-rows] duration-500 ease-in-out"
-            [style.grid-template-rows]="inputCollapsed() ? '0fr' : '1fr'">
+        <div class="grid transition-[grid-template-rows] duration-500 ease-in-out" [style.grid-template-rows]="inputCollapsed() ? '0fr' : '1fr'">
             <div class="overflow-hidden" (focusout)="onInputPanelBlur($event)">
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 p-5 bg-surface-50/50 dark:bg-surface-900/50">
-                    <div
-                        class="h-full bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-2xl shadow-sm">
+                    <div class="h-full bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-2xl shadow-sm">
                         <p-code-input side="left" class="block h-full" />
                     </div>
-                    <div
-                        class="h-full bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-2xl shadow-sm">
+                    <div class="h-full bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-2xl shadow-sm">
                         <p-code-input side="right" class="block h-full" />
                     </div>
                 </div>
@@ -65,24 +47,19 @@
     } @else {
     <!-- No card wrapper when both files not loaded yet -->
     <div class="overflow-hidden" (focusout)="onInputPanelBlur($event)">
-        <div
-            class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 bg-surface-0 dark:bg-surface-900 p-4 md:p-6 rounded-xl border border-surface-200 dark:border-surface-700 shadow-sm hover:shadow-md transition-shadow">
-            <div
-                class="flex flex-col p-5 bg-surface-50 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700/50 rounded-lg">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 bg-surface-0 dark:bg-surface-900 p-4 md:p-6 rounded-xl border border-surface-200 dark:border-surface-700 shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex flex-col p-5 bg-surface-50 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700/50 rounded-lg">
                 <div class="flex items-center gap-3 mb-4 shrink-0">
-                    <div
-                        class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                         <i class="pi pi-file"></i>
                     </div>
                     <span class="font-bold text-lg text-surface-900 dark:text-surface-100">Original Data</span>
                 </div>
                 <p-code-input side="left" class="block flex-1 min-h-[300px]" />
             </div>
-            <div
-                class="flex flex-col p-5 bg-surface-50 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700/50 rounded-lg">
+            <div class="flex flex-col p-5 bg-surface-50 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700/50 rounded-lg">
                 <div class="flex items-center gap-3 mb-4 shrink-0">
-                    <div
-                        class="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+                    <div class="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 flex items-center justify-center">
                         <i class="pi pi-file-edit"></i>
                     </div>
                     <span class="font-bold text-lg text-surface-900 dark:text-surface-100">Modified Data</span>
@@ -91,11 +68,9 @@
             </div>
         </div>
         @if (hasAnyFile()) {
-        <div
-            class="flex items-center justify-center mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-xl text-sm font-medium border border-blue-100 dark:border-blue-900/50 gap-3 animate-fadein">
+        <div class="flex items-center justify-center mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-xl text-sm font-medium border border-blue-100 dark:border-blue-900/50 gap-3 animate-fadein">
             <i class="pi pi-info-circle text-xl"></i>
-            <span>Add code to the {{ state.leftFile() ? 'right (Modified Data)' : 'left (Original Data)' }} panel to
-                activate the comparison engine.</span>
+            <span>Add code to the {{ state.leftFile() ? 'right (Modified Data)' : 'left (Original Data)' }} panel to activate the comparison engine.</span>
         </div>
         }
     </div>
@@ -103,24 +78,20 @@
 
     <!-- Diff section -->
     @if (hasBothFiles()) {
-    <div
-        class="flex flex-col mt-2 animate-fadein bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl overflow-hidden shadow-sm w-full">
+    <div class="flex flex-col mt-2 animate-fadein bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-xl overflow-hidden shadow-sm w-full">
         <!-- Unified Toolbar & Summary -->
-        <div
-            class="flex flex-col w-full border-b border-surface-200 dark:border-surface-700 sticky top-0 z-10 shadow-sm">
+        <div class="flex flex-col w-full border-b border-surface-200 dark:border-surface-700 sticky top-0 z-10 shadow-sm">
             <p-diff-toolbar [diffViewer]="diffViewerRef" class="w-full block" />
             <div class="w-full h-px bg-surface-200 dark:bg-surface-700 hidden lg:block opacity-50"></div>
             <p-diff-summary class="w-full block bg-surface-50/50 dark:bg-surface-800/20" />
         </div>
 
         <!-- Viewer & Minimap -->
-        <div class="flex transition-[height] duration-500 ease-in-out relative w-full overflow-hidden bg-surface-0 dark:bg-surface-900"
-            [style.height]="inputCollapsed() ? 'calc(100vh - 12rem)' : '65vh'">
+        <div class="flex transition-[height] duration-500 ease-in-out relative w-full overflow-hidden bg-surface-0 dark:bg-surface-900" [style.height]="inputCollapsed() ? 'calc(100vh - 12rem)' : '65vh'">
             <div class="flex-1 min-w-0 h-full">
                 <p-diff-viewer #diffViewerRef class="block h-full" />
             </div>
-            <div
-                class="hidden md:block w-16 shrink-0 border-l border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800">
+            <div class="hidden md:block w-16 shrink-0 border-l border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800">
                 <p-diff-minimap />
             </div>
         </div>

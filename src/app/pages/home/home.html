@@ -1,12 +1,10 @@
 <div class="flex flex-col gap-6 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
-
     <!-- ===== HERO ===== -->
     <div class="hero-wrapper text-center flex items-center justify-center">
         <!-- Title + sub -->
         <div class="relative z-10 w-full">
-            <h1
-                class="text-2xl sm:text-3xl lg:text-4xl font-bold text-surface-900 dark:text-white m-0 tracking-tight flex items-center justify-center gap-3">
-                <i class="pi pi-wrench text-primary-500 dark:text-white/80" style="font-size: 1.5rem;"></i>
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-surface-900 dark:text-white m-0 tracking-tight flex items-center justify-center gap-3">
+                <i class="pi pi-wrench text-primary-500 dark:text-white/80" style="font-size: 1.5rem"></i>
                 Dev Tools
             </h1>
         </div>
@@ -15,15 +13,15 @@
     <!-- ===== STATS ROW ===== -->
     <div class="flex flex-wrap items-center justify-center gap-3">
         <div class="stat-chip">
-            <i class="pi pi-th-large text-primary" style="font-size: 0.8rem;"></i>
+            <i class="pi pi-th-large text-primary" style="font-size: 0.8rem"></i>
             <span>{{ tools.length }} tools available</span>
         </div>
         <div class="stat-chip">
-            <i class="pi pi-wifi text-orange-400" style="font-size: 0.8rem;"></i>
+            <i class="pi pi-wifi text-orange-400" style="font-size: 0.8rem"></i>
             <span>Client-side only</span>
         </div>
         <div class="stat-chip">
-            <i class="pi pi-shield text-green-500" style="font-size: 0.8rem;"></i>
+            <i class="pi pi-shield text-green-500" style="font-size: 0.8rem"></i>
             <span>Zero data collection</span>
         </div>
     </div>
@@ -31,9 +29,8 @@
     <!-- ===== SEARCH BAR ===== -->
     <div class="flex flex-col gap-3">
         <div class="search-wrap">
-            <i class="pi pi-search search-icon text-surface-400" style="font-size: 0.9rem;"></i>
-            <input type="text" placeholder="Search tools…" [value]="searchQuery()"
-                (input)="onQueryChange($any($event.target).value)" />
+            <i class="pi pi-search search-icon text-surface-400" style="font-size: 0.9rem"></i>
+            <input type="text" placeholder="Search tools…" [value]="searchQuery()" (input)="onQueryChange($any($event.target).value)" />
             @if (searchQuery()) {
             <button class="clear-btn" (click)="clearSearch()" title="Clear">
                 <i class="pi pi-times"></i>
@@ -46,40 +43,36 @@
     <div class="flex flex-col gap-3">
         <div class="flex items-center justify-between">
             <h2 class="text-xs font-semibold uppercase tracking-widest text-surface-400 m-0">
-                @if (searchQuery()) {
-                {{ filteredTools().length }} result{{ filteredTools().length !== 1 ? 's' : '' }} for "{{ searchQuery()
-                }}"
-                } @else {
-                Available tools
-                }
+                @if (searchQuery()) { {{ filteredTools().length }} result{{ filteredTools().length !== 1 ? 's' : '' }} for "{{ searchQuery() }}" } @else { Available tools }
             </h2>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-
             @for (tool of filteredTools(); track tool.route) {
-            <a [routerLink]="tool.route" class="tool-card" [style.--card-accent-from]="tool.accentFrom"
-                [style.--card-accent-to]="tool.accentTo" [style.--card-glow]="tool.glow"
-                [style.--card-border-hover]="tool.borderHover" [style.--card-tag-bg]="tool.tagBg"
-                [style.--card-tag-color]="tool.tagColor">
+            <a
+                [routerLink]="tool.route"
+                class="tool-card"
+                [style.--card-accent-from]="tool.accentFrom"
+                [style.--card-accent-to]="tool.accentTo"
+                [style.--card-glow]="tool.glow"
+                [style.--card-border-hover]="tool.borderHover"
+                [style.--card-tag-bg]="tool.tagBg"
+                [style.--card-tag-color]="tool.tagColor"
+            >
                 <!-- Header row -->
                 <div class="flex items-start justify-between">
                     <!-- Icon -->
                     <div class="card-icon-wrap" [style.background]="tool.iconBg">
-                        <i [class]="tool.icon" [style.color]="tool.iconColor" style="font-size: 1.25rem;"></i>
+                        <i [class]="tool.icon" [style.color]="tool.iconColor" style="font-size: 1.25rem"></i>
                     </div>
                     <!-- Arrow -->
-                    <i class="pi pi-arrow-up-right card-arrow" style="font-size: 0.85rem; margin-top: 0.1rem;"></i>
+                    <i class="pi pi-arrow-up-right card-arrow" style="font-size: 0.85rem; margin-top: 0.1rem"></i>
                 </div>
 
                 <!-- Content -->
                 <div class="flex flex-col gap-1.5">
-                    <h3 class="font-semibold text-surface-800 dark:text-surface-100 m-0 text-base">
-                        {{ tool.label }}
-                    </h3>
-                    <p class="text-sm text-surface-500 dark:text-surface-400 m-0 leading-relaxed">
-                        {{ tool.description }}
-                    </p>
+                    <h3 class="font-semibold text-surface-800 dark:text-surface-100 m-0 text-base">{{ tool.label }}</h3>
+                    <p class="text-sm text-surface-500 dark:text-surface-400 m-0 leading-relaxed">{{ tool.description }}</p>
                 </div>
 
                 <!-- Tags -->
@@ -99,12 +92,9 @@
                     <p class="m-0 font-medium text-surface-500">No tools found</p>
                     <p class="m-0 text-sm text-surface-400 mt-1">Try a different keyword</p>
                 </div>
-                <button class="mt-2 text-sm text-primary font-medium cursor-pointer bg-transparent border-none p-0"
-                    (click)="clearSearch()">Clear search</button>
+                <button class="mt-2 text-sm text-primary font-medium cursor-pointer bg-transparent border-none p-0" (click)="clearSearch()">Clear search</button>
             </div>
             }
-
         </div>
     </div>
-
 </div>

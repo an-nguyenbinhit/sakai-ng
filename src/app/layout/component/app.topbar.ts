@@ -53,7 +53,7 @@ import { LayoutService } from '@/app/layout/service/layout.service';
             </a>
             <a routerLink="/dummy-file-generator" routerLinkActive="topnav-active" class="topnav-item">
                 <i class="pi pi-file-plus"></i>
-                <span>File Generator</span>
+                <span>Dummy File Generator</span>
             </a>
         </nav>
 

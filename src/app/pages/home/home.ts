@@ -103,6 +103,21 @@ export class Home {
             borderHover: '#14b8a6',
             tagBg: 'rgba(20,184,166,0.1)',
             tagColor: '#0d9488'
+        },
+        {
+            label: 'Dummy File Generator',
+            description: 'Generate dummy files of any size for testing upload limits and system storage.',
+            route: '/dummy-file-generator',
+            icon: 'pi pi-file-plus',
+            tags: ['Generator', 'Testing'],
+            accentFrom: 'rgba(16,185,129,0.15)',
+            accentTo: 'rgba(5,150,105,0.1)',
+            iconBg: 'oklch(0.95 0.05 150)',
+            iconColor: '#10b981',
+            glow: 'rgba(16,185,129,0.35)',
+            borderHover: '#10b981',
+            tagBg: 'rgba(16,185,129,0.1)',
+            tagColor: '#059669'
         }
     ];
 
