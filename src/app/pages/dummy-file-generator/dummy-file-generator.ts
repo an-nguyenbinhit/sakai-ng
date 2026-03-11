@@ -3,7 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { CheckboxModule } from 'primeng/checkbox';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { TextareaModule } from 'primeng/textarea';
+import { EditorModule } from 'primeng/editor';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
@@ -14,9 +17,14 @@ interface FileType {
     mime: string;
 }
 
+export interface JsonField {
+    name: string;
+    type: 'string' | 'number' | 'boolean' | 'uuid';
+}
+
 @Component({
     selector: 'app-dummy-file-generator',
-    imports: [CommonModule, FormsModule, SelectModule, InputNumberModule, TextareaModule, ButtonModule, ToastModule],
+    imports: [CommonModule, FormsModule, SelectModule, InputNumberModule, EditorModule, CheckboxModule, ProgressBarModule, ButtonModule, ToastModule],
     providers: [MessageService],
     templateUrl: './dummy-file-generator.html',
     styleUrl: './dummy-file-generator.scss'
@@ -36,6 +44,25 @@ export class DummyFileGeneratorComponent {
     selectedFileType: string = 'txt';
     fileSizeInMb: number = 10;
     sampleText: string = 'Generated Dummy Padding Content - ';
+    addRandomNoise: boolean = false;
+    progressValue: number = 0;
+    
+    // JSON Schema Builder
+    jsonSchema: JsonField[] = [
+        { name: 'id', type: 'uuid' },
+        { name: 'name', type: 'string' },
+        { name: 'isActive', type: 'boolean' }
+    ];
+
+    addJsonField() {
+        this.jsonSchema.push({ name: 'field' + (this.jsonSchema.length + 1), type: 'string' });
+    }
+
+    removeJsonField(index: number) {
+        if (this.jsonSchema.length > 1) {
+            this.jsonSchema.splice(index, 1);
+        }
+    }
     isGenerating: boolean = false;
 
     constructor(private messageService: MessageService) { }
@@ -51,26 +78,33 @@ export class DummyFileGeneratorComponent {
             return;
         }
 
-        if (!this.sampleText?.trim()) {
+        let cleanedText = this.sampleText;
+        if (!cleanedText?.trim() || cleanedText === '<p><br></p>') {
             this.messageService.add({ severity: 'error', summary: 'Missing Content', detail: 'Sample Text cannot be empty.' });
             return;
         }
 
+        if (this.selectedFileType !== 'html') {
+            // Strip HTML tags for non-html formats
+            cleanedText = cleanedText.replace(/<[^>]*>?/gm, '');
+        }
+
         this.isGenerating = true;
+        this.progressValue = 0;
 
         // Use setTimeout to allow UI to update to loading state before heavy JS operations block the thread
         setTimeout(() => {
             try {
-                this.processFileGeneration();
+                this.processFileGenerationChunked(cleanedText);
             } catch (error) {
                 console.error(error);
-                this.messageService.add({ severity: 'error', summary: 'Generation Failed', detail: 'An error occurred while generating the file.' });
                 this.isGenerating = false;
+                this.messageService.add({ severity: 'error', summary: 'Generation Failed', detail: 'An error occurred while generating the file.' });
             }
         }, 50);
     }
 
-    private processFileGeneration() {
+    private processFileGenerationChunked(textToUse: string) {
         const totalBytes = this.fileSizeInMb * 1024 * 1024;
         let finalBuffer: Uint8Array;
 
@@ -78,19 +112,31 @@ export class DummyFileGeneratorComponent {
 
         // Handling file formats with headers (PDF, HTML, Images) to make them minimally valid
         if (this.selectedFileType === 'pdf') {
-            finalBuffer = this.generatePdfBuffer(totalBytes, this.sampleText);
+            finalBuffer = this.generatePdfBuffer(totalBytes, textToUse);
         } else if (this.selectedFileType === 'html') {
-            finalBuffer = this.generateHtmlBuffer(totalBytes, this.sampleText);
+            finalBuffer = this.generateHtmlBuffer(totalBytes, textToUse);
         } else if (this.selectedFileType === 'jpg') {
-            finalBuffer = this.generateJpgBuffer(totalBytes, this.sampleText);
+            finalBuffer = this.generateJpgBuffer(totalBytes, textToUse);
         } else if (this.selectedFileType === 'png') {
-            finalBuffer = this.generatePngBuffer(totalBytes, this.sampleText);
+            finalBuffer = this.generatePngBuffer(totalBytes, textToUse);
         } else if (this.selectedFileType === 'json') {
-            finalBuffer = this.generateJsonBuffer(totalBytes, this.sampleText);
+            finalBuffer = this.generateJsonBuffer(totalBytes, textToUse);
         } else {
             // General text formats
-            finalBuffer = this.generateTextBuffer(totalBytes, this.sampleText);
+            finalBuffer = this.generateTextBuffer(totalBytes, textToUse);
         }
+
+        // Apply Random Noise if enabled
+        if (this.addRandomNoise && finalBuffer.length >= 36) {
+            const noise = crypto.randomUUID();
+            const encoder = new TextEncoder();
+            const noiseBytes = encoder.encode(noise);
+            finalBuffer.set(noiseBytes, finalBuffer.length - noiseBytes.length);
+        }
+
+        this.progressValue = 100;
+
+        this.progressValue = 100;
 
         // Trigger download
         const blob = new Blob([finalBuffer as any], { type: typeInfo.mime });
@@ -142,16 +188,62 @@ export class DummyFileGeneratorComponent {
         const buffer = new Uint8Array(totalBytes);
         const encoder = new TextEncoder();
 
-        const header = encoder.encode('{\n  "data": "');
-        const footer = encoder.encode('"\n}');
-        // Escape quotes in text just in case
-        const safeText = text.replace(/"/g, '\\"');
-        const encodedText = encoder.encode(safeText);
-
+        const header = encoder.encode('[\n');
+        const footer = encoder.encode('\n]');
+        
         buffer.set(header, 0);
+        
         const fillEnd = Math.max(header.length, totalBytes - footer.length);
+        let currentPos = header.length;
+        let isFirst = true;
 
-        this.fillBuffer(buffer, encodedText, header.length, fillEnd);
+        const maxItemLength = 2000; 
+
+        while (currentPos < fillEnd) {
+            let itemObj: any = {};
+            
+            for (const field of this.jsonSchema) {
+                if (field.type === 'uuid') {
+                    itemObj[field.name] = crypto.randomUUID();
+                } else if (field.type === 'string') {
+                    itemObj[field.name] = text.substring(0, 20).replace(/[\"\n]/g, '') + ' ' + Math.random().toString(36).substring(7);
+                } else if (field.type === 'number') {
+                    itemObj[field.name] = Math.floor(Math.random() * 1000000);
+                } else if (field.type === 'boolean') {
+                    itemObj[field.name] = Math.random() > 0.5;
+                }
+            }
+
+            let itemString = JSON.stringify(itemObj);
+            if (!isFirst) {
+                itemString = ',\n  ' + itemString;
+            } else {
+                itemString = '  ' + itemString;
+                isFirst = false;
+            }
+
+            let encodedItem = encoder.encode(itemString);
+            
+            // If the encoded item would exceed our fill limit, pad with spaces and break
+            if (currentPos + encodedItem.length > fillEnd) {
+                const remaining = fillEnd - currentPos;
+                for(let i = 0; i < remaining; i++) {
+                     buffer[currentPos + i] = 0x20; 
+                }
+                currentPos = fillEnd;
+                break;
+            }
+
+            buffer.set(encodedItem, currentPos);
+            currentPos += encodedItem.length;
+            
+            // Rough progress update (every ~1MB or 10% generated) to keep UI responsive
+            if (currentPos % (1024 * 1024) < encodedItem.length) {
+                 this.progressValue = Math.floor((currentPos / totalBytes) * 100);
+            }
+        }
+        
+        this.progressValue = 100;
 
         if (totalBytes > footer.length) {
             buffer.set(footer, totalBytes - footer.length);
