@@ -252,136 +252,98 @@ export class DummyFileGeneratorComponent {
         return buffer;
     }
 
+    private createBaseImageWithText(text: string, mimeType: 'image/jpeg' | 'image/png'): Uint8Array {
+        const canvas = document.createElement('canvas');
+        canvas.width = 800;
+        canvas.height = 600;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 30px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            const asciiContent = text.replace(/[^\x20-\x7E\s]/g, '');
+            const displayContent = (asciiContent.trim().length > 0 ? asciiContent : 'Dummy Image Content').trim();
+            
+            const words = displayContent.split(/\s+/);
+            let line = '';
+            const lines = [];
+            for (let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                const metrics = ctx.measureText(testLine);
+                if (metrics.width > canvas.width - 100 && n > 0) {
+                    lines.push(line);
+                    line = words[n] + ' ';
+                } else {
+                    line = testLine;
+                }
+            }
+            lines.push(line);
+            
+            let y = canvas.height / 2 - (lines.length * 40) / 2;
+            for (const l of lines) {
+                ctx.fillText(l.substring(0, 100).trim(), canvas.width / 2, y);
+                y += 40;
+                if (y > canvas.height - 50) break; 
+            }
+        }
+        
+        const dataUrl = canvas.toDataURL(mimeType, 0.9);
+        const base64 = dataUrl.split(',')[1];
+        const binaryString = window.atob(base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes;
+    }
+
     private generateJpgBuffer(totalBytes: number, text: string): Uint8Array {
         const buffer = new Uint8Array(totalBytes);
-
-        // 1x1 fully valid JPEG structure
-        // minimal gray image
-        const rawJpg = new Uint8Array([
-            0xFF, 0xD8, // SOI
-            0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x01, 0x00, 0x48, 0x00, 0x48, 0x00, 0x00, // APP0
-            0xFF, 0xDB, 0x00, 0x43, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, // DQT
-            0xFF, 0xC0, 0x00, 0x0B, 0x08, 0x00, 0x01, 0x00, 0x01, 0x01, 0x01, 0x11, 0x00, // SOF0
-            0xFF, 0xC4, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, // DHT
-            0xFF, 0xC4, 0x00, 0x14, 0x10, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // DHT
-            0xFF, 0xDA, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3F, 0x00, // SOS
-            0x3F, 0x00, // image data
-            0xFF, 0xD9 // EOI
-        ]);
-
-        const eoiLength = 2; // EOI is last 2 bytes FFD9
-        const header = rawJpg.subarray(0, rawJpg.length - eoiLength);
-        const footer = rawJpg.subarray(rawJpg.length - eoiLength);
-
-        buffer.set(header, 0);
-
-        let currentPos = header.length;
-        const encoder = new TextEncoder();
-        const encodedText = encoder.encode(text);
-
-        // We inject COM (Comment) segments: 0xFF 0xFE <length_high> <length_low> <data>
-        // Max segment data size is 65533 (65535 - 2 bytes for length)
-
-        while (currentPos < totalBytes - eoiLength) {
-            const bytesRemaining = (totalBytes - eoiLength) - currentPos;
-
-            // Need at least 4 bytes for a COM marker
-            if (bytesRemaining < 4) {
-                // Not enough room for a marker segment, just pad before EOI 
-                // Technically invalid strictly but safely ignored by readers after image data
-                while (currentPos < totalBytes - eoiLength) {
-                    buffer[currentPos] = 0x00;
-                    currentPos++;
-                }
-                break;
-            }
-
-            const segmentSize = Math.min(bytesRemaining, 65535);
-            const dataSize = segmentSize - 2; // 2 bytes for length value itself
-
-            buffer[currentPos++] = 0xFF;
-            buffer[currentPos++] = 0xFE; // COM marker
-            buffer[currentPos++] = (segmentSize >> 8) & 0xFF; // Length high
-            buffer[currentPos++] = segmentSize & 0xFF; // Length low
-
-            // Fill segment data
-            const segmentEnd = currentPos + dataSize;
-            while (currentPos < segmentEnd) {
-                const spaceLeft = segmentEnd - currentPos;
+        const rawImage = this.createBaseImageWithText(text, 'image/jpeg');
+        
+        const copyLength = Math.min(rawImage.length, totalBytes);
+        buffer.set(rawImage.subarray(0, copyLength), 0);
+        
+        if (copyLength < totalBytes) {
+            const encoder = new TextEncoder();
+            const encodedText = encoder.encode(text + '\n');
+            
+            let currentPos = copyLength;
+            while (currentPos < totalBytes) {
+                const spaceLeft = totalBytes - currentPos;
                 const toCopy = spaceLeft < encodedText.length ? encodedText.subarray(0, spaceLeft) : encodedText;
                 if (toCopy.length > 0) {
                     buffer.set(toCopy, currentPos);
                     currentPos += toCopy.length;
                 } else {
-                    // Fallback
                     buffer[currentPos++] = 0x20;
                 }
             }
         }
-
-        buffer.set(footer, currentPos);
-
+        
         return buffer;
     }
 
     private generatePngBuffer(totalBytes: number, text: string): Uint8Array {
         const buffer = new Uint8Array(totalBytes);
-
-        // 1x1 fully valid PNG signature, IHDR, IDAT
-        const rawPng = new Uint8Array([
-            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // Signature
-            0x00, 0x00, 0x00, 0x0D, // IHDR len 13
-            0x49, 0x48, 0x44, 0x52, // "IHDR"
-            0x00, 0x00, 0x00, 0x01, // width 1
-            0x00, 0x00, 0x00, 0x01, // height 1
-            0x08, 0x06, 0x00, 0x00, 0x00, // RGBA, depth 8
-            0x1F, 0x15, 0xC4, 0x89, // IHDR CRC
-
-            0x00, 0x00, 0x00, 0x0D, // IDAT len 13
-            0x49, 0x44, 0x41, 0x54, // "IDAT"
-            0x08, 0x1D, 0x01, 0x05, 0x00, 0xFA, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, // IDAT Data
-            0x01, 0xA8, 0x2A, 0x80, // IDAT CRC (dummy but fine for 1x1 empty)
-
-            0x00, 0x00, 0x00, 0x00, // IEND length 0
-            0x49, 0x45, 0x4E, 0x44, // "IEND"
-            0xAE, 0x42, 0x60, 0x82  // IEND CRC
-        ]);
-
-        const iendChunkLen = 12; // Length(4) + Type(4) + CRC(4)
-        const header = rawPng.subarray(0, rawPng.length - iendChunkLen);
-        const footer = rawPng.subarray(rawPng.length - iendChunkLen);
-
-        buffer.set(header, 0);
-
-        let currentPos = header.length;
-        const encoder = new TextEncoder();
-        const encodedText = encoder.encode(text);
-
-        // We inject custom tEXt chunks: length(4) + "tEXt"(4) + keyword(1) + \0 + text + CRC(4)
-        // Max chunk size in standard PNG is 2^31 - 1, we can just make one huge custom chunk
-
-        const chunkType = encoder.encode('zPAd'); // Custom unknown ancillary chunk safe to ignore
-
-        const availableSpace = totalBytes - currentPos - footer.length;
-
-        if (availableSpace >= 12) {
-            const dataLen = availableSpace - 12; // 4 len + 4 type + 4 crc
-
-            // Len
-            buffer[currentPos++] = (dataLen >>> 24) & 0xFF;
-            buffer[currentPos++] = (dataLen >>> 16) & 0xFF;
-            buffer[currentPos++] = (dataLen >>> 8) & 0xFF;
-            buffer[currentPos++] = dataLen & 0xFF;
-
-            // Type
-            buffer.set(chunkType, currentPos);
-            currentPos += 4;
-
-            // Data
-            const dataStart = currentPos;
-            const dataEnd = currentPos + dataLen;
-            while (currentPos < dataEnd) {
-                const spaceLeft = dataEnd - currentPos;
+        const rawImage = this.createBaseImageWithText(text, 'image/png');
+        
+        const copyLength = Math.min(rawImage.length, totalBytes);
+        buffer.set(rawImage.subarray(0, copyLength), 0);
+        
+        if (copyLength < totalBytes) {
+            const encoder = new TextEncoder();
+            const encodedText = encoder.encode(text + '\n');
+            
+            let currentPos = copyLength;
+            while (currentPos < totalBytes) {
+                const spaceLeft = totalBytes - currentPos;
                 const toCopy = spaceLeft < encodedText.length ? encodedText.subarray(0, spaceLeft) : encodedText;
                 if (toCopy.length > 0) {
                     buffer.set(toCopy, currentPos);
@@ -390,21 +352,8 @@ export class DummyFileGeneratorComponent {
                     buffer[currentPos++] = 0x20;
                 }
             }
-
-            // CRC (Fake CRC is fine for ignored custom chunk)
-            buffer[currentPos++] = 0xDE;
-            buffer[currentPos++] = 0xAD;
-            buffer[currentPos++] = 0xBE;
-            buffer[currentPos++] = 0xEF;
-        } else {
-            // Not enough space for a valid chunk, just pad with 0s (invalid strict PNG but accepted mostly)
-            while (currentPos < totalBytes - footer.length) {
-                buffer[currentPos++] = 0x00;
-            }
         }
-
-        buffer.set(footer, currentPos);
-
+        
         return buffer;
     }
 

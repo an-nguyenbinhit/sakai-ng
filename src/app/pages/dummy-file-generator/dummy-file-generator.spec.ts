@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DummyFileGenerator } from './dummy-file-generator';
+import { DummyFileGeneratorComponent } from './dummy-file-generator';
 
-describe('DummyFileGenerator', () => {
-    let component: DummyFileGenerator;
-    let fixture: ComponentFixture<DummyFileGenerator>;
+describe('DummyFileGeneratorComponent', () => {
+    let component: DummyFileGeneratorComponent;
+    let fixture: ComponentFixture<DummyFileGeneratorComponent>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [DummyFileGenerator]
+            imports: [DummyFileGeneratorComponent]
         }).compileComponents();
 
-        fixture = TestBed.createComponent(DummyFileGenerator);
+        fixture = TestBed.createComponent(DummyFileGeneratorComponent);
         component = fixture.componentInstance;
         await fixture.whenStable();
     });
