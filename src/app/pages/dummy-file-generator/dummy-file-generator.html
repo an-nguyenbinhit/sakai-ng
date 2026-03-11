@@ -36,10 +36,29 @@
                         incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus"
                         decrementButtonIcon="pi pi-minus" inputId="horizontal" styleClass="w-full"
                         (ngModelChange)="syncDefaultFileName()"></p-inputNumber>
-                    <div class="flex items-center gap-2 mt-2">
-                        <p-checkbox [(ngModel)]="addRandomNoise" [binary]="true" inputId="randomNoise"></p-checkbox>
-                        <label for="randomNoise" class="text-sm font-medium text-surface-700 dark:text-surface-300"
-                            pTooltip="Appends a unique UUID hash to bypass deduplication filters" tooltipPosition="top">Random Noise
+                    <!-- Quick size presets -->
+                    <div class="flex gap-1 mt-2 flex-wrap">
+                        <button *ngFor="let preset of sizePresets"
+                            type="button"
+                            (click)="fileSizeInMb = preset; syncDefaultFileName()"
+                            class="px-2 py-0.5 rounded text-xs font-mono font-medium border transition-colors cursor-pointer"
+                            [class.bg-primary]="fileSizeInMb === preset"
+                            [class.text-white]="fileSizeInMb === preset"
+                            [class.border-primary]="fileSizeInMb === preset"
+                            [class.bg-surface-0]="fileSizeInMb !== preset"
+                            [class.dark:bg-surface-800]="fileSizeInMb !== preset"
+                            [class.text-surface-600]="fileSizeInMb !== preset"
+                            [class.dark:text-surface-300]="fileSizeInMb !== preset"
+                            [class.border-surface-300]="fileSizeInMb !== preset"
+                            [class.dark:border-surface-600]="fileSizeInMb !== preset"
+                            [class.hover:border-primary]="fileSizeInMb !== preset">{{preset}}MB</button>
+                    </div>
+                    <!-- Random Noise toggle -->
+                    <div class="flex items-center gap-2 mt-3">
+                        <p-toggleswitch [(ngModel)]="addRandomNoise" inputId="randomNoise"></p-toggleswitch>
+                        <label for="randomNoise" class="text-sm font-medium text-surface-700 dark:text-surface-300 cursor-pointer"
+                            pTooltip="Thêm UUID ngẫu nhiên vào file để mỗi file có hash khác nhau, tránh bị hệ thống deduplication nhận ra là trùng"
+                            tooltipPosition="top">Random Noise
                             <span class="text-xs font-normal text-surface-400">(bypass deduplication)</span>
                         </label>
                     </div>

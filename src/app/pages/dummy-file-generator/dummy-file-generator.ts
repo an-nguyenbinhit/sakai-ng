@@ -5,11 +5,13 @@ import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { CheckboxModule } from 'primeng/checkbox';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { TextareaModule } from 'primeng/textarea';
 import { EditorModule } from 'primeng/editor';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
 import { MessageService } from 'primeng/api';
 
 interface FileType {
@@ -25,12 +27,14 @@ export interface JsonField {
 
 @Component({
     selector: 'app-dummy-file-generator',
-    imports: [CommonModule, FormsModule, SelectModule, InputNumberModule, InputTextModule, EditorModule, CheckboxModule, ProgressBarModule, ButtonModule, ToastModule],
+    imports: [CommonModule, FormsModule, SelectModule, InputNumberModule, InputTextModule, EditorModule, CheckboxModule, ToggleSwitchModule, ProgressBarModule, ButtonModule, ToastModule, TooltipModule],
     providers: [MessageService],
     templateUrl: './dummy-file-generator.html',
     styleUrl: './dummy-file-generator.scss'
 })
 export class DummyFileGeneratorComponent {
+    sizePresets: number[] = [1, 10, 50, 100, 200];
+
     fileTypes: FileType[] = [
         { label: 'Text Document (.txt)', value: 'txt', mime: 'text/plain' },
         { label: 'CSV File (.csv)', value: 'csv', mime: 'text/csv' },
