@@ -163,45 +163,52 @@ export class DummyFileGeneratorComponent {
         const buffer = new Uint8Array(totalBytes);
         const encoder = new TextEncoder();
 
-        // Very basic valid empty PDF skeleton
-        const headerStr = `%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n` +
-            `2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n` +
-            `3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >>\nendobj\n`;
-        // We will insert padding as a comment after obj 3
+        // Extract some ASCII text to render visibly on the first page
+        const asciiContent = text.replace(/[^\x20-\x7E]/g, '');
+        const displayContent = (asciiContent.length > 0 ? asciiContent : 'Dummy PDF Content')
+            .substring(0, 100)
+            .replace(/\\/g, '\\\\')
+            .replace(/\(/g, '\\(')
+            .replace(/\)/g, '\\)');
 
+        const contentStream = `BT\n/F1 24 Tf\n50 700 Td\n(${displayContent}) Tj\nET\n`;
+        const contentLen = contentStream.length;
+
+        const obj1 = `1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n`;
+        const obj2 = `2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n`;
+        const obj3 = `3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>\nendobj\n`;
+        const obj4 = `4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n`;
+        const obj5 = `5 0 obj\n<< /Length ${contentLen} >>\nstream\n${contentStream}endstream\nendobj\n`;
+
+        const pdfSig = `%PDF-1.4\n`;
+        
+        const obj1Loc = pdfSig.length;
+        const obj2Loc = obj1Loc + obj1.length;
+        const obj3Loc = obj2Loc + obj2.length;
+        const obj4Loc = obj3Loc + obj3.length;
+        const obj5Loc = obj4Loc + obj4.length;
+
+        const headerStr = pdfSig + obj1 + obj2 + obj3 + obj4 + obj5;
         const header = encoder.encode(headerStr);
-
-        // Calculate where the footer starts
-        // Footer length will be around 110 bytes depending on the exact byte offsets, 
-        // but we can pad within the PDF structure (e.g., using a comment) so the xref is accurate.
-        // For simplicity to make it valid: 
-        // 1. Write header
-        // 2. Write padding (as PDF comments `% .... \n`)
-        // 3. Write footer with correct XREF offsets
 
         buffer.set(header, 0);
 
-        // Prepare padding
         const paddingPrefix = encoder.encode('% ');
         const paddingNewline = encoder.encode('\n');
         const encodedText = encoder.encode(text);
 
-        // Approx footer size calculation (needs exact byte offsets for xref)
-        // Let's reserve enough space at the end for the footer (e.g., 200 bytes)
-        const footerSpace = 250;
+        // Reserve space for the cross-reference table and trailer
+        const footerSpace = 400;
         const paddingEnd = totalBytes - footerSpace;
-
-        // Fill padding
         let currentPos = header.length;
 
+        // Fill padding with the full text (including unicode) as comments
         while (currentPos < paddingEnd) {
-            // Write comment prefix
             if (currentPos + paddingPrefix.length <= paddingEnd) {
                 buffer.set(paddingPrefix, currentPos);
                 currentPos += paddingPrefix.length;
             } else { break; }
 
-            // Write text
             const spaceLeft = paddingEnd - currentPos;
             const toCopy = spaceLeft < encodedText.length ? encodedText.subarray(0, spaceLeft) : encodedText;
             if (toCopy.length > 0) {
@@ -209,8 +216,6 @@ export class DummyFileGeneratorComponent {
                 currentPos += toCopy.length;
             }
 
-            // Write newline to end comment line periodically (or just at the end)
-            // To keep it simple, just write it at the very end of our padding block
             if (currentPos >= paddingEnd - 1) {
                 buffer.set(paddingNewline, currentPos);
                 currentPos += paddingNewline.length;
@@ -218,27 +223,17 @@ export class DummyFileGeneratorComponent {
             }
         }
 
-        // Ensure the padding ends cleanly with a newline so the xref isn't commented out
-        buffer[currentPos - 1] = 0x0A; // \n
+        buffer[currentPos - 1] = 0x0A; // Ensure ends with newline
 
-        // Now generate the exact footer string based on actual offsets
-        const offset1 = 9; // After %PDF-1.4\n
-        const offset2 = offset1 + 42; // obj 1 len
-        const offset3 = offset2 + 53; // obj 2 len
-
-        // Form the footer
         const xrefStart = currentPos;
-        const footerStr = `xref\n0 4\n0000000000 65535 f \n` +
-            `0000000009 00000 n \n` +
-            `${offset2.toString().padStart(10, '0')} 00000 n \n` +
-            `${offset3.toString().padStart(10, '0')} 00000 n \n` +
-            `trailer\n<< /Size 4 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF\n`;
+        const footerStr = `xref\n0 6\n0000000000 65535 f \n` +
+            `${obj1Loc.toString().padStart(10, '0')} 00000 n \n` +
+            `${obj2Loc.toString().padStart(10, '0')} 00000 n \n` +
+            `${obj3Loc.toString().padStart(10, '0')} 00000 n \n` +
+            `${obj4Loc.toString().padStart(10, '0')} 00000 n \n` +
+            `${obj5Loc.toString().padStart(10, '0')} 00000 n \n` +
+            `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF\n`;
 
-        let footer = encoder.encode(footerStr);
-
-        // The exact end might be slightly smaller or larger than totalBytes 
-        // if we just append. We must guarantee EXACTLY totalBytes.
-        // So we will pad the end of the footer with spaces before %%EOF\n
         const eofStr = '\n%%EOF\n';
         const eofBin = encoder.encode(eofStr);
         const trailerPart = encoder.encode(footerStr.replace(eofStr, ''));
@@ -246,13 +241,12 @@ export class DummyFileGeneratorComponent {
         buffer.set(trailerPart, currentPos);
         currentPos += trailerPart.length;
 
-        // Pad spaces
+        // Pad spaces before the final EOF
         while (currentPos < totalBytes - eofBin.length) {
-            buffer[currentPos] = 0x20; // Space
+            buffer[currentPos] = 0x20;
             currentPos++;
         }
 
-        // Final EOF
         buffer.set(eofBin, currentPos);
 
         return buffer;
