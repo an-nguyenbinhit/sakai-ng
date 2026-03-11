@@ -45,15 +45,29 @@ export class DummyFileGeneratorComponent {
     selectedFileType: string = 'txt';
     fileSizeInMb: number = 10;
     sampleText: string = 'Generated Dummy Padding Content - ';
-    addRandomNoise: boolean = false;
+    addRandomNoise: boolean = true;
+    outputFileBaseName: string = this.buildDefaultBaseName(10);
     progressValue: number = 0;
+
+    private getTodayDateStr(): string {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    private buildDefaultBaseName(sizeMb: number): string {
+        return `dummy_${this.getTodayDateStr()}_${sizeMb}mb`;
+    }
+
+    get outputFileName(): string {
+        return `${this.outputFileBaseName}.${this.selectedFileType}`;
+    }
 
     // --- Format helpers ---
     isPlainTextFormat(): boolean {
-        return ['txt', 'log', 'csv'].includes(this.selectedFileType);
+        return ['txt', 'log', 'csv', 'pdf'].includes(this.selectedFileType);
     }
     isRichTextFormat(): boolean {
-        return ['html', 'pdf'].includes(this.selectedFileType);
+        return ['html'].includes(this.selectedFileType);
     }
     isImageFormat(): boolean {
         return ['jpg', 'png'].includes(this.selectedFileType);
@@ -65,8 +79,18 @@ export class DummyFileGeneratorComponent {
             this.sampleText = 'Dummy Image Content';
         } else if (this.isRichTextFormat()) {
             this.sampleText = '<p>Generated Dummy Padding Content</p>';
-        } else if (this.isPlainTextFormat()) {
+        } else {
+            // plain text (txt, log, csv, pdf)
             this.sampleText = 'Generated Dummy Padding Content - ';
+        }
+        this.syncDefaultFileName();
+    }
+
+    syncDefaultFileName(): void {
+        // Only auto-update if the baseName still matches the default pattern
+        const pattern = /^dummy_\d{4}-\d{2}-\d{2}_\d+mb$/;
+        if (pattern.test(this.outputFileBaseName)) {
+            this.outputFileBaseName = this.buildDefaultBaseName(this.fileSizeInMb);
         }
     }
     
@@ -117,9 +141,11 @@ export class DummyFileGeneratorComponent {
                 return;
             }
             if (this.selectedFileType !== 'html') {
-                // Strip HTML tags then decode entities (e.g. &nbsp; → space)
+                // Strip HTML tags then decode entities, normalize non-breaking spaces → regular space
                 const stripped = cleanedText.replace(/<[^>]*>?/gm, '');
-                cleanedText = this.decodeHtmlEntities(stripped).trim();
+                cleanedText = this.decodeHtmlEntities(stripped)
+                    .replace(/\u00A0/g, ' ')  // &nbsp; → normal space
+                    .trim();
             }
         }
 
@@ -177,7 +203,7 @@ export class DummyFileGeneratorComponent {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `dummy_${this.fileSizeInMb}mb.${this.selectedFileType}`;
+        link.download = this.outputFileName;
         document.body.appendChild(link);
         link.click();
 
@@ -186,7 +212,7 @@ export class DummyFileGeneratorComponent {
         window.URL.revokeObjectURL(url);
 
         this.isGenerating = false;
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: `File generated and download started: dummy_${this.fileSizeInMb}mb.${this.selectedFileType}` });
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: `File generated: ${this.outputFileName}` });
     }
 
     private generateTextBuffer(totalBytes: number, text: string): Uint8Array {

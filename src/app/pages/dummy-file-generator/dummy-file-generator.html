@@ -1,8 +1,4 @@
-<div class="flex flex-col gap-6 p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
-    <!-- ===== HEADER ===== -->
-    <div class="text-center flex flex-col items-center justify-center mb-2">
-        <h1 class="text-2xl sm:text-3xl font-bold text-surface-900 dark:text-white m-0 mb-2 tracking-tight">Dummy File Generator</h1>
-    </div>
+<div class="flex flex-col gap-6 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
 
     <!-- ===== GENERATOR FORM ===== -->
     <div class="card p-0 border border-surface-200 dark:border-surface-700 shadow-none rounded-2xl overflow-hidden">
@@ -35,17 +31,17 @@
                     <div class="flex justify-between items-center">
                         <label htmlFor="fileSize" class="font-medium text-surface-900 dark:text-surface-0">Size (MB)</label>
                     </div>
-                    <div class="flex gap-4 items-center">
-                        <p-inputNumber id="fileSize" [(ngModel)]="fileSizeInMb" [min]="1" [max]="500" [showButtons]="true"
-                            buttonLayout="horizontal" spinnerMode="horizontal" decrementButtonClass="p-button-secondary"
-                            incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-minus"
-                            decrementButtonIcon="pi pi-plus" inputId="horizontal" styleClass="w-full"
-                            class="flex-1"></p-inputNumber>
-                        <div class="flex items-center gap-2">
-                            <p-checkbox [(ngModel)]="addRandomNoise" [binary]="true" inputId="randomNoise"></p-checkbox>
-                            <label for="randomNoise" class="text-sm font-medium text-surface-700 dark:text-surface-300 whitespace-nowrap"
-                                pTooltip="Appends a unique UUID hash to bypass deduplication filters" tooltipPosition="top">Random Noise</label>
-                        </div>
+                    <p-inputNumber id="fileSize" [(ngModel)]="fileSizeInMb" [min]="1" [max]="500" [showButtons]="true"
+                        buttonLayout="horizontal" spinnerMode="horizontal" decrementButtonClass="p-button-secondary"
+                        incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-minus"
+                        decrementButtonIcon="pi pi-plus" inputId="horizontal" styleClass="w-full"
+                        (ngModelChange)="syncDefaultFileName()"></p-inputNumber>
+                    <div class="flex items-center gap-2 mt-2">
+                        <p-checkbox [(ngModel)]="addRandomNoise" [binary]="true" inputId="randomNoise"></p-checkbox>
+                        <label for="randomNoise" class="text-sm font-medium text-surface-700 dark:text-surface-300"
+                            pTooltip="Appends a unique UUID hash to bypass deduplication filters" tooltipPosition="top">Random Noise
+                            <span class="text-xs font-normal text-surface-400">(bypass deduplication)</span>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -139,8 +135,14 @@
             <p-progressBar *ngIf="isGenerating" [value]="progressValue" [showValue]="false" class="w-full" [style]="{'height': '4px'}"></p-progressBar>
             
             <div class="p-4 sm:px-8 border-t border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="text-sm text-surface-600 dark:text-surface-400 font-mono">
-                    Output: <span class="font-bold text-primary">dummy_{{fileSizeInMb}}mb.{{selectedFileType}}</span>
+                <div class="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-400 font-mono flex-1 min-w-0">
+                    <span class="shrink-0">Output:</span>
+                    <div class="flex items-center flex-1 min-w-0 border border-surface-300 dark:border-surface-600 rounded-md overflow-hidden">
+                        <input pInputText [(ngModel)]="outputFileBaseName"
+                            class="flex-1 min-w-0 font-mono text-sm text-primary font-bold h-8 px-2 border-0 outline-none bg-transparent"
+                            placeholder="filename" />
+                        <span class="shrink-0 px-2 h-8 flex items-center bg-surface-100 dark:bg-surface-800 text-surface-500 dark:text-surface-400 border-l border-surface-300 dark:border-surface-600 select-none">.{{selectedFileType}}</span>
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-4 w-full sm:w-auto">
