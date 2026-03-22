@@ -1,31 +1,220 @@
-.dummy-textarea {
+.dummy-generator-page {
+    --dummy-accent: var(--p-primary-color);
+    --dummy-accent-soft: color-mix(in srgb, var(--p-primary-color) 14%, white);
+    --dummy-accent-strong: color-mix(in srgb, var(--p-primary-color) 24%, white);
+    --dummy-border-soft: color-mix(in srgb, var(--p-primary-color) 12%, var(--p-surface-200));
+    --dummy-shadow-soft: 0 18px 40px -28px color-mix(in srgb, var(--p-primary-color) 32%, transparent);
+    --dummy-shadow-hover: 0 24px 48px -30px color-mix(in srgb, var(--p-primary-color) 40%, transparent);
+}
+
+.dummy-generator-card {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+        border-color: var(--dummy-border-soft);
+        box-shadow: var(--dummy-shadow-soft);
+    }
+}
+
+.size-preset-button {
+    position: relative;
+    transition: transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+
+    &:not(.bg-primary):hover {
+        transform: translateY(-1px);
+        background: var(--dummy-accent-soft);
+        border-color: color-mix(in srgb, var(--dummy-accent) 38%, var(--p-surface-300));
+        color: color-mix(in srgb, var(--dummy-accent) 72%, black);
+        box-shadow: 0 8px 18px -14px color-mix(in srgb, var(--dummy-accent) 58%, transparent);
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--dummy-accent) 22%, transparent);
+    }
+
+    &.bg-primary {
+        box-shadow: 0 10px 20px -16px color-mix(in srgb, var(--dummy-accent) 80%, transparent);
+    }
+
+    .app-dark &:not(.bg-primary):hover {
+        background: color-mix(in srgb, var(--dummy-accent) 16%, var(--p-surface-800));
+        color: var(--p-surface-0);
+    }
+}
+
+.dummy-textarea,
+.json-field-name {
     padding: 0.625rem 0.75rem;
-    min-height: 140px;
-    resize: vertical;
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     border: 1px solid var(--p-surface-200);
     background: var(--p-surface-0);
     color: var(--p-surface-900);
     outline: none;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
     line-height: 1.6;
 
     &::placeholder {
         color: var(--p-surface-400);
     }
 
-    &:focus {
-        border-color: var(--p-primary-color);
-        box-shadow: 0 0 0 2px color-mix(in srgb, var(--p-primary-color) 20%, transparent);
+    &:hover {
+        border-color: color-mix(in srgb, var(--dummy-accent) 20%, var(--p-surface-300));
     }
 
-    .dark & {
+    &:focus {
+        border-color: var(--dummy-accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--dummy-accent) 18%, transparent);
+    }
+
+    .app-dark & {
         border-color: var(--p-surface-700);
-        background: var(--p-surface-900);
+        background: color-mix(in srgb, var(--p-surface-900) 92%, var(--dummy-accent) 8%);
         color: var(--p-surface-0);
 
-        &:focus {
-            border-color: var(--p-primary-color);
+        &:hover {
+            border-color: color-mix(in srgb, var(--dummy-accent) 32%, var(--p-surface-600));
         }
+    }
+}
+
+.json-field-name {
+    min-height: auto;
+    padding-block: 0.55rem;
+}
+
+.dummy-textarea {
+    min-height: 140px;
+    resize: vertical;
+}
+
+.json-schema-panel {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+
+    &:hover {
+        border-color: var(--dummy-border-soft);
+        box-shadow: inset 0 1px 0 color-mix(in srgb, white 65%, transparent), var(--dummy-shadow-soft);
+    }
+}
+
+.json-schema-row {
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        border-color: color-mix(in srgb, var(--dummy-accent) 22%, var(--p-surface-300));
+        box-shadow: 0 14px 28px -24px color-mix(in srgb, var(--dummy-accent) 44%, transparent);
+    }
+}
+
+.dummy-action-bar {
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.output-file-shell {
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+
+    &:hover {
+        border-color: color-mix(in srgb, var(--dummy-accent) 30%, var(--p-surface-300));
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dummy-accent) 8%, transparent);
+    }
+
+    &:focus-within {
+        border-color: var(--dummy-accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--dummy-accent) 18%, transparent);
+    }
+}
+
+.dummy-generator-page label[for='randomNoise'] {
+    transition: color 0.18s ease;
+
+    &:hover {
+        color: color-mix(in srgb, var(--dummy-accent) 72%, black);
+    }
+}
+
+:host ::ng-deep {
+    .dummy-select .p-select,
+    .dummy-number-input .p-inputnumber,
+    .json-type-select .p-select {
+        transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    }
+
+    .dummy-select .p-select:hover,
+    .json-type-select .p-select:hover,
+    .dummy-number-input .p-inputnumber:hover {
+        border-color: color-mix(in srgb, var(--dummy-accent) 28%, var(--p-surface-border));
+        box-shadow: 0 10px 22px -18px color-mix(in srgb, var(--dummy-accent) 36%, transparent);
+    }
+
+    .dummy-select .p-select.p-focus,
+    .json-type-select .p-select.p-focus,
+    .dummy-number-input .p-inputnumber.p-inputwrapper-focus {
+        border-color: var(--dummy-accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--dummy-accent) 18%, transparent);
+    }
+
+    .dummy-number-input .p-inputnumber-button {
+        transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+    }
+
+    .dummy-number-input .p-inputnumber-button:hover {
+        background: var(--dummy-accent-soft);
+        color: color-mix(in srgb, var(--dummy-accent) 80%, black);
+        border-color: color-mix(in srgb, var(--dummy-accent) 34%, var(--p-surface-border));
+    }
+
+    .json-add-button.p-button.p-button-outlined {
+        transition: transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .json-add-button.p-button.p-button-outlined:hover {
+        transform: translateY(-1px);
+        background: var(--dummy-accent-soft);
+        border-color: color-mix(in srgb, var(--dummy-accent) 40%, var(--p-surface-border));
+        box-shadow: 0 12px 24px -22px color-mix(in srgb, var(--dummy-accent) 44%, transparent);
+    }
+
+    .json-delete-button.p-button {
+        transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .json-delete-button.p-button:not(:disabled):hover {
+        transform: translateY(-1px);
+        background: color-mix(in srgb, var(--p-red-500) 10%, transparent);
+        box-shadow: 0 10px 24px -22px color-mix(in srgb, var(--p-red-500) 55%, transparent);
+    }
+
+    .download-button.p-button {
+        transition: transform 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+        box-shadow: 0 14px 28px -20px color-mix(in srgb, var(--dummy-accent) 48%, transparent);
+    }
+
+    .download-button.p-button:not(:disabled):hover {
+        transform: translateY(-1px);
+        filter: saturate(1.04);
+        box-shadow: 0 18px 34px -22px color-mix(in srgb, var(--dummy-accent) 55%, transparent);
+    }
+
+    .download-button.p-button:not(:disabled):focus-visible,
+    .json-add-button.p-button:focus-visible,
+    .json-delete-button.p-button:focus-visible {
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--dummy-accent) 18%, transparent);
+        outline: none;
+    }
+
+    .p-tooltip .p-tooltip-text {
+        max-width: 22rem;
+        line-height: 1.45;
+    }
+}
+
+@media (max-width: 640px) {
+    .json-schema-row {
+        align-items: stretch;
+    }
+
+    .json-schema-row > div {
+        flex-direction: column;
     }
 }
