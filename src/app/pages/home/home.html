@@ -14,11 +14,11 @@
         <div class="hero-panels">
             <div class="stat-chip">
                 <i class="pi pi-th-large"></i>
-                <span>{{ liveTools().length }} live tools</span>
+                <span>{{ filteredTools().length }} tools listed</span>
             </div>
             <div class="stat-chip">
-                <i class="pi pi-star"></i>
-                <span>{{ newTools().length }} new modules</span>
+                <i class="pi pi-folder-open"></i>
+                <span>{{ categories.length }} categories</span>
             </div>
             <div class="stat-chip">
                 <i class="pi pi-wifi"></i>
@@ -43,58 +43,6 @@
         </div>
         <p class="search-caption">Search matches label, description, tags, keywords, and category name.</p>
     </section>
-
-    @if (!isSearchActive()) {
-        <section class="spotlight-grid">
-            <article class="spotlight-card">
-                <div class="spotlight-head">
-                    <span class="spotlight-badge">Featured</span>
-                    <h2>High-traffic utilities</h2>
-                </div>
-                <div class="spotlight-list">
-                    @for (tool of featuredTools(); track tool.label) {
-                        <a class="spotlight-item" [routerLink]="tool.route">
-                            <i [class]="tool.icon"></i>
-                            <div>
-                                <strong>{{ tool.label }}</strong>
-                                <span>{{ tool.description }}</span>
-                            </div>
-                        </a>
-                    }
-                </div>
-            </article>
-
-            <article class="spotlight-card">
-                <div class="spotlight-head">
-                    <span class="spotlight-badge">New</span>
-                    <h2>Phase 1 rollout</h2>
-                </div>
-                <div class="pill-row">
-                    @for (tool of newTools(); track tool.label) {
-                        <a class="pill-link" [routerLink]="tool.route">
-                            <i [class]="tool.icon"></i>
-                            <span>{{ tool.label }}</span>
-                        </a>
-                    }
-                </div>
-            </article>
-
-            <article class="spotlight-card">
-                <div class="spotlight-head">
-                    <span class="spotlight-badge">Most used</span>
-                    <h2>Current anchors</h2>
-                </div>
-                <div class="pill-row">
-                    @for (tool of mostUsedTools(); track tool.label) {
-                        <a class="pill-link" [routerLink]="tool.route">
-                            <i [class]="tool.icon"></i>
-                            <span>{{ tool.label }}</span>
-                        </a>
-                    }
-                </div>
-            </article>
-        </section>
-    }
 
     <section class="category-stack">
         <div class="section-heading">

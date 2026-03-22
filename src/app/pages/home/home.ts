@@ -29,10 +29,6 @@ export class Home {
         });
     });
 
-    readonly liveTools = computed(() => this.tools.filter((tool) => tool.route));
-    readonly featuredTools = computed(() => this.tools.filter((tool) => tool.featured));
-    readonly newTools = computed(() => this.tools.filter((tool) => tool.status === 'new'));
-    readonly mostUsedTools = computed(() => this.tools.filter((tool) => tool.mostUsed));
     readonly isSearchActive = computed(() => !!this.searchQuery().trim());
 
     readonly categorySections = computed(() =>

@@ -21,7 +21,6 @@
 
 .hero-wrapper,
 .search-panel,
-.spotlight-card,
 .category-block,
 .empty-state {
     border-radius: 1.25rem;
@@ -98,7 +97,6 @@
 .search-caption,
 .section-heading p,
 .tool-card__body p,
-.spotlight-item span,
 .category-header h3 {
     margin: 0;
     color: var(--p-surface-600);
@@ -110,7 +108,6 @@
 }
 
 .hero-panels,
-.pill-row,
 .tool-card__tags {
     display: flex;
     flex-wrap: wrap;
@@ -210,22 +207,11 @@
     font-size: 0.85rem;
 }
 
-.spotlight-grid {
-    display: grid;
-    gap: 1rem;
-
-    @media (min-width: 992px) {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-}
-
-.spotlight-card,
 .category-block,
 .empty-state {
     padding: 1.25rem;
 }
 
-.spotlight-head,
 .section-heading,
 .category-header {
     display: flex;
@@ -233,12 +219,6 @@
     gap: 1rem;
 }
 
-.spotlight-head {
-    align-items: flex-start;
-    margin-bottom: 1rem;
-}
-
-.spotlight-head h2,
 .section-heading h2,
 .tool-card__body h4 {
     margin: 0;
@@ -249,59 +229,8 @@
     }
 }
 
-.spotlight-badge {
-    display: inline-flex;
-    padding: 0.3rem 0.65rem;
-    border-radius: 999px;
-    background: rgba(16, 185, 129, 0.12);
-    color: #047857;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-
-    :host-context(.app-dark) & {
-        color: #a7f3d0;
-        background: rgba(16, 185, 129, 0.18);
-    }
-}
-
-.spotlight-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.spotlight-item,
-.pill-link,
 .tool-card {
     text-decoration: none;
-}
-
-.spotlight-item,
-.pill-link {
-    display: flex;
-    gap: 0.75rem;
-    align-items: flex-start;
-    padding: 0.8rem 0.9rem;
-    border-radius: 1rem;
-    border: 1px solid var(--p-surface-200);
-    background: var(--p-surface-50);
-    color: inherit;
-
-    :host-context(.app-dark) & {
-        background: var(--p-surface-950);
-        border-color: var(--p-surface-700);
-    }
-}
-
-.spotlight-item strong {
-    display: block;
-    margin-bottom: 0.25rem;
-}
-
-.pill-link {
-    align-items: center;
 }
 
 .category-stack {
