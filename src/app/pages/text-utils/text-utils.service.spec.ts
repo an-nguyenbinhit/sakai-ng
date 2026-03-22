@@ -18,4 +18,4 @@ describe('TextUtilsService', () => {
     it('sorts lines descending', () => {
         expect(service.sortLines('b\na\nc', 'desc')).toBe('c\nb\na');
     });
-}
+});

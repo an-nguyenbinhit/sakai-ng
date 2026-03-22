@@ -101,6 +101,14 @@ export const appRoutes: Routes = [
                 data: {
                     description: 'Parse URLs, edit query parameters, and encode or decode Base64, URL, HTML, and JSON string payloads.'
                 }
+            },
+            {
+                path: 'schema-lab',
+                loadComponent: () => import('./app/pages/schema-lab/schema-lab').then((m) => m.SchemaLab),
+                title: 'Schema Lab for JSON Schema, TypeScript & Zod',
+                data: {
+                    description: 'Infer JSON Schema from real payloads, validate samples, and generate TypeScript or Zod models locally in the browser.'
+                }
             }
         ]
     },

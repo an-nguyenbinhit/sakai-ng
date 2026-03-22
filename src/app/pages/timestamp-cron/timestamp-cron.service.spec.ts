@@ -21,4 +21,4 @@ describe('TimestampCronService', () => {
         const runs = service.getNextRuns('0 9 * * 1-5', 'UTC', 2);
         expect(runs.length).toBe(2);
     });
-}
+});

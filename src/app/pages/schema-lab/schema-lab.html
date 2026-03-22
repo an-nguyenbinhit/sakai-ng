@@ -1,0 +1,75 @@
+<p-toast></p-toast>
+
+<app-tool-page-shell
+    eyebrow="Format & Validate"
+    title="Schema Lab"
+    description="Infer JSON Schema from real payloads, validate samples locally, and generate TypeScript or Zod models for frontend work."
+    [badges]="['New', 'Offline-ready']"
+    [stats]="shellStats()"
+>
+    <div tool-actions class="workspace-toolbar">
+        <div class="toolbar-group">
+            <input class="native-input" type="text" [ngModel]="rootTypeName()" (ngModelChange)="rootTypeName.set($event)" placeholder="RootSchema" />
+            <button pButton type="button" icon="pi pi-star" label="Sample" severity="secondary" [outlined]="true" (click)="loadSample()"></button>
+            <label class="file-button">
+                <input type="file" accept=".json,.txt" (change)="importPayload($event)" />
+                <span>Import payload</span>
+            </label>
+        </div>
+
+        <div class="toolbar-group">
+            <button pButton type="button" icon="pi pi-box" label="Infer schema" (click)="inferSchema()"></button>
+            <button pButton type="button" icon="pi pi-check-circle" label="Validate" severity="secondary" [outlined]="true" (click)="validateSchema()"></button>
+            <button pButton type="button" icon="pi pi-code" label="TypeScript" severity="secondary" [outlined]="true" (click)="generateOutput('typescript')"></button>
+            <button pButton type="button" icon="pi pi-bolt" label="Zod" severity="secondary" [outlined]="true" (click)="generateOutput('zod')"></button>
+            <button pButton type="button" icon="pi pi-copy" label="Copy output" severity="contrast" (click)="copyOutput()"></button>
+            <button pButton type="button" icon="pi pi-download" label="Download" severity="secondary" [outlined]="true" (click)="downloadOutput()"></button>
+        </div>
+    </div>
+
+    <div class="mode-pills">
+        <button type="button" class="mode-pill" [class.mode-pill--active]="outputKind() === 'schema'" (click)="generateOutput('schema')">JSON Schema</button>
+        <button type="button" class="mode-pill" [class.mode-pill--active]="outputKind() === 'typescript'" (click)="generateOutput('typescript')">TypeScript</button>
+        <button type="button" class="mode-pill" [class.mode-pill--active]="outputKind() === 'zod'" (click)="generateOutput('zod')">Zod</button>
+    </div>
+
+    <div class="status-banner" [class.status-banner--error]="validationState() === 'error'" [class.status-banner--success]="validationState() === 'success'">
+        <i [class]="validationState() === 'success' ? 'pi pi-verified' : validationState() === 'error' ? 'pi pi-exclamation-triangle' : 'pi pi-info-circle'"></i>
+        <span>{{ validationMessage() }}</span>
+    </div>
+
+    <section class="workspace-grid workspace-grid--triple">
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Input</p>
+                    <h2>Sample Payload</h2>
+                </div>
+                <span>{{ payloadMetrics().lines }} lines | {{ payloadMetrics().bytes }} bytes</span>
+            </header>
+            <textarea pTextarea [ngModel]="payloadText()" (ngModelChange)="payloadText.set($event)" rows="18" class="workspace-textarea"></textarea>
+        </article>
+
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Schema</p>
+                    <h2>JSON Schema</h2>
+                </div>
+                <span>{{ schemaMetrics().lines }} lines | {{ schemaMetrics().bytes }} bytes</span>
+            </header>
+            <textarea pTextarea [ngModel]="schemaText()" (ngModelChange)="schemaText.set($event)" rows="18" class="workspace-textarea"></textarea>
+        </article>
+
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Output</p>
+                    <h2>{{ outputKindLabel() }}</h2>
+                </div>
+                <span>{{ outputMetrics().lines }} lines | {{ outputMetrics().bytes }} bytes</span>
+            </header>
+            <textarea pTextarea [ngModel]="outputText()" rows="18" class="workspace-textarea" readonly></textarea>
+        </article>
+    </section>
+</app-tool-page-shell>

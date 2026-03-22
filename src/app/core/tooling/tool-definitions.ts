@@ -250,15 +250,17 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     {
         label: 'Schema Lab',
         description: 'Validate JSON Schema and generate frontend-friendly types from real sample payloads.',
-        route: null,
+        route: '/schema-lab',
         icon: 'pi pi-box',
         tags: ['Schema', 'Types'],
         keywords: ['typescript', 'zod', 'validation'],
         category: 'format-validate',
-        badge: 'Planned',
-        status: 'planned',
+        badge: 'New',
+        status: 'new',
         supportsFiles: true,
-        supportsOffline: true
+        supportsOffline: true,
+        featured: true,
+        menuVisible: true
     },
     {
         label: 'Mock Data Generator',

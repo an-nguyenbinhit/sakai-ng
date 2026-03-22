@@ -29,4 +29,4 @@ describe('UrlToolsService', () => {
     it('decodes JSON-string encoded text', () => {
         expect(service.decode('"hello"', 'json')).toBe('hello');
     });
-}
+});

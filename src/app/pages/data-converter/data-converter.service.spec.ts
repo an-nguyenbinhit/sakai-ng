@@ -24,4 +24,4 @@ describe('DataConverterService', () => {
     it('escapes a raw string for JSON string transport', () => {
         expect(service.escapeJsonString('line 1\nline 2')).toBe('line 1\\nline 2');
     });
-}
+});
