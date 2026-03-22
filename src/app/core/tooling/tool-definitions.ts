@@ -1,12 +1,6 @@
 export type ToolStatus = 'live' | 'new' | 'planned';
 
-export type ToolCategoryKey =
-    | 'format-validate'
-    | 'convert-transform'
-    | 'query-debug'
-    | 'encode-security'
-    | 'time-generators'
-    | 'frontend-helpers';
+export type ToolCategoryKey = 'format-validate' | 'convert-transform' | 'query-debug' | 'encode-security' | 'time-generators' | 'frontend-helpers';
 
 export interface ToolCategoryDefinition {
     key: ToolCategoryKey;
@@ -237,15 +231,17 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     {
         label: 'Query Playground',
         description: 'Run JSONPath and XPath queries against structured payloads with raw and tree outputs.',
-        route: null,
+        route: '/query-playground',
         icon: 'pi pi-sitemap',
         tags: ['JSONPath', 'XPath'],
         keywords: ['query', 'tree', 'inspect'],
         category: 'query-debug',
-        badge: 'Planned',
-        status: 'planned',
+        badge: 'New',
+        status: 'new',
         supportsFiles: true,
-        supportsOffline: true
+        supportsOffline: true,
+        featured: true,
+        menuVisible: true
     },
     {
         label: 'Schema Lab',

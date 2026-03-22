@@ -109,6 +109,14 @@ export const appRoutes: Routes = [
                 data: {
                     description: 'Infer JSON Schema from real payloads, validate samples, and generate TypeScript or Zod models locally in the browser.'
                 }
+            },
+            {
+                path: 'query-playground',
+                loadComponent: () => import('./app/pages/query-playground/query-playground').then((m) => m.QueryPlayground),
+                title: 'Query Playground for JSONPath & XPath',
+                data: {
+                    description: 'Run JSONPath and XPath queries against JSON or XML payloads, inspect exact match paths, and review tree-shaped results locally.'
+                }
             }
         ]
     },

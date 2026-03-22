@@ -1,0 +1,121 @@
+<p-toast></p-toast>
+
+<app-tool-page-shell
+    eyebrow="Query & Debug"
+    title="Query Playground"
+    description="Run JSONPath and XPath against real payloads, inspect exact match paths, and review the result set as both raw data and a tree."
+    [badges]="['Phase 2', 'Offline-ready']"
+    [stats]="shellStats()"
+>
+    <div tool-actions class="workspace-toolbar">
+        <div class="toolbar-group">
+            <select class="native-select" [ngModel]="language()" (ngModelChange)="setLanguage($event)">
+                @for (mode of modes; track mode.value) {
+                <option [value]="mode.value">{{ mode.label }}</option>
+                }
+            </select>
+            <select class="native-select" [ngModel]="resultMode()" (ngModelChange)="setResultMode($event)">
+                @for (mode of resultModes; track mode.value) {
+                <option [value]="mode.value">{{ mode.label }}</option>
+                }
+            </select>
+            <button pButton type="button" icon="pi pi-star" label="Sample" severity="secondary" outlined="true" (click)="loadSample()"></button>
+            <label class="file-button">
+                <input type="file" accept=".json,.xml,.txt" (change)="importFile($event)" />
+                <span>Import payload</span>
+            </label>
+        </div>
+
+        <div class="toolbar-group">
+            <button pButton type="button" icon="pi pi-play" label="Run query" (click)="runQuery()"></button>
+            <button pButton type="button" icon="pi pi-copy" label="Copy output" severity="contrast" (click)="copyOutput()"></button>
+            <button pButton type="button" icon="pi pi-download" label="Download output" severity="secondary" outlined="true" (click)="downloadOutput()"></button>
+        </div>
+    </div>
+
+    <div class="shortcut-row">
+        @for (example of examples(); track example.query) {
+        <button pButton type="button" [label]="example.label" size="small" severity="secondary" outlined="true" (click)="loadExample(example.query)"></button>
+        }
+    </div>
+
+    @if (filteredRecentQueries().length) {
+    <div class="history-panel">
+        <div class="history-header">
+            <p>Recent queries</p>
+            <span>Stored locally in this browser</span>
+        </div>
+        <div class="history-list">
+            @for (item of filteredRecentQueries(); track item.language + item.query + item.resultMode) {
+            <button class="history-chip" type="button" (click)="loadHistory(item)">
+                <span class="history-chip__query">{{ item.query }}</span>
+                <span class="history-chip__meta">{{ item.resultMode }}</span>
+            </button>
+            }
+        </div>
+    </div>
+    }
+
+    <div class="field-stack">
+        <label class="field-label" for="queryText">{{ language() === 'jsonpath' ? 'JSONPath query' : 'XPath query' }}</label>
+        <textarea pTextarea id="queryText" [ngModel]="queryText()" (ngModelChange)="queryText.set($event)" rows="3" class="query-textarea" [placeholder]="language() === 'jsonpath' ? '$.services[*].name' : '//service/name/text()'"></textarea>
+    </div>
+
+    @if (error()) {
+    <div class="status-banner status-banner--error">
+        <i class="pi pi-exclamation-triangle"></i>
+        <span>{{ error() }}</span>
+    </div>
+    } @else {
+    <div class="status-banner">
+        <i class="pi pi-check-circle"></i>
+        <span>{{ matchCount() }} {{ matchCount() === 1 ? 'match' : 'matches' }} in the latest result set.</span>
+    </div>
+    }
+
+    <section class="workspace-grid">
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Payload</p>
+                    <h2>{{ language() === 'jsonpath' ? 'JSON input' : 'XML input' }}</h2>
+                </div>
+                <span>{{ inputMetrics().lines }} lines · {{ inputMetrics().bytes }} bytes</span>
+            </header>
+            <textarea pTextarea [ngModel]="inputText()" (ngModelChange)="inputText.set($event)" rows="18" class="workspace-textarea"></textarea>
+        </article>
+
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Raw Output</p>
+                    <h2>{{ resultMode() === 'values' ? 'Matched values' : resultMode() === 'paths' ? 'Matched paths' : 'Matched paths and values' }}</h2>
+                </div>
+                <span>{{ outputMetrics().lines }} lines · {{ outputMetrics().bytes }} bytes</span>
+            </header>
+            <textarea pTextarea [ngModel]="outputText()" rows="18" class="workspace-textarea" readonly></textarea>
+        </article>
+    </section>
+
+    <section class="workspace-grid workspace-grid--single">
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Tree View</p>
+                    <h2>Result structure</h2>
+                </div>
+                <span>{{ matchCount() }} {{ matchCount() === 1 ? 'match' : 'matches' }}</span>
+            </header>
+
+            @if (resultTree().length) {
+            <p-tree [value]="resultTree()" styleClass="result-tree">
+                <ng-template let-node pTemplate="default">
+                    <span class="tree-label">{{ node.label }}</span>
+                </ng-template>
+            </p-tree>
+            } @else {
+            <p class="empty-state">Run a valid query to inspect matched nodes here.</p>
+            }
+        </article>
+    </section>
+</app-tool-page-shell>
