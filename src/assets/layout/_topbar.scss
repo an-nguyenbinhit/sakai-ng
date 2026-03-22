@@ -163,6 +163,13 @@
             position: relative;
         }
 
+        .topnav-group--align-right {
+            .topnav-panel {
+                left: auto;
+                right: 0;
+            }
+        }
+
         .topnav-panel {
             position: absolute;
             top: calc(100% + 0.9rem);
@@ -211,7 +218,10 @@
             span {
                 color: var(--text-color-secondary);
                 font-size: 0.78rem;
-                white-space: nowrap;
+                white-space: normal;
+                text-align: right;
+                max-width: 10rem;
+                line-height: 1.4;
             }
         }
 

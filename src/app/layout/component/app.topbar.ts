@@ -32,6 +32,7 @@ import { TOOL_NAVIGATION_GROUPS } from '@/app/core/tooling/tool-definitions';
             @for (group of navigationGroups; track group.category.key) {
                 <div
                     class="topnav-group"
+                    [class.topnav-group--align-right]="isTrailingGroup($index)"
                     (mouseenter)="setActiveCategory(group.category.key)"
                     (mouseleave)="clearActiveCategory()"
                 >
@@ -131,5 +132,9 @@ export class AppTopbar {
         const activePath = this.layoutService.layoutState().activePath;
 
         return group?.tools.some((tool) => !!tool.route && activePath === tool.route) ?? false;
+    }
+
+    isTrailingGroup(index: number) {
+        return index >= this.navigationGroups.length - 2;
     }
 }
