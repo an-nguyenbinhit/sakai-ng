@@ -1,5 +1,5 @@
-import { Component, computed, inject, HostListener, input, signal, effect, untracked } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, computed, inject, input, signal, effect, untracked, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -26,15 +26,22 @@ import { ViewMode } from '../../models/diff.models';
     templateUrl: './diff-toolbar.html',
     styleUrl: './diff-toolbar.scss'
 })
-export class DiffToolbar {
+export class DiffToolbar implements OnInit, OnDestroy {
     state = inject(CodeCompareState);
     private exportService = inject(ExportService);
     private messageService = inject(MessageService);
+    private platformId = inject(PLATFORM_ID);
+    private keydownListener: ((event: KeyboardEvent) => void) | null = null;
 
     imageStatus = signal<'idle' | 'exporting' | 'done'>('idle');
     imageLabel = computed(() => (this.imageStatus() === 'done' ? 'Saved!' : 'Export Image'));
 
     exportMenuItems: MenuItem[] = [
+        {
+            label: 'Export as Unified Diff',
+            icon: 'pi pi-file',
+            command: () => this.onExportUnifiedDiff()
+        },
         {
             label: 'Export as HTML',
             icon: 'pi pi-file-export',
@@ -93,6 +100,24 @@ export class DiffToolbar {
         });
     }
 
+    ngOnInit(): void {
+        if (!isPlatformBrowser(this.platformId)) {
+            return;
+        }
+
+        this.keydownListener = (event: KeyboardEvent) => this.onKeydown(event);
+        window.addEventListener('keydown', this.keydownListener);
+    }
+
+    ngOnDestroy(): void {
+        if (!isPlatformBrowser(this.platformId) || !this.keydownListener) {
+            return;
+        }
+
+        window.removeEventListener('keydown', this.keydownListener);
+        this.keydownListener = null;
+    }
+
     onViewModeChange(mode: ViewMode): void {
         this.state.setViewMode(mode);
     }
@@ -133,6 +158,15 @@ export class DiffToolbar {
         this.messageService.add({ severity: 'success', summary: 'Exported', detail: 'HTML diff file downloaded', life: 2000 });
     }
 
+    onExportUnifiedDiff(): void {
+        const leftFile = this.state.leftFile();
+        const rightFile = this.state.rightFile();
+        if (!leftFile || !rightFile) return;
+
+        this.exportService.exportUnifiedDiff(leftFile, rightFile, this.state.options());
+        this.messageService.add({ severity: 'success', summary: 'Exported', detail: 'Unified diff file downloaded', life: 2000 });
+    }
+
     async onExportImage(): Promise<void> {
         const result = this.state.diffResult();
         const leftFile = this.state.leftFile();
@@ -152,8 +186,7 @@ export class DiffToolbar {
         }
     }
 
-    @HostListener('window:keydown', ['$event'])
-    onKeydown(event: KeyboardEvent): void {
+    private onKeydown(event: KeyboardEvent): void {
         if (event.altKey && event.key === 'ArrowDown') {
             event.preventDefault();
             this.nextDiff();

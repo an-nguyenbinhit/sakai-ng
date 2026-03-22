@@ -142,6 +142,40 @@
                     ></div>
                 </div>
             </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+                <div class="flex flex-col bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+                            <i class="pi pi-pencil"></i>
+                        </div>
+                        <span class="font-bold text-lg">Replacement String</span>
+                    </div>
+                    <input
+                        type="text"
+                        pInputText
+                        [ngModel]="replacementString()"
+                        (ngModelChange)="replacementString.set($event); updateReplacementPreview()"
+                        placeholder="Use $1, $2... for backreferences"
+                        class="w-full font-mono text-base p-4 rounded-xl border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-[#1e1e1e]"
+                    />
+                </div>
+
+                <div class="flex flex-col bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between gap-3 mb-4 text-violet-600 dark:text-violet-400">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center shadow-inner">
+                                <i class="pi pi-refresh"></i>
+                            </div>
+                            <span class="font-bold text-lg">Replacement Preview</span>
+                        </div>
+                        <p-button icon="pi pi-copy" [rounded]="true" [text]="true" severity="secondary" pTooltip="Copy replacement result" tooltipPosition="top" (click)="copyReplacementPreview()" [disabled]="!replacementPreview()"></p-button>
+                    </div>
+                    <div class="flex-1 whitespace-pre-wrap break-all font-mono text-base text-surface-900 dark:text-surface-0 min-h-[72px] p-4 border border-surface-200 dark:border-surface-700 rounded-xl bg-surface-50 dark:bg-[#1e1e1e] overflow-auto shadow-inner leading-relaxed">
+                        {{ replacementPreview() || 'Replacement output will appear here.' }}
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Right Side: Analytics & Extraction -->
@@ -165,22 +199,24 @@
                         <ng-template pTemplate="header">
                             <tr>
                                 <th style="width: 15%" class="text-surface-500">#</th>
-                                <th style="width: 55%" class="text-surface-500">Matched Sequence</th>
-                                <th style="width: 30%" class="text-surface-500">Index Range</th>
+                                <th style="width: 45%" class="text-surface-500">Matched Sequence</th>
+                                <th style="width: 15%" class="text-surface-500">Groups</th>
+                                <th style="width: 25%" class="text-surface-500">Index Range</th>
                             </tr>
                         </ng-template>
-                        <ng-template pTemplate="body" let-m>
-                            <tr class="hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors">
+                        <ng-template pTemplate="body" let-m let-rowIndex="rowIndex">
+                            <tr class="hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors cursor-pointer" (click)="selectMatch(rowIndex)">
                                 <td class="font-bold text-surface-400">{{m.index}}</td>
                                 <td class="font-mono text-sm max-w-[150px] truncate py-3" pTooltip="{{m.match}}" tooltipPosition="top">
                                     <span class="bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200 px-2 py-1 rounded shadow-sm border border-amber-200 dark:border-amber-800">{{m.match}}</span>
                                 </td>
+                                <td class="text-xs font-mono text-surface-500 tracking-wider font-semibold">{{m.captureGroups.length}}</td>
                                 <td class="text-xs font-mono text-surface-500 tracking-wider font-semibold">{{m.start}}<span class="text-surface-300 mx-1">→</span>{{m.end}}</td>
                             </tr>
                         </ng-template>
                         <ng-template pTemplate="emptymessage">
                             <tr>
-                                <td colspan="3" class="text-center p-12 text-surface-400 dark:text-surface-600">
+                                <td colspan="4" class="text-center p-12 text-surface-400 dark:text-surface-600">
                                     <div class="flex flex-col items-center gap-4">
                                         <i class="pi pi-inbox text-5xl opacity-50 drop-shadow-sm"></i>
                                         <span class="text-lg">No matches extracted.<br />Adjust your expression or text.</span>
@@ -191,6 +227,46 @@
                     </p-table>
                 </div>
             </div>
+
+            @if (activeMatch(); as match) {
+            <div class="flex flex-col bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                        <i class="pi pi-sitemap"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-lg block leading-tight">Capture Groups</span>
+                        <span class="text-xs text-surface-500 font-medium">Match #{{ match.index }}</span>
+                    </div>
+                </div>
+
+                @if (match.captureGroups.length === 0 && (match.namedGroups | keyvalue).length === 0) {
+                <div class="text-sm text-surface-500">This match does not expose capture groups.</div>
+                }
+
+                @if (match.captureGroups.length) {
+                <div class="flex flex-col gap-2 mb-3">
+                    @for (group of match.captureGroups; track group.index) {
+                    <div class="p-3 rounded-xl bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700">
+                        <div class="text-xs font-semibold text-surface-500 mb-1">$ {{ group.index }}</div>
+                        <div class="font-mono text-sm break-all text-surface-900 dark:text-surface-0">{{ group.value || '(empty)' }}</div>
+                    </div>
+                    }
+                </div>
+                }
+
+                @if ((match.namedGroups | keyvalue).length) {
+                <div class="flex flex-col gap-2">
+                    @for (entry of match.namedGroups | keyvalue; track entry.key) {
+                    <div class="p-3 rounded-xl bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700">
+                        <div class="text-xs font-semibold text-surface-500 mb-1">{{ entry.key }}</div>
+                        <div class="font-mono text-sm break-all text-surface-900 dark:text-surface-0">{{ entry.value || '(empty)' }}</div>
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+            }
 
             <!-- Snippet Generator Card -->
             <div class="flex flex-col bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow mt-auto">

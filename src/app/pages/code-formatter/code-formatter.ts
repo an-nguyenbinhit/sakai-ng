@@ -23,6 +23,14 @@ import * as markdownPlugin from 'prettier/plugins/markdown';
 
 import { format as sqlFormat } from 'sql-formatter';
 
+type WarningLevel = 'info' | 'warn' | 'error';
+
+interface FormatterWarning {
+    level: WarningLevel;
+    code: string;
+    message: string;
+}
+
 @Component({
     selector: 'app-code-formatter',
     standalone: true,
@@ -46,6 +54,7 @@ export class CodeFormatter {
     selectedLanguage = signal<string>('html');
     inputCode = signal<string>('');
     outputCode = signal<string>('');
+    warnings = signal<FormatterWarning[]>([]);
 
     inputEditorOptions = signal<any>({ theme: 'vs-light', language: 'html', automaticLayout: true, fontSize: 14, minimap: { enabled: false }, scrollBeyondLastLine: false });
     outputEditorOptions = signal<any>({ theme: 'vs-light', language: 'html', automaticLayout: true, readOnly: true, fontSize: 14, minimap: { enabled: false }, scrollBeyondLastLine: false });
@@ -75,6 +84,7 @@ export class CodeFormatter {
     private inputEditorInstance: any;
     private outputEditorInstance: any;
     private autoUpdateTimeout: any;
+    private languageLockedByUser = false;
 
     constructor(
         private messageService: MessageService,
@@ -95,7 +105,10 @@ export class CodeFormatter {
         );
     }
 
-    onLanguageChange() {
+    onLanguageChange(lockSelection = true) {
+        if (lockSelection) {
+            this.languageLockedByUser = true;
+        }
         this.inputEditorOptions.set({ ...this.inputEditorOptions(), language: this.selectedLanguage() });
         this.outputEditorOptions.set({ ...this.outputEditorOptions(), language: this.selectedLanguage() });
         if (this.autoUpdate()) {
@@ -137,6 +150,7 @@ export class CodeFormatter {
     onInputChange(newValue: string) {
         this.inputCode.set(newValue);
         this.inputSize.set(new Blob([newValue]).size);
+        this.maybeDetectLanguageFromContent(newValue);
 
         if (this.autoUpdate()) {
             if (this.autoUpdateTimeout) {
@@ -175,12 +189,14 @@ export class CodeFormatter {
     clearInput() {
         this.inputCode.set('');
         this.inputSize.set(0);
+        this.clearWarnings();
         if (this.autoUpdate()) this.formatCode();
     }
 
     clearOutput() {
         this.outputCode.set('');
         this.outputSize.set(0);
+        this.clearWarnings();
     }
 
     copyCode(isInput: boolean) {
@@ -225,7 +241,7 @@ export class CodeFormatter {
         this.inputCode.set(sample);
         this.selectedLanguage.set('typescript');
         this.inputSize.set(new Blob([sample]).size);
-        this.onLanguageChange();
+        this.onLanguageChange(false);
         this.messageService.add({ severity: 'info', summary: 'Sample Loaded', detail: 'TypeScript sample loaded' });
         if (this.autoUpdate()) this.formatCode();
         this.displaySettings.set(false);
@@ -233,6 +249,7 @@ export class CodeFormatter {
 
     async formatCode() {
         const code = this.inputCode();
+        this.clearWarnings();
         if (!code.trim()) {
             this.outputCode.set('');
             this.outputSize.set(0);
@@ -303,6 +320,12 @@ export class CodeFormatter {
             if (!this.autoUpdate()) this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Code formatted!' });
         } catch (error: any) {
             console.error('Formatting error:', error);
+            const fallbackApplied = this.applyFallbackFormatting(code, error);
+            if (!fallbackApplied) {
+                this.outputCode.set(code);
+                this.outputSize.set(new Blob([code]).size);
+                this.addWarning('error', 'FORMAT_FAILED', error?.message || 'Formatter failed. Showing original input in the output panel.');
+            }
             if (!this.autoUpdate()) {
                 this.messageService.add({ severity: 'error', summary: 'Formatting Error', detail: error.message || 'Syntax error in code.' });
             }
@@ -360,6 +383,7 @@ export class CodeFormatter {
             this.inputCode.set(res);
             this.inputSize.set(new Blob([res]).size);
             this.detectLanguageFromFile(file.name);
+            this.maybeDetectLanguageFromContent(res);
             this.messageService.add({ severity: 'info', summary: 'File Loaded', detail: `Loaded ${file.name}` });
             if (this.autoUpdate()) this.formatCode();
         };
@@ -368,36 +392,40 @@ export class CodeFormatter {
 
     detectLanguageFromFile(filename: string) {
         const ext = filename.split('.').pop()?.toLowerCase();
+        let detectedLanguage: string | null = null;
         switch (ext) {
             case 'js':
             case 'ts':
             case 'jsx':
             case 'tsx':
-                this.selectedLanguage.set('typescript');
+                detectedLanguage = 'typescript';
                 break;
             case 'json':
-                this.selectedLanguage.set('json');
+                detectedLanguage = 'json';
                 break;
             case 'html':
             case 'htm':
-                this.selectedLanguage.set('html');
+                detectedLanguage = 'html';
                 break;
             case 'css':
             case 'scss':
             case 'less':
-                this.selectedLanguage.set('css');
+                detectedLanguage = 'css';
                 break;
             case 'md':
-                this.selectedLanguage.set('markdown');
+                detectedLanguage = 'markdown';
                 break;
             case 'xml':
-                this.selectedLanguage.set('xml');
+                detectedLanguage = 'xml';
                 break;
             case 'sql':
-                this.selectedLanguage.set('sql');
+                detectedLanguage = 'sql';
                 break;
         }
-        this.onLanguageChange();
+        if (detectedLanguage) {
+            this.applyDetectedLanguage(detectedLanguage);
+        }
+        this.onLanguageChange(false);
     }
 
     downloadCode(isInput: boolean) {
@@ -446,5 +474,76 @@ export class CodeFormatter {
         document.body.removeChild(a);
 
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'File downloaded successfully!' });
+    }
+
+    private clearWarnings() {
+        this.warnings.set([]);
+    }
+
+    private addWarning(level: WarningLevel, code: string, message: string) {
+        this.warnings.update((items) => [...items, { level, code, message }]);
+    }
+
+    private applyDetectedLanguage(language: string) {
+        if (this.languageLockedByUser) {
+            this.addWarning('info', 'LANGUAGE_DETECTED', `Detected ${language.toUpperCase()} input, but kept your manually selected language.`);
+            return;
+        }
+
+        if (this.selectedLanguage() !== language) {
+            this.selectedLanguage.set(language);
+            this.addWarning('info', 'LANGUAGE_DETECTED', `Detected ${language.toUpperCase()} from the current input.`);
+        }
+    }
+
+    private maybeDetectLanguageFromContent(content: string) {
+        const detected = this.detectLanguageFromContent(content);
+        if (!detected) return;
+
+        this.applyDetectedLanguage(detected);
+        this.inputEditorOptions.set({ ...this.inputEditorOptions(), language: this.selectedLanguage() });
+        this.outputEditorOptions.set({ ...this.outputEditorOptions(), language: this.selectedLanguage() });
+    }
+
+    private detectLanguageFromContent(content: string): string | null {
+        const value = content.trim();
+        if (!value) return null;
+
+        if ((value.startsWith('{') || value.startsWith('[')) && this.isLikelyJson(value)) return 'json';
+        if (/^<!DOCTYPE html>|^<html[\s>]|^<body[\s>]|^<div[\s>]|^<\w+[\s>]/i.test(value)) return 'html';
+        if (/^<\?xml|^<[a-z0-9_-]+>[\s\S]*<\/[a-z0-9_-]+>$/i.test(value)) return 'xml';
+        if (/^\s*(SELECT|INSERT|UPDATE|DELETE|WITH|CREATE|ALTER|DROP)\b/i.test(value)) return 'sql';
+        if (/^\s*[@.#]?[a-z0-9_-]+\s*\{[\s\S]*:\s*[^}]+}/im.test(value)) return 'css';
+        if (/^\s*#|\n#{1,6}\s|```/.test(value)) return 'markdown';
+        if (/\b(interface|type|enum|implements|private|public|readonly)\b|:\s*[A-Z_a-z][\w<>\[\]\|]*/.test(value)) return 'typescript';
+        if (/\b(function|const|let|var|=>|import|export)\b/.test(value)) return 'typescript';
+
+        return null;
+    }
+
+    private isLikelyJson(content: string): boolean {
+        try {
+            JSON.parse(content);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    private applyFallbackFormatting(code: string, error: unknown): boolean {
+        if (this.selectedLanguage() !== 'json') {
+            return false;
+        }
+
+        try {
+            const formatted = JSON.stringify(JSON.parse(code), null, this.useTabs() ? '\t' : Number(this.tabWidth()));
+            this.outputCode.set(formatted);
+            this.outputSize.set(new Blob([formatted]).size);
+            this.addWarning('warn', 'JSON_FALLBACK', 'Primary formatter failed. Applied safe JSON fallback formatting instead.');
+            return true;
+        } catch {
+            this.addWarning('error', 'JSON_FALLBACK_FAILED', error instanceof Error ? error.message : 'JSON formatting failed.');
+            return false;
+        }
     }
 }

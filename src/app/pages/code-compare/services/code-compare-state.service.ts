@@ -76,7 +76,7 @@ export class CodeCompareState {
         this.scrollRatio.set(0);
         this.showAllUnchanged.set(false);
         this.fontSize.set(14);
-        sessionStorage.removeItem(SESSION_KEY);
+        this.getSessionStorage()?.removeItem(SESSION_KEY);
     }
 
     increaseFontSize(): void {
@@ -146,6 +146,8 @@ export class CodeCompareState {
 
     private persistToSession(): void {
         try {
+            const storage = this.getSessionStorage();
+            if (!storage) return;
             const session: CodeCompareSession = {
                 leftFile: this.leftFile(),
                 rightFile: this.rightFile(),
@@ -153,7 +155,7 @@ export class CodeCompareState {
                 viewMode: this.viewMode(),
                 fontSize: this.fontSize()
             };
-            sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+            storage.setItem(SESSION_KEY, JSON.stringify(session));
         } catch {
             // sessionStorage might be full or unavailable
         }
@@ -161,7 +163,9 @@ export class CodeCompareState {
 
     private loadFromSession(): void {
         try {
-            const raw = sessionStorage.getItem(SESSION_KEY);
+            const storage = this.getSessionStorage();
+            if (!storage) return;
+            const raw = storage.getItem(SESSION_KEY);
             if (!raw) return;
             const session: CodeCompareSession = JSON.parse(raw);
             if (session.leftFile) this.leftFile.set(session.leftFile);
@@ -170,7 +174,11 @@ export class CodeCompareState {
             if (session.viewMode) this.viewMode.set(session.viewMode);
             if (session.fontSize) this.fontSize.set(session.fontSize);
         } catch {
-            sessionStorage.removeItem(SESSION_KEY);
+            this.getSessionStorage()?.removeItem(SESSION_KEY);
         }
+    }
+
+    private getSessionStorage(): Storage | null {
+        return typeof sessionStorage !== 'undefined' ? sessionStorage : null;
     }
 }

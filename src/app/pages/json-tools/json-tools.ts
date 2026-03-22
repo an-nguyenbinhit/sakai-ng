@@ -12,6 +12,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { EditorComponent } from 'ngx-monaco-editor-v2';
 import { LayoutService } from '@/app/layout/service/layout.service';
 import { SelectModule } from 'primeng/select';
+import Ajv from 'ajv';
+import { JSONPath } from 'jsonpath-plus';
 
 import * as prettier from 'prettier/standalone';
 import * as babelPlugin from 'prettier/plugins/babel';
@@ -53,6 +55,14 @@ export class JsonTools {
 
     transformFn = signal<string>('return data;');
     displayTransformSettings = signal<boolean>(false);
+    displayQuerySettings = signal<boolean>(false);
+    displaySchemaSettings = signal<boolean>(false);
+    query = signal<string>('');
+    queryResults = signal<string>('');
+    queryError = signal<string | null>(null);
+    schemaInput = signal<string>('{\n  "type": "object"\n}');
+    validationErrors = signal<Array<{ path: string; message: string }>>([]);
+    validationPassed = signal<boolean | null>(null);
 
     private inputEditorInstance: any;
     private outputEditorInstance: any;
@@ -282,6 +292,58 @@ export class JsonTools {
             if (!this.autoUpdate()) {
                 this.messageService.add({ severity: 'error', summary: 'Transform Error', detail: error.message || 'Failed to execute script.' });
             }
+        }
+    }
+
+    runJsonPathQuery() {
+        const input = this.inputCode().trim();
+        this.queryError.set(null);
+        this.queryResults.set('');
+
+        if (!input) {
+            this.queryError.set('Load or paste JSON before running a query.');
+            return;
+        }
+
+        try {
+            const parsed = JSON.parse(input);
+            const result = JSONPath({ path: this.query().trim() || '$', json: parsed, wrap: true });
+            const serialized = JSON.stringify(result, null, 2);
+            this.queryResults.set(serialized);
+        } catch (error: any) {
+            this.queryError.set(error?.message || 'Failed to execute JSONPath query.');
+        }
+    }
+
+    validateAgainstSchema() {
+        const input = this.inputCode().trim();
+        this.validationErrors.set([]);
+        this.validationPassed.set(null);
+
+        if (!input) {
+            this.validationErrors.set([{ path: '$', message: 'Load or paste JSON before validating.' }]);
+            return;
+        }
+
+        try {
+            const payload = JSON.parse(input);
+            const schema = JSON.parse(this.schemaInput());
+            const ajv = new Ajv({ allErrors: true, strict: false });
+            const validate = ajv.compile(schema);
+            const valid = validate(payload);
+
+            this.validationPassed.set(Boolean(valid));
+            if (!valid) {
+                this.validationErrors.set(
+                    (validate.errors ?? []).map((item) => ({
+                        path: item.instancePath || '$',
+                        message: item.message || 'Schema validation failed'
+                    }))
+                );
+            }
+        } catch (error: any) {
+            this.validationPassed.set(false);
+            this.validationErrors.set([{ path: '$', message: error?.message || 'Failed to validate JSON against schema.' }]);
         }
     }
 

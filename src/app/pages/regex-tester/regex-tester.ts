@@ -13,6 +13,20 @@ import { DrawerModule } from 'primeng/drawer';
 import { TabsModule } from 'primeng/tabs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
+interface RegexCaptureGroup {
+    index: number;
+    value: string;
+}
+
+interface RegexMatchResult {
+    index: number;
+    match: string;
+    start: number;
+    end: number;
+    captureGroups: RegexCaptureGroup[];
+    namedGroups: Record<string, string>;
+}
+
 @Component({
     selector: 'app-regex-tester',
     standalone: true,
@@ -24,14 +38,17 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 export class RegexTester {
     pattern = signal<string>('');
     testString = signal<string>('');
+    replacementString = signal<string>('');
 
     flagG = signal<boolean>(true);
     flagI = signal<boolean>(false);
     flagM = signal<boolean>(true);
 
-    matches = signal<any[]>([]);
+    matches = signal<RegexMatchResult[]>([]);
     highlightedHtml = signal<SafeHtml>('');
     regexError = signal<string | null>(null);
+    replacementPreview = signal<string>('');
+    selectedMatchIndex = signal<number>(0);
 
     cheatSheetVisible = signal<boolean>(false);
 
@@ -113,6 +130,7 @@ export class RegexTester {
         if (!pat) {
             this.matches.set([]);
             this.updateHighlightedHtml(testStr);
+            this.updateReplacementPreview();
             return;
         }
 
@@ -120,37 +138,27 @@ export class RegexTester {
             const flagStr = this.getFlags();
             const regex = new RegExp(pat, flagStr);
 
-            let newMatches: any[] = [];
+            let newMatches: RegexMatchResult[] = [];
 
             if (!testStr) {
                 this.matches.set([]);
                 this.updateHighlightedHtml('');
+                this.updateReplacementPreview();
                 return;
             }
 
             if (flagStr.includes('g')) {
                 const results = [...testStr.matchAll(regex)];
-                newMatches = results.map((res: any, index) => ({
-                    index: index + 1,
-                    match: res[0],
-                    start: res.index,
-                    end: res.index + res[0].length
-                }));
+                newMatches = results.map((res: any, index) => this.buildMatchResult(res, index + 1));
             } else {
                 const res = testStr.match(regex);
                 if (res && res.index !== undefined) {
-                    newMatches = [
-                        {
-                            index: 1,
-                            match: res[0],
-                            start: res.index,
-                            end: res.index + res[0].length
-                        }
-                    ];
+                    newMatches = [this.buildMatchResult(res, 1)];
                 }
             }
 
             this.matches.set(newMatches);
+            this.selectedMatchIndex.set(0);
 
             let lastIdx = 0;
             let resultHtml = '';
@@ -169,10 +177,12 @@ export class RegexTester {
             } else {
                 this.updateHighlightedHtml(testStr);
             }
+            this.updateReplacementPreview();
         } catch (e: any) {
             this.matches.set([]);
             this.updateHighlightedHtml(testStr);
             this.regexError.set(e.message);
+            this.updateReplacementPreview();
         }
     }
 
@@ -190,6 +200,7 @@ export class RegexTester {
     clearInputs() {
         this.pattern.set('');
         this.testString.set('');
+        this.replacementString.set('');
         this.flagG.set(true);
         this.flagI.set(false);
         this.flagM.set(true);
@@ -256,5 +267,49 @@ export class RegexTester {
         navigator.clipboard.writeText(code).then(() => {
             this.messageService.add({ severity: 'success', summary: 'Copied', detail: 'Code snippet copied to clipboard' });
         });
+    }
+
+    updateReplacementPreview() {
+        const pat = this.pattern();
+        const testStr = this.testString();
+        if (!pat || !testStr) {
+            this.replacementPreview.set('');
+            return;
+        }
+
+        try {
+            const regex = new RegExp(pat, this.getFlags());
+            this.replacementPreview.set(testStr.replace(regex, this.replacementString()));
+        } catch {
+            this.replacementPreview.set('');
+        }
+    }
+
+    copyReplacementPreview() {
+        const output = this.replacementPreview();
+        if (!output) return;
+        navigator.clipboard.writeText(output).then(() => {
+            this.messageService.add({ severity: 'success', summary: 'Copied', detail: 'Replacement preview copied to clipboard' });
+        });
+    }
+
+    selectMatch(index: number) {
+        this.selectedMatchIndex.set(index);
+    }
+
+    activeMatch = computed(() => this.matches()[this.selectedMatchIndex()] ?? null);
+
+    private buildMatchResult(res: any, index: number): RegexMatchResult {
+        return {
+            index,
+            match: res[0],
+            start: res.index,
+            end: res.index + res[0].length,
+            captureGroups: res.slice(1).map((value: string, groupIndex: number) => ({
+                index: groupIndex + 1,
+                value: value ?? ''
+            })),
+            namedGroups: { ...(res.groups ?? {}) }
+        };
     }
 }

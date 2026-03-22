@@ -169,6 +169,16 @@
                 <p-button icon="pi pi-window-maximize" [rounded]="true" [text]="true" severity="secondary" pTooltip="Fullscreen" tooltipPosition="bottom" (click)="toggleFullscreen(outputContainer)"></p-button>
             </div>
         </div>
+        @if (warnings().length > 0) {
+        <div class="px-4 xl:px-6 py-3 border-b border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-900/10 flex flex-col gap-2">
+            @for (warning of warnings(); track warning.code + warning.message) {
+            <div class="text-sm flex items-start gap-2" [ngClass]="warning.level === 'error' ? 'text-red-700 dark:text-red-300' : warning.level === 'warn' ? 'text-amber-800 dark:text-amber-200' : 'text-blue-700 dark:text-blue-300'">
+                <i class="pi" [ngClass]="warning.level === 'error' ? 'pi-times-circle' : warning.level === 'warn' ? 'pi-exclamation-triangle' : 'pi-info-circle'"></i>
+                <span>{{ warning.message }}</span>
+            </div>
+            }
+        </div>
+        }
         <!-- Editor -->
         <div #outputContainer class="relative bg-surface-0 dark:bg-[#1e1e1e] editor-body">
             <ngx-monaco-editor class="absolute inset-0 w-full h-full" style="height: 100%" [options]="outputEditorOptions()" [ngModel]="outputCode()" (onInit)="onOutputEditorInit($event)"></ngx-monaco-editor>

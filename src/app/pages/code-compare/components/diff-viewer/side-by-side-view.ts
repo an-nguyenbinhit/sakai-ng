@@ -1,5 +1,5 @@
-import { Component, computed, inject, viewChild, AfterViewInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, computed, inject, viewChild, AfterViewInit, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ScrollingModule, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { CodeCompareState } from '../../services/code-compare-state.service';
 import { DiffLineComponent } from '../diff-line/diff-line';
@@ -14,6 +14,7 @@ import { SideBySideRow } from '../../models/diff.models';
 })
 export class SideBySideView implements AfterViewInit, OnDestroy {
     state = inject(CodeCompareState);
+    private platformId = inject(PLATFORM_ID);
 
     leftViewport = viewChild.required<CdkVirtualScrollViewport>('leftViewport');
     rightViewport = viewChild.required<CdkVirtualScrollViewport>('rightViewport');
@@ -28,6 +29,10 @@ export class SideBySideView implements AfterViewInit, OnDestroy {
     private rightScrollListener: (() => void) | null = null;
 
     ngAfterViewInit(): void {
+        if (!isPlatformBrowser(this.platformId)) {
+            return;
+        }
+
         const leftEl = this.leftViewport().elementRef.nativeElement;
         const rightEl = this.rightViewport().elementRef.nativeElement;
 
@@ -54,6 +59,10 @@ export class SideBySideView implements AfterViewInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        if (!isPlatformBrowser(this.platformId)) {
+            return;
+        }
+
         const leftEl = this.leftViewport().elementRef.nativeElement;
         const rightEl = this.rightViewport().elementRef.nativeElement;
         if (this.leftScrollListener) leftEl.removeEventListener('scroll', this.leftScrollListener);

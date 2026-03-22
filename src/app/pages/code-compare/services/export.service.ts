@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { createTwoFilesPatch } from 'diff';
 import { DiffResult, FileContent, DiffOptions, ViewMode } from '../models/diff.models';
 
 @Injectable({ providedIn: 'root' })
@@ -6,6 +7,17 @@ export class ExportService {
     exportHtml(result: DiffResult, leftFile: FileContent, rightFile: FileContent, viewMode: ViewMode, options: DiffOptions, fontSize = 14): void {
         const html = viewMode === 'inline' ? this.buildInlineHtmlExport(result, leftFile, rightFile, options, fontSize) : this.buildSideBySideHtmlExport(result, leftFile, rightFile, options, fontSize);
         this.downloadFile(`diff-${Date.now()}.html`, html, 'text/html;charset=utf-8');
+    }
+
+    exportUnifiedDiff(leftFile: FileContent, rightFile: FileContent, options: DiffOptions): void {
+        const activeOptions = this.getActiveOptionsSummary(options);
+        const oldHeader = activeOptions ? `Original file\nActive diff options: ${activeOptions}` : 'Original file';
+        const newHeader = activeOptions ? `Modified file\nActive diff options: ${activeOptions}` : 'Modified file';
+        const patch = createTwoFilesPatch(leftFile.name, rightFile.name, leftFile.content, rightFile.content, oldHeader, newHeader, {
+            context: options.contextLines
+        });
+
+        this.downloadFile(`diff-${Date.now()}.diff`, patch, 'text/x-diff;charset=utf-8');
     }
 
     exportImage(result: DiffResult, leftFile: FileContent, rightFile: FileContent, viewMode: ViewMode, options: DiffOptions, fontSize = 14): Promise<void> {
