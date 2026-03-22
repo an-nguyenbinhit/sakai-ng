@@ -1,80 +1,41 @@
 # AGENTS.md
 
-This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
+This repository uses `AGENTS.md` plus the project skill at `.agent/skills/sakai-ng-development/SKILL.md` as the canonical guidance stack. Keep this file short, accurate, and aligned with the current app.
 
 ## Commands
 
 ```bash
-npm start          # Dev server at http://localhost:4201 (auto-reloads on changes)
+npm start          # Dev server at http://localhost:4201
 npm run build      # Production build to dist/devworkspace/
-npm run watch      # Dev build with file watching
-npm test           # Unit tests via Karma/Jasmine
-npm run format     # Format all JS/TS/HTML files with Prettier
+npm run watch      # Development build in watch mode
+npm test           # Karma/Jasmine unit tests
+npm run format     # Prettier for JS/TS/HTML files
 ```
 
-To run a single test file, use:
-```bash
-npx ng test --include='**/path/to/file.spec.ts'
-```
+Single-spec execution via `npx ng test --include='**/path/to/file.spec.ts'` may not work reliably in every environment. Treat it as optional and verify the command before depending on it.
 
-## Architecture
+## Current app shape
 
-**DevWorkspace** is an Angular 21 admin template built on [PrimeNG](https://primeng.org/) component library with Tailwind CSS v4.
+`DevWorkspace` is an Angular 21 tool suite built with standalone components, PrimeNG, Tailwind CSS v4, Monaco Editor, and SSR/prerender support.
 
-### Key architectural choices
+- Routing is defined centrally in `src/app.routes.ts`.
+- The shell is `AppLayout`, with navigation in `src/app/layout/component/app.menu.ts`.
+- Current tool routes are: `/`, `/code-compare`, `/code-formatter`, `/json-tools`, `/regex-tester`, `/encode-decode`, and `/dummy-file-generator`.
+- `LayoutService` in `src/app/layout/service/layout.service.ts` owns layout and theme state via Angular signals.
 
-- **Standalone components** throughout — no NgModules. Every component uses `standalone: true`.
-- **Zoneless change detection** (`provideZonelessChangeDetection()`) — use Angular signals for reactivity instead of triggering zone-based CD.
-- **Signals-based state** — `LayoutService` manages all layout/theme state via `signal()` and `computed()` from `@angular/core`.
-- **Path alias** — `@/*` maps to `src/*` (e.g., `import { LayoutService } from '@/app/layout/service/layout.service'`).
-- **Dark mode** — toggled by adding/removing the `.app-dark` class on `<html>`. Uses View Transitions API when available.
+## Working rules
 
-### Routing structure
+- Prefer standalone Angular components and direct imports; do not introduce NgModules.
+- Use signals for local reactive state where appropriate; the app is zoneless via `provideZonelessChangeDetection()`.
+- Use the `@/*` path alias for cross-directory imports from `src/*`.
+- Preserve existing PrimeNG + Tailwind patterns instead of re-theming components ad hoc.
+- When adding or changing routes, keep route `title` and `data.description` metadata accurate.
+- Guard browser-only APIs such as `window`, `document`, `localStorage`, and `sessionStorage` so SSR/prerender does not break.
 
-```
-/                    → AppLayout (shell with sidebar + topbar)
-  /                  → Dashboard
-  /uikit/**          → Lazy-loaded UI kit demos
-  /documentation     → Documentation page
-  /pages/**          → Lazy-loaded: crud, empty, notfound
-/landing             → Public landing page (no shell)
-/auth/**             → Lazy-loaded: login, error, access
-/notfound            → 404 page
-```
+## Validation
 
-### Layout system (`src/app/layout/`)
+- Use targeted tests when available.
+- Run `npm run build` for integration validation on meaningful app changes.
+- Treat SSR/prerender failures as first-class regressions, especially when touching pages, layout, or browser APIs.
 
-The `AppLayout` component is the main shell. It composes:
-- `AppTopbar` — top navigation bar with menu toggle and theme configurator trigger
-- `AppSidebar` → `AppMenu` → `AppMenuitem` — recursive sidebar navigation
-- `AppFooter` — bottom footer
-- `AppConfigurator` / `AppFloatingConfigurator` — theme/preset switcher panel
-
-`LayoutService` is the single source of truth for layout state:
-- `layoutConfig` signal: `{ preset, primary, surface, darkTheme, menuMode }` — theme configuration
-- `layoutState` signal: `{ staticMenuDesktopInactive, overlayMenuActive, mobileMenuActive, ... }` — UI state
-- Menu modes: `'static'` (default) or `'overlay'`
-
-### Theming
-
-PrimeNG is configured with the `Aura` preset by default (`src/app.config.ts`). The `AppConfigurator` component allows runtime switching between Aura, Lara, and Nora presets, primary colors, and surface palettes using `@primeuix/themes` utilities (`updatePreset`, `updateSurfacePalette`, `$t()`).
-
-### Page services (`src/app/pages/service/`)
-
-Demo data services providing mock data for the UI kit examples:
-- `ProductService`, `CustomerService` — CRUD demo data
-- `CountryService`, `NodeService`, `PhotoService`, `IconService` — various component demos
-
-### Styling
-
-- Global styles: `src/assets/styles.scss` and `src/assets/tailwind.css`
-- Component styles use inline SCSS (`inlineStyleLanguage: "scss"` in angular.json)
-- Tailwind CSS v4 via PostCSS (`@tailwindcss/postcss`)
-- PrimeUI Tailwind integration via `tailwindcss-primeui` plugin
-
-### Code conventions
-
-- Component class names have **no suffix** (ESLint enforces `@angular-eslint/component-class-suffix` with empty suffixes array) — e.g., `Dashboard`, `AppLayout`, not `DashboardComponent`
-- Component selectors use prefix `p` (per ESLint config), but built-in layout components use `app-` prefix
-- Single quotes, 4-space indent, 250-char print width (see `.prettierrc.json`)
-- TypeScript strict mode enabled with `noImplicitOverride`, `noImplicitReturns`, `strictTemplates`
+See `.agent/skills/sakai-ng-development/SKILL.md` for detailed repo workflows.

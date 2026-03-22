@@ -1,69 +1,77 @@
 ---
 name: sakai-ng-development
-description: Guidelines, architecture overview, and conventions for developing the Sakai-NG Angular project.
+description: Repo-specific workflow for changing DevWorkspace, including Angular 21 conventions, routing, layout, SEO metadata, SSR-safe browser API usage, and validation for tool pages.
 ---
 
 # Sakai-NG Development Skill
 
-This skill provides essential guidelines, architectural choices, and commands for working on the Sakai-NG project, an Angular 21 admin template built on PrimeNG with Tailwind CSS v4.
+Use this skill for any feature, bugfix, refactor, or review inside this repo, especially when the task touches routes, tool pages, layout, SEO metadata, Monaco-based editors, or SSR/prerender behavior.
 
-## Commands
+## Repo facts
 
-- **Start Dev Server**: `npm start` (Runs on http://localhost:4201 with auto-reload)
-- **Production Build**: `npm run build` (Builds to `dist/sakai-ng/`)
-- **Dev Build with Watch**: `npm run watch`
-- **Run Unit Tests**: `npm test` (via Karma/Jasmine)
-- **Format Code**: `npm run format` (Format all JS/TS/HTML files with Prettier)
+- App name: `DevWorkspace`
+- Stack: Angular 21, standalone components, zoneless change detection, signals, PrimeNG, Tailwind CSS v4, Monaco editor
+- Main route table: `src/app.routes.ts`
+- Main shell/menu: `src/app/layout/component/app.menu.ts`
+- Shared layout state: `src/app/layout/service/layout.service.ts`
+- Production build output: `dist/devworkspace`
+- Path alias: `@/*` maps to `src/*`
 
-To run a single test file:
-```bash
-npx ng test --include='**/path/to/file.spec.ts'
-```
+Current routed pages:
+- `/`
+- `/code-compare`
+- `/code-formatter`
+- `/json-tools`
+- `/regex-tester`
+- `/encode-decode`
+- `/dummy-file-generator`
 
-## Architecture
+## Working rules
 
-### Key Architectural Choices
+- Prefer standalone Angular components and direct imports. Do not add NgModules.
+- Use signals for local reactive state when state is owned by the component or shared service.
+- Follow the repo's existing file pattern instead of enforcing one template style. Some components use external HTML/SCSS files, while several layout components use inline templates.
+- Keep PrimeNG and Tailwind usage aligned with existing code. Reuse established patterns before introducing custom styling abstractions.
+- Use the `@/*` alias for cross-directory imports.
+- Keep route `title` and `data.description` metadata accurate when adding or changing pages.
+- Watch for SSR/prerender safety. Any use of `window`, `document`, `localStorage`, `sessionStorage`, DOM globals, or browser-only libraries must be guarded for non-browser execution.
+- Class names should not use a `Component` suffix unless the repo already has a legacy exception that is part of the current route surface.
 
-1. **Standalone Components**: The project uses standalone components exclusively (no `NgModules`). Every component must have `standalone: true`.
-2. **Zoneless Change Detection**: The app uses `provideZonelessChangeDetection()` and Angular signals for reactivity, avoiding traditional zone-based change detection.
-3. **Signals-based State**: `LayoutService` manages all layout/theme state via `signal()` and `computed()` from `@angular/core`.
-4. **Path Alias**: Always use `@/` to import from `src/` (e.g., `import { LayoutService } from '@/app/layout/service/layout.service'`).
-5. **Dark Mode**: Dark mode is toggled by adding or removing the `.app-dark` class on the `<html>` element.
+## Task workflows
 
-### Code Conventions
+### Edit an existing tool page
 
-- **Component Structure**: Always separate HTML, SCSS, and TS into distinct files (`.html`, `.scss`, `.ts`). Do **NOT** use inline `template` or `styles` in the `@Component` decorator.
-- **Component Class Names**: Do **NOT** use suffixes for component classes. Use `Dashboard` instead of `DashboardComponent`.
-- **Component Selectors**: Custom layout components should use the `app-` prefix. PrimeNG components use the `p-` prefix.
-- **Formatting**: The project uses single quotes, 4-space indent, and a 250-char print width (enforced by Prettier).
+1. Read the page component plus any local services/specs it depends on.
+2. Check `src/app.routes.ts` for route metadata that may need to change with the feature.
+3. Preserve the current UX language in `src/app/layout/component/app.menu.ts` if labels or navigation are affected.
+4. When changing browser-driven behavior, review SSR impact before writing code.
+5. Validate with the smallest useful test scope first, then run `npm run build` for meaningful changes.
 
-### Routing Structure
+### Add a new tool page
 
-- `/` → `AppLayout` (Main shell with sidebar + topbar)
-  - `/` → Dashboard
-  - `/pages/**` → Lazy-loaded routing for CRUD, empty, notfound
-  - `/uikit/**` → Lazy-loaded UI kit demos
-  - `/documentation` → Documentation
-- `/landing` → Public landing page (no shell)
-- `/auth/**` → Lazy-loaded auth pages (login, error, access denial)
-- `/notfound` → 404 page
+1. Create the new page under `src/app/pages/<tool-name>/`.
+2. Register the route in `src/app.routes.ts`.
+3. Add or update the matching sidebar item in `src/app/layout/component/app.menu.ts`.
+4. Set a route `title` and `data.description` that match the feature and SEO intent.
+5. If the page uses browser-only capabilities, make the initial render SSR-safe.
 
-### Layout System (`src/app/layout/`)
+### Update layout or theming behavior
 
-The main shell component `AppLayout` is composed of:
-- `AppTopbar`: Top navigation and menus.
-- `AppSidebar` → `AppMenu` → `AppMenuitem`: Recursive sidebar navigation.
-- `AppFooter`: Bottom footer.
-- `AppConfigurator` / `AppFloatingConfigurator`: Theme and preset switchers.
+1. Treat `LayoutService` as the source of truth for layout/theme state.
+2. Preserve the current preset/dark-mode behavior from `src/app.config.ts` and layout components.
+3. If a change touches menu behavior, test both desktop and mobile assumptions in the existing logic.
+4. Be careful with document-level effects and view transitions; they must remain browser-guarded.
 
-**LayoutService (`src/app/layout/service/layout.service.ts`)** handles the state:
-- `layoutConfig` signal: Theme configuration (`preset`, `primary`, `surface`, `darkTheme`, `menuMode`).
-- `layoutState` signal: UI state (`staticMenuDesktopInactive`, `overlayMenuActive`, `mobileMenuActive`, etc.).
-- Menu modes: Supported modes are `'static'` (default) or `'overlay'`.
+## Validation
 
-### Theming & Styling
+- `npm test` for broad unit coverage.
+- `npx ng test --include='**/path/to/file.spec.ts'` only when the local Angular/Karma setup actually honors the filter.
+- `npm run build` is the required integration check for meaningful app changes because it exercises production build plus prerender behavior.
+- If build output reports SSR/prerender failures from browser globals, treat that as a real regression, not a test artifact.
 
-- The project uses the PrimeNG `Aura` preset by default (`src/app.config.ts`).
-- **Global Styles**: Defined in `src/assets/styles.scss` and `src/assets/tailwind.css`.
-- **Component Styles**: Use external SCSS files for component-specific styles (`styleUrl: './component-name.scss'`).
-- The project implements **Tailwind CSS v4** via PostCSS and PrimeUI Tailwind integration.
+## Review checklist
+
+- Does the change match the current route map and menu structure rather than the older admin-template layout?
+- Are route metadata and user-facing labels still consistent?
+- Are browser APIs guarded for SSR/prerender?
+- Is the change using existing PrimeNG/Tailwind patterns instead of inventing a parallel style system?
