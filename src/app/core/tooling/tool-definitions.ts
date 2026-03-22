@@ -261,15 +261,17 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     {
         label: 'Mock Data Generator',
         description: 'Create seeded text, numbers, dates, and JSON payloads from a lightweight field model.',
-        route: null,
+        route: '/mock-data-generator',
         icon: 'pi pi-star',
         tags: ['Mock', 'Seed'],
         keywords: ['faker', 'sample payload', 'fixtures'],
         category: 'time-generators',
-        badge: 'Planned',
-        status: 'planned',
+        badge: 'New',
+        status: 'new',
         supportsFiles: false,
-        supportsOffline: true
+        supportsOffline: true,
+        featured: true,
+        menuVisible: true
     },
     {
         label: 'Color Tools',

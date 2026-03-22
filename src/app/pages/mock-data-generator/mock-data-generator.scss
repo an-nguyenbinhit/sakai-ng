@@ -1,0 +1,231 @@
+:host {
+    display: block;
+}
+
+.workspace-toolbar,
+.toolbar-group,
+.field-card__grid,
+.field-card__rules,
+.panel-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.workspace-toolbar {
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.toolbar-group--compact {
+    flex: 1 1 26rem;
+}
+
+.scenario-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+}
+
+.scenario-pill,
+.dataset-card {
+    border: 1px solid color-mix(in srgb, var(--p-surface-400) 40%, transparent);
+    background: color-mix(in srgb, var(--p-surface-0) 92%, var(--p-primary-50) 8%);
+    transition:
+        transform 150ms ease,
+        border-color 150ms ease,
+        background 150ms ease;
+}
+
+.scenario-pill {
+    padding: 0.65rem 1rem;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.scenario-pill--active {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--p-primary-100) 75%, white) 0%, color-mix(in srgb, var(--p-primary-200) 30%, white) 100%);
+    border-color: color-mix(in srgb, var(--p-primary-400) 65%, transparent);
+}
+
+.status-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid color-mix(in srgb, var(--p-primary-300) 50%, transparent);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--p-primary-50) 78%, white) 0%, color-mix(in srgb, var(--p-surface-0) 88%, var(--p-primary-100) 12%) 100%);
+}
+
+.workspace-grid {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.workspace-grid--advanced {
+    grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.3fr) minmax(20rem, 1fr);
+}
+
+.workspace-panel {
+    border: 1px solid color-mix(in srgb, var(--p-surface-400) 35%, transparent);
+    border-radius: 1.25rem;
+    background: color-mix(in srgb, var(--p-surface-0) 95%, var(--p-primary-50) 5%);
+    overflow: hidden;
+    min-width: 0;
+}
+
+.workspace-panel--wide {
+    min-width: 0;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: end;
+    padding: 1.1rem 1.2rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--p-surface-300) 35%, transparent);
+}
+
+.panel-header p {
+    margin: 0 0 0.25rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--p-surface-500);
+}
+
+.panel-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.panel-header span {
+    color: var(--p-surface-500);
+    font-size: 0.85rem;
+}
+
+.dataset-list,
+.field-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 1.1rem;
+}
+
+.dataset-card {
+    text-align: left;
+    border-radius: 1rem;
+    padding: 1rem;
+    cursor: pointer;
+}
+
+.dataset-card:hover,
+.dataset-card--active {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--p-primary-400) 60%, transparent);
+}
+
+.dataset-card__header,
+.dataset-card__body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.dataset-card__header {
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.dataset-card__body > * {
+    flex: 1 1 10rem;
+}
+
+.field-card {
+    padding: 1rem;
+    border-radius: 1rem;
+    border: 1px solid color-mix(in srgb, var(--p-surface-300) 40%, transparent);
+    background: color-mix(in srgb, var(--p-surface-0) 92%, var(--p-surface-100) 8%);
+}
+
+.field-card__grid + .field-card__grid,
+.field-card__grid + .field-card__rules,
+.field-card__rules + .field-card__grid {
+    margin-top: 0.75rem;
+}
+
+.field-card__grid > *:not(button),
+.field-card__rules > * {
+    flex: 1 1 11rem;
+}
+
+.field-card__grid--compact > *:not(button) {
+    flex-basis: 10rem;
+}
+
+.toggle-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--p-surface-400) 45%, transparent);
+    background: color-mix(in srgb, var(--p-surface-0) 86%, var(--p-primary-100) 14%);
+    font-size: 0.85rem;
+}
+
+.toggle-chip input {
+    margin: 0;
+}
+
+.toggle-chip--sm {
+    padding: 0.45rem 0.65rem;
+}
+
+.native-select {
+    min-height: 2.8rem;
+    width: 100%;
+    border-radius: 0.8rem;
+    border: 1px solid color-mix(in srgb, var(--p-surface-400) 45%, transparent);
+    background: var(--p-surface-0);
+    padding: 0.7rem 0.85rem;
+    color: inherit;
+}
+
+.field-textarea,
+.workspace-textarea {
+    width: 100%;
+    border-radius: 1rem;
+}
+
+.field-textarea {
+    margin-top: 0.75rem;
+}
+
+.workspace-textarea {
+    width: calc(100% - 2.2rem);
+    margin: 1.1rem;
+    min-height: 38rem;
+}
+
+@media (max-width: 1280px) {
+    .workspace-grid--advanced {
+        grid-template-columns: minmax(16rem, 0.9fr) minmax(0, 1.1fr);
+    }
+
+    .workspace-grid--advanced > :last-child {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 960px) {
+    .workspace-grid--advanced {
+        grid-template-columns: 1fr;
+    }
+}

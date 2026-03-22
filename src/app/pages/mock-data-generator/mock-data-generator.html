@@ -1,0 +1,231 @@
+<p-toast></p-toast>
+
+<app-tool-page-shell
+    eyebrow="Time & Generators"
+    title="Mock Data Generator"
+    description="Generate realistic multi-dataset fixtures with nested objects, arrays, related fields, references, weighted enums, conditions, uniqueness rules, and scenario-based edge cases."
+    [badges]="['Advanced', 'Offline-ready']"
+    [stats]="shellStats()"
+>
+    <div tool-actions class="workspace-toolbar">
+        <div class="toolbar-group toolbar-group--compact">
+            <input pInputText type="text" [ngModel]="seed()" (ngModelChange)="seed.set($event)" placeholder="Seed" />
+            <p-inputNumber [ngModel]="indent()" (ngModelChange)="indent.set($event || 2)" [min]="0" [max]="4"></p-inputNumber>
+            <button pButton type="button" icon="pi pi-bolt" label="Generate" (click)="generate()"></button>
+            <button pButton type="button" icon="pi pi-copy" label="Copy" severity="contrast" (click)="copyOutput()"></button>
+            <button pButton type="button" icon="pi pi-download" label="Download" severity="secondary" [outlined]="true" (click)="downloadOutput()"></button>
+        </div>
+
+        <div class="toolbar-group">
+            <button pButton type="button" icon="pi pi-shopping-bag" label="Commerce preset" severity="secondary" [outlined]="true" (click)="loadPreset('commerce')"></button>
+            <button pButton type="button" icon="pi pi-briefcase" label="CRM preset" severity="secondary" [outlined]="true" (click)="loadPreset('crm')"></button>
+        </div>
+    </div>
+
+    <div class="scenario-strip">
+        @for (scenario of scenarioOptions; track scenario.value) {
+            <button
+                type="button"
+                class="scenario-pill"
+                [class.scenario-pill--active]="selectedScenario() === scenario.value"
+                (click)="applyScenario(scenario.value)"
+            >
+                {{ scenario.label }}
+            </button>
+        }
+    </div>
+
+    <div class="status-banner">
+        <i class="pi pi-info-circle"></i>
+        <span>{{ statusMessage() }}</span>
+    </div>
+
+    <section class="workspace-grid workspace-grid--advanced">
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Datasets</p>
+                    <h2>Relational Collections</h2>
+                </div>
+                <button pButton type="button" icon="pi pi-plus" label="Dataset" size="small" (click)="addDataset()"></button>
+            </header>
+
+            <div class="dataset-list">
+                @for (dataset of datasets(); track trackById($index, dataset)) {
+                    <button
+                        type="button"
+                        class="dataset-card"
+                        [class.dataset-card--active]="activeDatasetId() === dataset.id"
+                        (click)="activeDatasetId.set(dataset.id)"
+                    >
+                        <div class="dataset-card__header">
+                            <strong>{{ dataset.label }}</strong>
+                            <span>{{ dataset.count }} rows</span>
+                        </div>
+                        <div class="dataset-card__body">
+                            <input
+                                pInputText
+                                type="text"
+                                [ngModel]="dataset.key"
+                                (ngModelChange)="updateDataset(dataset.id, 'key', $event)"
+                                placeholder="dataset-key"
+                                (click)="$event.stopPropagation()"
+                            />
+                            <input
+                                pInputText
+                                type="text"
+                                [ngModel]="dataset.label"
+                                (ngModelChange)="updateDataset(dataset.id, 'label', $event)"
+                                placeholder="Label"
+                                (click)="$event.stopPropagation()"
+                            />
+                            <p-inputNumber
+                                [ngModel]="dataset.count"
+                                (ngModelChange)="updateDataset(dataset.id, 'count', $event || 1)"
+                                [min]="1"
+                                [max]="250"
+                                (click)="$event.stopPropagation()"
+                            ></p-inputNumber>
+                            <button
+                                pButton
+                                type="button"
+                                icon="pi pi-trash"
+                                severity="danger"
+                                [text]="true"
+                                (click)="$event.stopPropagation(); removeDataset(dataset.id)"
+                            ></button>
+                        </div>
+                    </button>
+                }
+            </div>
+        </article>
+
+        <article class="workspace-panel workspace-panel--wide">
+            <header class="panel-header">
+                <div>
+                    <p>Schema Editor</p>
+                    <h2>{{ activeDataset()?.label || 'Select a dataset' }}</h2>
+                </div>
+                <div class="panel-actions">
+                    <button pButton type="button" icon="pi pi-plus" label="Scalar" size="small" severity="secondary" [outlined]="true" (click)="addField('scalar')"></button>
+                    <button pButton type="button" icon="pi pi-box" label="Object" size="small" severity="secondary" [outlined]="true" (click)="addField('object')"></button>
+                    <button pButton type="button" icon="pi pi-list" label="Array" size="small" severity="secondary" [outlined]="true" (click)="addField('array')"></button>
+                </div>
+            </header>
+
+            <div class="field-list">
+                @for (field of activeFields(); track trackById($index, field)) {
+                    <section class="field-card">
+                        <div class="field-card__grid">
+                            <input pInputText type="text" [ngModel]="field.name" (ngModelChange)="updateField(field.id, 'name', $event)" placeholder="fieldName" />
+
+                            <select class="native-select" [ngModel]="field.parentId" (ngModelChange)="updateField(field.id, 'parentId', $event)">
+                                @for (parent of getParentOptions(field.datasetId, field.id); track parent.label) {
+                                    <option [ngValue]="parent.value">{{ parent.label }}</option>
+                                }
+                            </select>
+
+                            <select class="native-select" [ngModel]="field.shape" (ngModelChange)="updateField(field.id, 'shape', $event)">
+                                @for (option of shapeOptions; track option.value) {
+                                    <option [ngValue]="option.value">{{ option.label }}</option>
+                                }
+                            </select>
+
+                            <select class="native-select" [ngModel]="field.sourceMode" (ngModelChange)="updateField(field.id, 'sourceMode', $event)" [disabled]="field.shape !== 'scalar'">
+                                @for (option of sourceOptions; track option.value) {
+                                    <option [ngValue]="option.value">{{ option.label }}</option>
+                                }
+                            </select>
+
+                            <select class="native-select" [ngModel]="field.type" (ngModelChange)="updateField(field.id, 'type', $event)" [disabled]="field.shape !== 'scalar'">
+                                @for (option of fieldTypeOptions; track option.value) {
+                                    <option [ngValue]="option.value">{{ option.label }}</option>
+                                }
+                            </select>
+
+                            <button pButton type="button" icon="pi pi-trash" severity="danger" [text]="true" (click)="removeField(field.id)"></button>
+                        </div>
+
+                        <div class="field-card__rules">
+                            <label class="toggle-chip toggle-chip--sm">
+                                <input type="checkbox" [ngModel]="field.unique" (ngModelChange)="updateField(field.id, 'unique', $event)" />
+                                <span>Unique</span>
+                            </label>
+                            <label class="toggle-chip toggle-chip--sm">
+                                <input type="checkbox" [ngModel]="field.nullable" (ngModelChange)="updateField(field.id, 'nullable', $event)" />
+                                <span>Nullable</span>
+                            </label>
+
+                            <p-inputNumber [ngModel]="field.nullRate" (ngModelChange)="updateField(field.id, 'nullRate', $event || 0)" [min]="0" [max]="1" [step]="0.05"></p-inputNumber>
+                            <p-inputNumber [ngModel]="field.omitRate" (ngModelChange)="updateField(field.id, 'omitRate', $event || 0)" [min]="0" [max]="1" [step]="0.05"></p-inputNumber>
+                            <p-inputNumber [ngModel]="field.invalidRate" (ngModelChange)="updateField(field.id, 'invalidRate', $event || 0)" [min]="0" [max]="1" [step]="0.05"></p-inputNumber>
+                        </div>
+
+                        @if (field.shape === 'scalar' && field.type === 'number') {
+                            <div class="field-card__grid field-card__grid--compact">
+                                <p-inputNumber [ngModel]="field.min" (ngModelChange)="updateField(field.id, 'min', $event || 0)" [min]="-999999" [max]="999999"></p-inputNumber>
+                                <p-inputNumber [ngModel]="field.max" (ngModelChange)="updateField(field.id, 'max', $event || 100)" [min]="-999999" [max]="999999"></p-inputNumber>
+                                <select class="native-select" [ngModel]="field.distribution" (ngModelChange)="updateField(field.id, 'distribution', $event)">
+                                    @for (option of distributionOptions; track option.value) {
+                                        <option [ngValue]="option.value">{{ option.label }}</option>
+                                    }
+                                </select>
+                            </div>
+                        }
+
+                        @if (field.shape === 'array') {
+                            <div class="field-card__grid field-card__grid--compact">
+                                <p-inputNumber [ngModel]="field.arrayMin" (ngModelChange)="updateField(field.id, 'arrayMin', $event || 1)" [min]="0" [max]="20"></p-inputNumber>
+                                <p-inputNumber [ngModel]="field.arrayMax" (ngModelChange)="updateField(field.id, 'arrayMax', $event || 3)" [min]="0" [max]="20"></p-inputNumber>
+                            </div>
+                        }
+
+                        @if (field.shape === 'scalar' && (field.type === 'enum' || field.type === 'pattern' || field.sourceMode === 'template')) {
+                            <textarea
+                                pTextarea
+                                [ngModel]="field.sourceMode === 'template' ? field.template || '' : field.optionsText || ''"
+                                (ngModelChange)="field.sourceMode === 'template' ? updateField(field.id, 'template', $event) : updateField(field.id, 'optionsText', $event)"
+                                rows="3"
+                                class="field-textarea"
+                                [placeholder]="field.sourceMode === 'template' ? '{{firstName|lower}}.{{lastName|lower}}@example.dev' : field.type === 'pattern' ? 'ORD-{YYYY}-{#####}' : 'active|70&#10;pending|20&#10;disabled|10'"
+                            ></textarea>
+                        }
+
+                        @if (field.shape === 'scalar' && field.sourceMode === 'reference') {
+                            <div class="field-card__grid field-card__grid--compact">
+                                <select class="native-select" [ngModel]="field.referenceDatasetId" (ngModelChange)="updateField(field.id, 'referenceDatasetId', $event)">
+                                    <option [ngValue]="null">Reference dataset</option>
+                                    @for (dataset of getDatasetReferenceOptions(field.datasetId); track dataset.value) {
+                                        <option [ngValue]="dataset.value">{{ dataset.label }}</option>
+                                    }
+                                </select>
+                                <input pInputText type="text" [ngModel]="field.referenceFieldPath || ''" (ngModelChange)="updateField(field.id, 'referenceFieldPath', $event)" placeholder="id or nested.path" />
+                            </div>
+                        }
+
+                        <div class="field-card__grid field-card__grid--compact">
+                            <input pInputText type="text" [ngModel]="field.conditionPath || ''" (ngModelChange)="updateField(field.id, 'conditionPath', $event)" placeholder="Condition path (optional)" />
+                            <select class="native-select" [ngModel]="field.conditionOperator" (ngModelChange)="updateField(field.id, 'conditionOperator', $event)">
+                                @for (option of conditionOptions; track option.value) {
+                                    <option [ngValue]="option.value">{{ option.label }}</option>
+                                }
+                            </select>
+                            <input pInputText type="text" [ngModel]="field.conditionValue || ''" (ngModelChange)="updateField(field.id, 'conditionValue', $event)" placeholder="Condition value" />
+                        </div>
+                    </section>
+                }
+            </div>
+        </article>
+
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Preview</p>
+                    <h2>Generated Payload</h2>
+                </div>
+                <span>{{ outputMetrics().lines }} lines | {{ outputMetrics().bytes }} bytes</span>
+            </header>
+            <textarea pTextarea [ngModel]="outputText()" rows="32" class="workspace-textarea font-mono" readonly></textarea>
+        </article>
+    </section>
+</app-tool-page-shell>

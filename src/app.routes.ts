@@ -117,6 +117,14 @@ export const appRoutes: Routes = [
                 data: {
                     description: 'Run JSONPath and XPath queries against JSON or XML payloads, inspect exact match paths, and review tree-shaped results locally.'
                 }
+            },
+            {
+                path: 'mock-data-generator',
+                loadComponent: () => import('./app/pages/mock-data-generator/mock-data-generator').then((m) => m.MockDataGenerator),
+                title: 'Mock Data Generator for Seeded JSON Fixtures',
+                data: {
+                    description: 'Generate seeded mock JSON fixtures with names, emails, dates, enums, and numeric fields from a lightweight field model.'
+                }
             }
         ]
     },
