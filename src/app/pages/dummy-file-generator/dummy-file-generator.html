@@ -8,11 +8,54 @@
     [stats]="shellStats()"
 >
     <div class="dummy-generator-page">
-        <div class="dummy-generator-card card p-0 shadow-none rounded-2xl overflow-hidden">
-            <div class="dummy-generator-card__body p-6 sm:p-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="flex flex-col gap-2">
-                        <label htmlFor="fileType" class="font-medium text-surface-900 dark:text-surface-0">Format</label>
+        <section class="dummy-layout">
+            <aside class="workspace-panel workspace-panel--sidebar">
+                <header class="panel-header panel-header--sidebar">
+                    <div>
+                        <p>Quick Setup</p>
+                        <h2>Configure Output</h2>
+                    </div>
+                    <span>{{ selectedFileType.toUpperCase() }}</span>
+                </header>
+
+                <div class="panel-body panel-body--sidebar">
+                    <div class="download-panel download-panel--top">
+                        <div class="download-panel__header">
+                            <div>
+                                <p>Output File</p>
+                            </div>
+                        </div>
+
+                        <div class="output-file-shell">
+                            <input
+                                pInputText
+                                [(ngModel)]="outputFileBaseName"
+                                class="download-panel__input"
+                                placeholder="filename"
+                            />
+                            <span>.{{ selectedFileType }}</span>
+                        </div>
+
+                        <button
+                            pButton
+                            pRipple
+                            (click)="generateFile()"
+                            [loading]="isGenerating"
+                            styleClass="download-button"
+                            class="download-button__native"
+                        >
+                            <i class="pi pi-download" *ngIf="!isGenerating"></i>
+                            <span>{{ isGenerating ? 'Generating...' : 'Download File' }}</span>
+                        </button>
+
+                        <div class="download-panel__meta">
+                            <span class="download-panel__meta-item">Default name: <strong>{{ outputFileBaseName }}</strong></span>
+                            <span *ngIf="isGenerating">{{ progressValue | number: '1.0-0' }}%</span>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label htmlFor="fileType" class="field-label">Format</label>
                         <p-select
                             id="fileType"
                             [options]="fileTypes"
@@ -41,9 +84,10 @@
                         </p-select>
                     </div>
 
-                    <div class="flex flex-col gap-2">
-                        <div class="flex justify-between items-center">
-                            <label htmlFor="fileSize" class="font-medium text-surface-900 dark:text-surface-0">Size (MB)</label>
+                    <div class="field-group">
+                        <div class="field-row">
+                            <label htmlFor="fileSize" class="field-label">Size</label>
+                            <span class="field-hint">1 to 200 MB</span>
                         </div>
                         <p-inputNumber
                             id="fileSize"
@@ -62,184 +106,173 @@
                             (ngModelChange)="syncDefaultFileName()"
                         ></p-inputNumber>
 
-                        <div class="flex gap-1 mt-2 flex-wrap">
+                        <div class="preset-grid">
                             <button
                                 *ngFor="let preset of sizePresets"
                                 type="button"
                                 (click)="fileSizeInMb = preset; syncDefaultFileName()"
-                                class="size-preset-button px-2 py-0.5 rounded text-xs font-mono font-medium border transition-colors cursor-pointer"
-                                [class.bg-primary]="fileSizeInMb === preset"
-                                [class.text-white]="fileSizeInMb === preset"
-                                [class.border-primary]="fileSizeInMb === preset"
-                                [class.bg-surface-0]="fileSizeInMb !== preset"
-                                [class.dark:bg-surface-800]="fileSizeInMb !== preset"
-                                [class.text-surface-600]="fileSizeInMb !== preset"
-                                [class.dark:text-surface-300]="fileSizeInMb !== preset"
-                                [class.border-surface-300]="fileSizeInMb !== preset"
-                                [class.dark:border-surface-600]="fileSizeInMb !== preset"
-                                [class.hover:border-primary]="fileSizeInMb !== preset"
+                                class="size-preset-button"
+                                [class.size-preset-button--active]="fileSizeInMb === preset"
                             >
                                 {{ preset }}MB
                             </button>
                         </div>
-
-                        <div class="flex items-center gap-2 mt-3">
-                            <p-toggleswitch [(ngModel)]="addRandomNoise" inputId="randomNoise"></p-toggleswitch>
-                            <label
-                                for="randomNoise"
-                                class="random-noise-label text-sm font-medium text-surface-700 dark:text-surface-300 cursor-pointer"
-                                pTooltip="Add a random UUID suffix so each generated file has a distinct hash and is less likely to be deduplicated."
-                                tooltipPosition="top"
-                            >
-                                Random Noise
-                                <span class="text-xs font-normal text-surface-400">(bypass deduplication)</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dummy-status-banner dummy-status-banner--compact">
-                    <i class="pi" [ngClass]="isGenerating ? 'pi-spin pi-spinner' : 'pi-info-circle'"></i>
-                    <span>
-                        {{ isGenerating ? ('Generating ' + outputFileName + '...') : ('Ready to export ' + outputFileName + ' with ' + fileSizeInMb + ' MB of data.') }}
-                    </span>
-                </div>
-
-                <div class="dummy-action-bar dummy-action-bar--top p-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div class="flex items-center gap-2 text-sm text-surface-600 dark:text-surface-400 font-mono flex-1 min-w-0">
-                        <span class="shrink-0">Output:</span>
-                        <div class="output-file-shell flex items-center flex-1 min-w-0 rounded-md overflow-hidden">
-                            <input
-                                pInputText
-                                [(ngModel)]="outputFileBaseName"
-                                class="flex-1 min-w-0 font-mono text-sm text-primary font-bold h-8 px-2 border-0 outline-none bg-transparent"
-                                placeholder="filename"
-                            />
-                            <span class="shrink-0 px-2 h-8 flex items-center select-none">.{{ selectedFileType }}</span>
-                        </div>
                     </div>
 
-                    <div class="flex items-center gap-4 w-full sm:w-auto">
-                        <span *ngIf="isGenerating" class="text-sm text-surface-500 font-medium">{{ progressValue | number: '1.0-0' }}%</span>
-                        <button
-                            pButton
-                            pRipple
-                            (click)="generateFile()"
-                            [loading]="isGenerating"
-                            styleClass="download-button"
-                            class="w-full sm:w-auto p-button-primary px-6 transition-colors"
-                        >
-                            <i class="pi pi-download mr-2" *ngIf="!isGenerating"></i>
-                            <span class="font-semibold">{{ isGenerating ? 'Generating...' : 'Download' }}</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div
-                    *ngIf="selectedFileType === 'json'"
-                    class="json-schema-panel flex flex-col gap-4 mt-6 p-4 border border-surface-200 dark:border-surface-700 rounded-xl bg-surface-50 dark:bg-surface-900/50"
-                >
-                    <div class="flex justify-between items-center">
-                        <label class="font-medium text-surface-900 dark:text-surface-0 flex items-center gap-2">JSON Schema Properties</label>
-                        <button pButton pRipple icon="pi pi-plus" label="Add Field" size="small" outlined styleClass="json-add-button" (click)="addJsonField()"></button>
-                    </div>
-
-                    <div class="flex flex-col gap-3">
-                        <div
-                            *ngFor="let field of jsonSchema; let i = index"
-                            class="json-schema-row flex items-center gap-3 bg-surface-0 dark:bg-surface-800 p-2 rounded-lg border border-surface-200 dark:border-surface-700"
-                        >
-                            <div class="flex-grow flex items-center gap-3">
-                                <input pInputText [(ngModel)]="field.name" placeholder="Field Name" class="json-field-name flex-grow" />
-                                <p-select
-                                    [options]="[
-                                        { label: 'String', value: 'string' },
-                                        { label: 'Number', value: 'number' },
-                                        { label: 'Boolean', value: 'boolean' },
-                                        { label: 'UUID', value: 'uuid' }
-                                    ]"
-                                    [(ngModel)]="field.type"
-                                    optionLabel="label"
-                                    optionValue="value"
-                                    styleClass="json-type-select w-32"
-                                ></p-select>
+                    <div class="field-group">
+                        <div class="toggle-card">
+                            <div>
+                                <p class="toggle-card__title">Random Noise</p>
+                                <p class="toggle-card__text">Add a UUID suffix to reduce duplicate file hashes.</p>
                             </div>
-                            <button
-                                pButton
-                                pRipple
-                                icon="pi pi-trash"
-                                severity="danger"
-                                text
-                                rounded
-                                styleClass="json-delete-button"
-                                (click)="removeJsonField(i)"
-                                [disabled]="jsonSchema.length === 1"
-                            ></button>
+                            <p-toggleswitch [(ngModel)]="addRandomNoise" inputId="randomNoise"></p-toggleswitch>
                         </div>
                     </div>
-                </div>
 
-                <div *ngIf="isPlainTextFormat()" class="flex flex-col gap-2 mt-6">
-                    <label class="font-medium text-surface-900 dark:text-surface-0 flex items-center gap-2">
-                        File Content (Padding)
-                        <span class="text-xs font-normal text-surface-400">(plain text)</span>
-                    </label>
-                    <textarea
-                        [(ngModel)]="sampleText"
-                        [rows]="6"
-                        placeholder="Enter text that will repeat as padding..."
-                        class="dummy-textarea w-full font-mono text-sm"
-                    ></textarea>
                 </div>
+            </aside>
 
-                <div *ngIf="isRichTextFormat()" class="flex flex-col gap-2 mt-6">
-                    <label class="font-medium text-surface-900 dark:text-surface-0 flex items-center gap-2">
-                        File Content (Padding)
-                        <span class="text-xs font-normal text-surface-400">(rich text)</span>
-                    </label>
-                    <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
-                        <p-editor [(ngModel)]="sampleText" [style]="{ height: '180px' }">
-                            <ng-template pTemplate="header">
-                                <span class="ql-formats">
-                                    <button class="ql-bold" aria-label="Bold"></button>
-                                    <button class="ql-italic" aria-label="Italic"></button>
-                                    <button class="ql-underline" aria-label="Underline"></button>
-                                    <button class="ql-strike" aria-label="Strike"></button>
-                                </span>
-                                <span class="ql-formats">
-                                    <select class="ql-color" aria-label="Text Color"></select>
-                                    <select class="ql-background" aria-label="Background Color"></select>
-                                </span>
-                                <span class="ql-formats">
-                                    <button class="ql-list" value="ordered" aria-label="Ordered List"></button>
-                                    <button class="ql-list" value="bullet" aria-label="Unordered List"></button>
-                                    <select class="ql-align" aria-label="Text Alignment"></select>
-                                </span>
-                                <span class="ql-formats">
-                                    <button class="ql-link" aria-label="Insert Link"></button>
-                                    <button class="ql-code-block" aria-label="Insert Code Block"></button>
-                                </span>
-                                <span class="ql-formats">
-                                    <button class="ql-clean" aria-label="Remove Styles"></button>
-                                </span>
-                            </ng-template>
-                        </p-editor>
+            <section class="workspace-panel workspace-panel--main">
+                <header class="panel-header">
+                    <div>
+                        <p>Content Builder</p>
+                        <h2>Define Generated Payload</h2>
+                    </div>
+                    <span>{{ selectedFileType.toUpperCase() }} template</span>
+                </header>
+
+                <div class="panel-body">
+                    <div class="content-intro">
+                        <div class="content-intro__copy">
+                            <h3>Adjust the content pattern before export</h3>
+                            <p>Each format exposes the right editor so you can control how the filler content looks once the file is generated.</p>
+                        </div>
+                        <div class="content-intro__chips">
+                            <span class="intro-chip" *ngIf="isPlainTextFormat()">Plain text repeat</span>
+                            <span class="intro-chip" *ngIf="isRichTextFormat()">Rich content block</span>
+                            <span class="intro-chip" *ngIf="isImageFormat()">Caption render</span>
+                            <span class="intro-chip" *ngIf="selectedFileType === 'json'">Schema-driven rows</span>
+                        </div>
+                    </div>
+
+                    <div
+                        *ngIf="selectedFileType === 'json'"
+                        class="json-schema-panel"
+                    >
+                        <div class="section-heading">
+                            <div>
+                                <p>JSON Schema</p>
+                                <h3>Properties for generated objects</h3>
+                            </div>
+                            <button pButton pRipple icon="pi pi-plus" label="Add Field" size="small" outlined styleClass="json-add-button" (click)="addJsonField()"></button>
+                        </div>
+
+                        <div class="flex flex-col gap-3">
+                            <div
+                                *ngFor="let field of jsonSchema; let i = index"
+                                class="json-schema-row"
+                            >
+                                <div class="json-schema-row__inputs">
+                                    <input pInputText [(ngModel)]="field.name" placeholder="Field Name" class="json-field-name flex-grow" />
+                                    <p-select
+                                        [options]="[
+                                            { label: 'String', value: 'string' },
+                                            { label: 'Number', value: 'number' },
+                                            { label: 'Boolean', value: 'boolean' },
+                                            { label: 'UUID', value: 'uuid' }
+                                        ]"
+                                        [(ngModel)]="field.type"
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        styleClass="json-type-select"
+                                    ></p-select>
+                                </div>
+                                <button
+                                    pButton
+                                    pRipple
+                                    icon="pi pi-trash"
+                                    severity="danger"
+                                    text
+                                    rounded
+                                    styleClass="json-delete-button"
+                                    (click)="removeJsonField(i)"
+                                    [disabled]="jsonSchema.length === 1"
+                                ></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div *ngIf="isPlainTextFormat()" class="editor-panel">
+                        <div class="section-heading">
+                            <div>
+                                <p>Padding Content</p>
+                                <h3>Repeated plain text</h3>
+                            </div>
+                            <span class="section-caption">Best for TXT, LOG, CSV and PDF filler.</span>
+                        </div>
+                        <textarea
+                            [(ngModel)]="sampleText"
+                            [rows]="10"
+                            placeholder="Enter text that will repeat as padding..."
+                            class="dummy-textarea"
+                        ></textarea>
+                    </div>
+
+                    <div *ngIf="isRichTextFormat()" class="editor-panel">
+                        <div class="section-heading">
+                            <div>
+                                <p>Padding Content</p>
+                                <h3>Rich text editor</h3>
+                            </div>
+                            <span class="section-caption">Useful when exporting HTML.</span>
+                        </div>
+                        <div class="rich-editor-shell">
+                            <p-editor [(ngModel)]="sampleText" [style]="{ height: '240px' }">
+                                <ng-template pTemplate="header">
+                                    <span class="ql-formats">
+                                        <button class="ql-bold" aria-label="Bold"></button>
+                                        <button class="ql-italic" aria-label="Italic"></button>
+                                        <button class="ql-underline" aria-label="Underline"></button>
+                                        <button class="ql-strike" aria-label="Strike"></button>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <select class="ql-color" aria-label="Text Color"></select>
+                                        <select class="ql-background" aria-label="Background Color"></select>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <button class="ql-list" value="ordered" aria-label="Ordered List"></button>
+                                        <button class="ql-list" value="bullet" aria-label="Unordered List"></button>
+                                        <select class="ql-align" aria-label="Text Alignment"></select>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <button class="ql-link" aria-label="Insert Link"></button>
+                                        <button class="ql-code-block" aria-label="Insert Code Block"></button>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <button class="ql-clean" aria-label="Remove Styles"></button>
+                                    </span>
+                                </ng-template>
+                            </p-editor>
+                        </div>
+                    </div>
+
+                    <div *ngIf="isImageFormat()" class="editor-panel">
+                        <div class="section-heading">
+                            <div>
+                                <p>Image Caption</p>
+                                <h3>Text rendered into the preview image</h3>
+                            </div>
+                            <span class="section-caption">Keep it short for cleaner visual output.</span>
+                        </div>
+                        <input pInputText [(ngModel)]="sampleText" placeholder="Enter a short caption for the image..." class="dummy-text-input" maxlength="120" />
+                        <span class="field-hint">Max 120 characters, ASCII recommended.</span>
                     </div>
                 </div>
 
-                <div *ngIf="isImageFormat()" class="flex flex-col gap-2 mt-6">
-                    <label class="font-medium text-surface-900 dark:text-surface-0 flex items-center gap-2">
-                        Image Caption
-                        <span class="text-xs font-normal text-surface-400">(displayed on image)</span>
-                    </label>
-                    <input pInputText [(ngModel)]="sampleText" placeholder="Enter a short caption for the image..." class="w-full" maxlength="120" />
-                    <span class="text-xs text-surface-400">Max 120 characters · ASCII only</span>
+                <div class="progress-strip" *ngIf="isGenerating">
+                    <p-progressBar [value]="progressValue" [showValue]="false" class="w-full" [style]="{ height: '4px' }"></p-progressBar>
                 </div>
-            </div>
-
-            <div class="flex-col">
-                <p-progressBar *ngIf="isGenerating" [value]="progressValue" [showValue]="false" class="w-full" [style]="{ height: '4px' }"></p-progressBar>
-            </div>
-        </div>
+            </section>
+        </section>
     </div>
 </app-tool-page-shell>
