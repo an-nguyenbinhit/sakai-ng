@@ -1,5 +1,5 @@
 import { Injectable, effect, signal, computed, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 
 export interface LayoutConfig {
     preset: string;
@@ -22,7 +22,10 @@ interface LayoutState {
     providedIn: 'root'
 })
 export class LayoutService {
+    private readonly storageKey = 'devworkspace.darkTheme';
+
     platformId = inject(PLATFORM_ID);
+    document = inject(DOCUMENT);
 
     layoutConfig = signal<LayoutConfig>({
         preset: 'Aura',
@@ -58,6 +61,9 @@ export class LayoutService {
     private initialized = false;
 
     constructor() {
+        this.restoreDarkThemePreference();
+        this.toggleDarkMode(this.layoutConfig());
+
         effect(() => {
             const config = this.layoutConfig();
 
@@ -68,13 +74,17 @@ export class LayoutService {
 
             this.handleDarkModeTransition(config);
         });
+
+        effect(() => {
+            this.persistDarkThemePreference(this.layoutConfig().darkTheme);
+        });
     }
 
     private handleDarkModeTransition(config: LayoutConfig): void {
         if (!isPlatformBrowser(this.platformId)) {
             return;
         }
-        const supportsViewTransition = 'startViewTransition' in document;
+        const supportsViewTransition = 'startViewTransition' in this.document;
 
         if (supportsViewTransition) {
             this.startViewTransition(config);
@@ -84,7 +94,7 @@ export class LayoutService {
     }
 
     private startViewTransition(config: LayoutConfig): void {
-        document.startViewTransition(() => {
+        this.document.startViewTransition(() => {
             this.toggleDarkMode(config);
         });
     }
@@ -96,10 +106,17 @@ export class LayoutService {
 
         const _config = config || this.layoutConfig();
         if (_config.darkTheme) {
-            document.documentElement.classList.add('app-dark');
+            this.document.documentElement.classList.add('app-dark');
         } else {
-            document.documentElement.classList.remove('app-dark');
+            this.document.documentElement.classList.remove('app-dark');
         }
+    }
+
+    toggleDarkTheme() {
+        this.layoutConfig.update((state) => ({
+            ...state,
+            darkTheme: !state.darkTheme
+        }));
     }
 
     onMenuToggle() {
@@ -128,5 +145,36 @@ export class LayoutService {
 
     isMobile() {
         return !this.isDesktop();
+    }
+
+    private restoreDarkThemePreference() {
+        const storage = this.getStorage();
+        const persisted = storage?.getItem(this.storageKey);
+
+        if (persisted !== 'true' && persisted !== 'false') {
+            return;
+        }
+
+        this.layoutConfig.update((state) => ({
+            ...state,
+            darkTheme: persisted === 'true'
+        }));
+    }
+
+    private persistDarkThemePreference(isDarkTheme: boolean) {
+        const storage = this.getStorage();
+        storage?.setItem(this.storageKey, String(isDarkTheme));
+    }
+
+    private getStorage(): Storage | null {
+        if (!isPlatformBrowser(this.platformId)) {
+            return null;
+        }
+
+        try {
+            return this.document.defaultView?.localStorage ?? null;
+        } catch {
+            return null;
+        }
     }
 }
