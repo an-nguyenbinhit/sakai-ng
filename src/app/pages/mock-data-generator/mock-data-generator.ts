@@ -84,6 +84,7 @@ export class MockDataGenerator {
 
     readonly seed = signal('devworkspace-seed');
     readonly indent = signal(2);
+    readonly autoPreview = signal(true);
     readonly datasets = signal<MockDatasetDefinition[]>([]);
     readonly fields = signal<MockFieldDefinition[]>([]);
     readonly activeDatasetId = signal<number | null>(null);
@@ -123,7 +124,7 @@ export class MockDataGenerator {
         this.selectedScenario.set('balanced');
         this.seed.set(kind === 'commerce' ? 'commerce-seed' : 'crm-seed');
         this.syncCounters();
-        this.generate();
+        this.runPreview();
     }
 
     applyScenario(scenario: MockScenarioPreset) {
@@ -131,7 +132,7 @@ export class MockDataGenerator {
         this.fields.set(next.fields);
         this.datasets.set(next.datasets);
         this.selectedScenario.set(scenario);
-        this.generate();
+        this.runPreview();
     }
 
     addDataset() {
@@ -144,6 +145,7 @@ export class MockDataGenerator {
         };
         this.datasets.update((datasets) => [...datasets, nextDataset]);
         this.activeDatasetId.set(id);
+        this.runPreview();
     }
 
     removeDataset(id: number) {
@@ -153,11 +155,12 @@ export class MockDataGenerator {
         if (this.activeDatasetId() === id) {
             this.activeDatasetId.set(datasets[0]?.id ?? null);
         }
-        this.generate();
+        this.runPreview();
     }
 
     updateDataset<K extends keyof MockDatasetDefinition>(id: number, key: K, value: MockDatasetDefinition[K]) {
         this.datasets.update((datasets) => datasets.map((dataset) => (dataset.id === id ? { ...dataset, [key]: value } : dataset)));
+        this.runPreview();
     }
 
     addField(shape: MockFieldShape = 'scalar') {
@@ -189,6 +192,7 @@ export class MockDataGenerator {
         };
 
         this.fields.update((fields) => [...fields, field]);
+        this.runPreview();
     }
 
     removeField(id: number) {
@@ -205,7 +209,7 @@ export class MockDataGenerator {
         }
 
         this.fields.update((fields) => fields.filter((field) => !childIds.has(field.id)));
-        this.generate();
+        this.runPreview();
     }
 
     updateField<K extends keyof MockFieldDefinition>(id: number, key: K, value: MockFieldDefinition[K]) {
@@ -226,6 +230,7 @@ export class MockDataGenerator {
                 return next;
             })
         );
+        this.runPreview();
     }
 
     getParentOptions(datasetId: number, fieldId: number): Array<SelectOption<number | null>> {
@@ -284,8 +289,31 @@ export class MockDataGenerator {
         return item.id;
     }
 
+    onSeedChange(value: string) {
+        this.seed.set(value);
+        this.runPreview();
+    }
+
+    onIndentChange(value: number | null | undefined) {
+        this.indent.set(value || 2);
+        this.runPreview();
+    }
+
+    toggleAutoPreview(value: boolean) {
+        this.autoPreview.set(value);
+        if (value) {
+            this.generate();
+        }
+    }
+
     private syncCounters() {
         this.nextDatasetId = Math.max(100, ...this.datasets().map((dataset) => dataset.id + 1));
         this.nextFieldId = Math.max(1000, ...this.fields().map((field) => field.id + 1));
+    }
+
+    private runPreview() {
+        if (this.autoPreview()) {
+            this.generate();
+        }
     }
 }

@@ -9,30 +9,36 @@
 >
     <div tool-actions class="workspace-toolbar">
         <div class="toolbar-group toolbar-group--compact">
-            <input pInputText type="text" [ngModel]="seed()" (ngModelChange)="seed.set($event)" placeholder="Seed" />
-            <p-inputNumber [ngModel]="indent()" (ngModelChange)="indent.set($event || 2)" [min]="0" [max]="4"></p-inputNumber>
+            <input pInputText type="text" [ngModel]="seed()" (ngModelChange)="onSeedChange($event)" placeholder="Seed" />
+            <p-inputNumber [ngModel]="indent()" (ngModelChange)="onIndentChange($event)" [min]="0" [max]="4"></p-inputNumber>
+            <label class="toggle-chip">
+                <input type="checkbox" [ngModel]="autoPreview()" (ngModelChange)="toggleAutoPreview($event)" />
+                <span>Auto preview</span>
+            </label>
             <button pButton type="button" icon="pi pi-bolt" label="Generate" (click)="generate()"></button>
             <button pButton type="button" icon="pi pi-copy" label="Copy" severity="contrast" (click)="copyOutput()"></button>
             <button pButton type="button" icon="pi pi-download" label="Download" severity="secondary" [outlined]="true" (click)="downloadOutput()"></button>
         </div>
+    </div>
 
+    <div tool-actions class="workspace-toolbar workspace-toolbar--secondary">
         <div class="toolbar-group">
             <button pButton type="button" icon="pi pi-shopping-bag" label="Commerce preset" severity="secondary" [outlined]="true" (click)="loadPreset('commerce')"></button>
             <button pButton type="button" icon="pi pi-briefcase" label="CRM preset" severity="secondary" [outlined]="true" (click)="loadPreset('crm')"></button>
         </div>
-    </div>
 
-    <div class="scenario-strip">
-        @for (scenario of scenarioOptions; track scenario.value) {
-            <button
-                type="button"
-                class="scenario-pill"
-                [class.scenario-pill--active]="selectedScenario() === scenario.value"
-                (click)="applyScenario(scenario.value)"
-            >
-                {{ scenario.label }}
-            </button>
-        }
+        <div class="scenario-strip">
+            @for (scenario of scenarioOptions; track scenario.value) {
+                <button
+                    type="button"
+                    class="scenario-pill"
+                    [class.scenario-pill--active]="selectedScenario() === scenario.value"
+                    (click)="applyScenario(scenario.value)"
+                >
+                    {{ scenario.label }}
+                </button>
+            }
+        </div>
     </div>
 
     <div class="status-banner">

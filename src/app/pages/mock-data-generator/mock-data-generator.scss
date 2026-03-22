@@ -1,5 +1,36 @@
 :host {
     display: block;
+    --mock-panel-bg: var(--p-surface-0);
+    --mock-panel-bg-alt: color-mix(in srgb, var(--p-surface-0) 95%, var(--p-primary-50) 5%);
+    --mock-panel-bg-soft: color-mix(in srgb, var(--p-surface-0) 92%, var(--p-surface-100) 8%);
+    --mock-border: color-mix(in srgb, var(--p-surface-400) 35%, transparent);
+    --mock-border-strong: color-mix(in srgb, var(--p-surface-400) 45%, transparent);
+    --mock-text: var(--p-surface-800);
+    --mock-text-muted: var(--p-surface-500);
+    --mock-banner-bg: linear-gradient(135deg, color-mix(in srgb, var(--p-primary-50) 78%, white) 0%, color-mix(in srgb, var(--p-surface-0) 88%, var(--p-primary-100) 12%) 100%);
+    --mock-banner-border: color-mix(in srgb, var(--p-primary-300) 50%, transparent);
+    --mock-pill-bg: color-mix(in srgb, var(--p-surface-0) 92%, var(--p-primary-50) 8%);
+    --mock-pill-active-bg: linear-gradient(135deg, color-mix(in srgb, var(--p-primary-100) 75%, white) 0%, color-mix(in srgb, var(--p-primary-200) 30%, white) 100%);
+    --mock-chip-bg: color-mix(in srgb, var(--p-surface-0) 86%, var(--p-primary-100) 14%);
+    --mock-input-bg: var(--p-surface-0);
+    --mock-shadow-hover: 0 10px 30px -24px rgba(15, 23, 42, 0.35);
+
+    :host-context(.app-dark) & {
+        --mock-panel-bg: var(--p-surface-900);
+        --mock-panel-bg-alt: linear-gradient(180deg, color-mix(in srgb, var(--p-surface-900) 92%, var(--p-primary-900) 8%) 0%, var(--p-surface-950) 100%);
+        --mock-panel-bg-soft: color-mix(in srgb, var(--p-surface-900) 88%, var(--p-primary-950) 12%);
+        --mock-border: color-mix(in srgb, var(--p-surface-600) 55%, transparent);
+        --mock-border-strong: color-mix(in srgb, var(--p-surface-500) 70%, transparent);
+        --mock-text: var(--p-surface-0);
+        --mock-text-muted: var(--p-surface-300);
+        --mock-banner-bg: linear-gradient(135deg, color-mix(in srgb, var(--p-primary-950) 70%, var(--p-surface-900)) 0%, color-mix(in srgb, var(--p-surface-900) 85%, var(--p-primary-900) 15%) 100%);
+        --mock-banner-border: color-mix(in srgb, var(--p-primary-500) 40%, var(--p-surface-700));
+        --mock-pill-bg: color-mix(in srgb, var(--p-surface-900) 88%, var(--p-primary-950) 12%);
+        --mock-pill-active-bg: linear-gradient(135deg, color-mix(in srgb, var(--p-primary-900) 62%, var(--p-surface-900)) 0%, color-mix(in srgb, var(--p-primary-700) 24%, var(--p-surface-900)) 100%);
+        --mock-chip-bg: color-mix(in srgb, var(--p-surface-900) 80%, var(--p-primary-900) 20%);
+        --mock-input-bg: var(--p-surface-950);
+        --mock-shadow-hover: 0 12px 36px -24px rgba(0, 0, 0, 0.55);
+    }
 }
 
 .workspace-toolbar,
@@ -18,6 +49,11 @@
     margin-bottom: 1rem;
 }
 
+.workspace-toolbar--secondary {
+    align-items: center;
+    gap: 1rem 1.5rem;
+}
+
 .toolbar-group--compact {
     flex: 1 1 26rem;
 }
@@ -26,17 +62,19 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.65rem;
-    margin-bottom: 1rem;
+    margin-left: auto;
 }
 
 .scenario-pill,
 .dataset-card {
-    border: 1px solid color-mix(in srgb, var(--p-surface-400) 40%, transparent);
-    background: color-mix(in srgb, var(--p-surface-0) 92%, var(--p-primary-50) 8%);
+    border: 1px solid var(--mock-border-strong);
+    background: var(--mock-pill-bg);
+    color: var(--mock-text);
     transition:
         transform 150ms ease,
         border-color 150ms ease,
-        background 150ms ease;
+        background 150ms ease,
+        box-shadow 150ms ease;
 }
 
 .scenario-pill {
@@ -46,8 +84,9 @@
 }
 
 .scenario-pill--active {
-    background: linear-gradient(135deg, color-mix(in srgb, var(--p-primary-100) 75%, white) 0%, color-mix(in srgb, var(--p-primary-200) 30%, white) 100%);
+    background: var(--mock-pill-active-bg);
     border-color: color-mix(in srgb, var(--p-primary-400) 65%, transparent);
+    color: var(--mock-text);
 }
 
 .status-banner {
@@ -57,8 +96,9 @@
     margin-bottom: 1rem;
     padding: 0.9rem 1rem;
     border-radius: 1rem;
-    border: 1px solid color-mix(in srgb, var(--p-primary-300) 50%, transparent);
-    background: linear-gradient(135deg, color-mix(in srgb, var(--p-primary-50) 78%, white) 0%, color-mix(in srgb, var(--p-surface-0) 88%, var(--p-primary-100) 12%) 100%);
+    border: 1px solid var(--mock-banner-border);
+    background: var(--mock-banner-bg);
+    color: var(--mock-text);
 }
 
 .workspace-grid {
@@ -71,9 +111,9 @@
 }
 
 .workspace-panel {
-    border: 1px solid color-mix(in srgb, var(--p-surface-400) 35%, transparent);
+    border: 1px solid var(--mock-border);
     border-radius: 1.25rem;
-    background: color-mix(in srgb, var(--p-surface-0) 95%, var(--p-primary-50) 5%);
+    background: var(--mock-panel-bg-alt);
     overflow: hidden;
     min-width: 0;
 }
@@ -88,7 +128,7 @@
     gap: 1rem;
     align-items: end;
     padding: 1.1rem 1.2rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--p-surface-300) 35%, transparent);
+    border-bottom: 1px solid var(--mock-border);
 }
 
 .panel-header p {
@@ -96,16 +136,17 @@
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: var(--p-surface-500);
+    color: var(--mock-text-muted);
 }
 
 .panel-header h2 {
     margin: 0;
     font-size: 1.1rem;
+    color: var(--mock-text);
 }
 
 .panel-header span {
-    color: var(--p-surface-500);
+    color: var(--mock-text-muted);
     font-size: 0.85rem;
 }
 
@@ -128,6 +169,7 @@
 .dataset-card--active {
     transform: translateY(-1px);
     border-color: color-mix(in srgb, var(--p-primary-400) 60%, transparent);
+    box-shadow: var(--mock-shadow-hover);
 }
 
 .dataset-card__header,
@@ -150,8 +192,8 @@
 .field-card {
     padding: 1rem;
     border-radius: 1rem;
-    border: 1px solid color-mix(in srgb, var(--p-surface-300) 40%, transparent);
-    background: color-mix(in srgb, var(--p-surface-0) 92%, var(--p-surface-100) 8%);
+    border: 1px solid var(--mock-border);
+    background: var(--mock-panel-bg-soft);
 }
 
 .field-card__grid + .field-card__grid,
@@ -175,9 +217,10 @@
     gap: 0.5rem;
     padding: 0.55rem 0.8rem;
     border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--p-surface-400) 45%, transparent);
-    background: color-mix(in srgb, var(--p-surface-0) 86%, var(--p-primary-100) 14%);
+    border: 1px solid var(--mock-border-strong);
+    background: var(--mock-chip-bg);
     font-size: 0.85rem;
+    color: var(--mock-text);
 }
 
 .toggle-chip input {
@@ -192,10 +235,32 @@
     min-height: 2.8rem;
     width: 100%;
     border-radius: 0.8rem;
-    border: 1px solid color-mix(in srgb, var(--p-surface-400) 45%, transparent);
-    background: var(--p-surface-0);
+    border: 1px solid var(--mock-border-strong);
+    background: var(--mock-input-bg);
     padding: 0.7rem 0.85rem;
-    color: inherit;
+    color: var(--mock-text);
+}
+
+.dataset-card__header strong,
+.dataset-card__header span,
+.field-card,
+.status-banner,
+.scenario-pill {
+    color: var(--mock-text);
+}
+
+.field-card__grid input,
+.field-card__rules,
+.field-card__grid,
+.dataset-card__body {
+    color: var(--mock-text);
+}
+
+.workspace-textarea,
+.field-textarea {
+    background: var(--mock-input-bg);
+    color: var(--mock-text);
+    border-color: var(--mock-border-strong);
 }
 
 .field-textarea,
