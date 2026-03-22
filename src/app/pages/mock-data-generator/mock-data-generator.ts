@@ -38,6 +38,12 @@ interface SelectOption<T> {
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MockDataGenerator {
+    private readonly defaultSeed = 'devworkspace-seed';
+    private readonly defaultIndent = 2;
+    private readonly defaultScenario: MockScenarioPreset = 'balanced';
+    private readonly defaultStatus =
+        'Build relational fixture datasets with nested objects, arrays, references, conditions, and seeded output.';
+
     readonly shapeOptions: Array<SelectOption<MockFieldShape>> = [
         { label: 'Scalar', value: 'scalar' },
         { label: 'Object', value: 'object' },
@@ -82,15 +88,15 @@ export class MockDataGenerator {
         { label: 'Chaos', value: 'chaos' }
     ];
 
-    readonly seed = signal('devworkspace-seed');
-    readonly indent = signal(2);
+    readonly seed = signal(this.defaultSeed);
+    readonly indent = signal(this.defaultIndent);
     readonly autoPreview = signal(true);
     readonly datasets = signal<MockDatasetDefinition[]>([]);
     readonly fields = signal<MockFieldDefinition[]>([]);
     readonly activeDatasetId = signal<number | null>(null);
-    readonly selectedScenario = signal<MockScenarioPreset>('balanced');
+    readonly selectedScenario = signal<MockScenarioPreset>(this.defaultScenario);
     readonly outputText = signal('');
-    readonly statusMessage = signal('Build relational fixture datasets with nested objects, arrays, references, conditions, and seeded output.');
+    readonly statusMessage = signal(this.defaultStatus);
 
     readonly activeDataset = computed(() => this.datasets().find((dataset) => dataset.id === this.activeDatasetId()) ?? null);
     readonly activeFields = computed(() => {
@@ -98,6 +104,21 @@ export class MockDataGenerator {
         return datasetId == null ? [] : this.fields().filter((field) => field.datasetId === datasetId).sort((left, right) => left.id - right.id);
     });
     readonly outputMetrics = computed(() => calculateTextMetrics(this.outputText()));
+    readonly canClearAll = computed(
+        () =>
+            this.datasets().length > 0 ||
+            this.fields().length > 0 ||
+            this.outputText().length > 0 ||
+            this.seed() !== this.defaultSeed ||
+            this.indent() !== this.defaultIndent ||
+            this.selectedScenario() !== this.defaultScenario
+    );
+    readonly canClearDatasets = computed(() => this.datasets().length > 0 || this.fields().length > 0);
+    readonly canClearActiveFields = computed(() => {
+        const datasetId = this.activeDatasetId();
+        return datasetId != null && this.fields().some((field) => field.datasetId === datasetId);
+    });
+    readonly canClearPreview = computed(() => this.outputText().trim().length > 0);
     readonly shellStats = computed(() => [
         { icon: 'pi pi-sitemap', label: `${this.datasets().length} datasets linked` },
         { icon: 'pi pi-box', label: `${this.fields().length} fields across graph` },
@@ -121,7 +142,7 @@ export class MockDataGenerator {
         this.datasets.set(preset.datasets);
         this.fields.set(preset.fields);
         this.activeDatasetId.set(preset.datasets[0]?.id ?? null);
-        this.selectedScenario.set('balanced');
+        this.selectedScenario.set(this.defaultScenario);
         this.seed.set(kind === 'commerce' ? 'commerce-seed' : 'crm-seed');
         this.syncCounters();
         this.runPreview();
@@ -212,6 +233,82 @@ export class MockDataGenerator {
         this.runPreview();
     }
 
+    clearAll() {
+        if (!this.canClearAll()) {
+            return;
+        }
+
+        this.seed.set(this.defaultSeed);
+        this.indent.set(this.defaultIndent);
+        this.autoPreview.set(true);
+        this.selectedScenario.set(this.defaultScenario);
+        this.datasets.set([]);
+        this.fields.set([]);
+        this.activeDatasetId.set(null);
+        this.outputText.set('');
+        this.statusMessage.set('Workspace cleared. Load a preset or add a dataset to start again.');
+        this.syncCounters();
+        this.messageService.add({
+            severity: 'info',
+            summary: 'Cleared',
+            detail: 'Mock data workspace reset.'
+        });
+    }
+
+    clearDatasets() {
+        if (!this.canClearDatasets()) {
+            return;
+        }
+
+        this.datasets.set([]);
+        this.fields.set([]);
+        this.activeDatasetId.set(null);
+        this.outputText.set('');
+        this.selectedScenario.set(this.defaultScenario);
+        this.statusMessage.set('Datasets and schema cleared. Add a dataset or load a preset to continue.');
+        this.syncCounters();
+        this.messageService.add({
+            severity: 'info',
+            summary: 'Datasets Cleared',
+            detail: 'All datasets and fields were removed.'
+        });
+    }
+
+    clearActiveDatasetFields() {
+        const dataset = this.activeDataset();
+        if (!dataset) {
+            return;
+        }
+
+        if (!this.canClearActiveFields()) {
+            return;
+        }
+
+        this.fields.update((fields) => fields.filter((field) => field.datasetId !== dataset.id));
+        this.outputText.set('');
+        this.statusMessage.set(`Schema for ${dataset.label} cleared. Add new fields to rebuild the dataset shape.`);
+        this.syncCounters();
+        this.messageService.add({
+            severity: 'info',
+            summary: 'Schema Cleared',
+            detail: `All fields in ${dataset.label} were removed.`
+        });
+    }
+
+    clearPreview() {
+        if (!this.canClearPreview()) {
+            return;
+        }
+
+        this.outputText.set('');
+        this.statusMessage.set('Preview cleared. Generate again when the schema is ready.');
+        this.messageService.add({
+            severity: 'info',
+            summary: 'Preview Cleared',
+            detail: 'Generated payload preview was cleared.'
+        });
+    }
+
     updateField<K extends keyof MockFieldDefinition>(id: number, key: K, value: MockFieldDefinition[K]) {
         this.fields.update((fields) =>
             fields.map((field) => {
@@ -295,7 +392,7 @@ export class MockDataGenerator {
     }
 
     onIndentChange(value: number | null | undefined) {
-        this.indent.set(value || 2);
+        this.indent.set(value || this.defaultIndent);
         this.runPreview();
     }
 

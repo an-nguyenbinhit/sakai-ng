@@ -41,6 +41,51 @@
         </div>
     </div>
 
+    <div tool-actions class="workspace-toolbar workspace-toolbar--secondary">
+        <div class="toolbar-group toolbar-group--clear">
+            <button
+                pButton
+                type="button"
+                icon="pi pi-eraser"
+                label="Clear all"
+                severity="danger"
+                [outlined]="true"
+                [disabled]="!canClearAll()"
+                (click)="clearAll()"
+            ></button>
+            <button
+                pButton
+                type="button"
+                icon="pi pi-database"
+                label="Clear datasets"
+                severity="secondary"
+                [outlined]="true"
+                [disabled]="!canClearDatasets()"
+                (click)="clearDatasets()"
+            ></button>
+            <button
+                pButton
+                type="button"
+                icon="pi pi-box"
+                label="Clear schema"
+                severity="secondary"
+                [outlined]="true"
+                [disabled]="!canClearActiveFields()"
+                (click)="clearActiveDatasetFields()"
+            ></button>
+            <button
+                pButton
+                type="button"
+                icon="pi pi-file"
+                label="Clear preview"
+                severity="secondary"
+                [outlined]="true"
+                [disabled]="!canClearPreview()"
+                (click)="clearPreview()"
+            ></button>
+        </div>
+    </div>
+
     <div class="status-banner">
         <i class="pi pi-info-circle"></i>
         <span>{{ statusMessage() }}</span>
