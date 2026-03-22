@@ -26,6 +26,11 @@ export interface ToolDefinition {
     menuVisible?: boolean;
 }
 
+export interface ToolNavigationGroup {
+    category: ToolCategoryDefinition;
+    tools: ToolDefinition[];
+}
+
 export const TOOL_CATEGORIES: ToolCategoryDefinition[] = [
     {
         key: 'format-validate',
@@ -302,3 +307,8 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
 ];
 
 export const LIVE_MENU_TOOLS = TOOL_DEFINITIONS.filter((tool) => tool.menuVisible && tool.route);
+
+export const TOOL_NAVIGATION_GROUPS: ToolNavigationGroup[] = TOOL_CATEGORIES.map((category) => ({
+    category,
+    tools: TOOL_DEFINITIONS.filter((tool) => tool.category === category.key)
+}));

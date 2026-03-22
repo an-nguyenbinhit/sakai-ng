@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
-import { LIVE_MENU_TOOLS } from '@/app/core/tooling/tool-definitions';
+import { TOOL_NAVIGATION_GROUPS } from '@/app/core/tooling/tool-definitions';
 
 @Component({
     selector: 'app-menu',
@@ -20,22 +19,34 @@ import { LIVE_MENU_TOOLS } from '@/app/core/tooling/tool-definitions';
     </ul> `
 })
 export class AppMenu {
-    model: MenuItem[] = [];
+    model: any[] = [];
 
     ngOnInit() {
         this.model = [
             {
-                label: 'Home',
-                items: [{ label: 'Home', icon: 'pi pi-fw pi-home', routerLink: ['/'] }]
+                label: 'Workspace',
+                items: [
+                    {
+                        label: 'Home',
+                        icon: 'pi pi-fw pi-home',
+                        routerLink: ['/'],
+                        path: '/'
+                    }
+                ]
             },
-            {
-                label: 'Tools',
-                items: LIVE_MENU_TOOLS.map((tool) => ({
+            ...TOOL_NAVIGATION_GROUPS.map((group) => ({
+                label: group.category.label,
+                items: group.tools.map((tool) => ({
                     label: tool.label,
                     icon: `pi pi-fw ${tool.icon.replace('pi ', '')}`,
-                    routerLink: [tool.route!]
+                    routerLink: tool.route ? [tool.route] : undefined,
+                    path: tool.route ?? undefined,
+                    disabled: !tool.route,
+                    badge: tool.badge || (tool.status === 'planned' ? 'Planned' : tool.status === 'new' ? 'New' : 'Live'),
+                    description: tool.description,
+                    class: tool.route ? '' : 'menu-item-disabled'
                 }))
-            }
+            }))
         ];
     }
 }

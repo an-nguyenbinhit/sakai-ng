@@ -12,9 +12,19 @@ import { filter } from 'rxjs/operators';
             <div class="layout-menuitem-root-text">{{ item().label }}</div>
         }
         @if ((!hasRouterLink() || hasChildren()) && isVisible()) {
-            <a [attr.href]="item().url" (click)="itemClick($event)" [ngClass]="item().class" [attr.target]="item().target" tabindex="0">
+            <a [attr.href]="item().url" (click)="itemClick($event)" [ngClass]="item().class" [attr.target]="item().target" [attr.tabindex]="item().disabled ? -1 : 0">
                 <i [ngClass]="item().icon" class="layout-menuitem-icon"></i>
-                <span class="layout-menuitem-text">{{ item().label }}</span>
+                <span class="layout-menuitem-copy">
+                    <span class="layout-menuitem-row">
+                        <span class="layout-menuitem-text">{{ item().label }}</span>
+                        @if (item().badge) {
+                            <span class="layout-menuitem-badge">{{ item().badge }}</span>
+                        }
+                    </span>
+                    @if (item().description && !hasChildren()) {
+                        <small class="layout-menuitem-description">{{ item().description }}</small>
+                    }
+                </span>
                 @if (hasChildren()) {
                     <i class="pi pi-fw pi-angle-down layout-submenu-toggler"></i>
                 }
@@ -35,10 +45,20 @@ import { filter } from 'rxjs/operators';
                 [state]="item().state"
                 [queryParams]="item().queryParams"
                 [attr.target]="item().target"
-                tabindex="0"
+                [attr.tabindex]="item().disabled ? -1 : 0"
             >
                 <i [ngClass]="item().icon" class="layout-menuitem-icon"></i>
-                <span class="layout-menuitem-text">{{ item().label }}</span>
+                <span class="layout-menuitem-copy">
+                    <span class="layout-menuitem-row">
+                        <span class="layout-menuitem-text">{{ item().label }}</span>
+                        @if (item().badge) {
+                            <span class="layout-menuitem-badge">{{ item().badge }}</span>
+                        }
+                    </span>
+                    @if (item().description && !hasChildren()) {
+                        <small class="layout-menuitem-description">{{ item().description }}</small>
+                    }
+                </span>
                 @if (hasChildren()) {
                     <i class="pi pi-fw pi-angle-down layout-submenu-toggler"></i>
                 }

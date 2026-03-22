@@ -11,6 +11,11 @@ import { LayoutService } from '@/app/layout/service/layout.service';
     imports: [AppMenu, RouterModule],
     template: `
         <div class="layout-sidebar">
+            <div class="layout-sidebar-header">
+                <p>Tool categories</p>
+                <h2>Browse by workflow</h2>
+                <span>Live and planned utilities stay aligned with the home page taxonomy.</span>
+            </div>
             <app-menu></app-menu>
         </div>
     `

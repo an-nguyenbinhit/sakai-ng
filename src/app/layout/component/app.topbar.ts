@@ -1,8 +1,8 @@
-import { Component, inject } from '@angular/core';
-import { MenuItem } from 'primeng/api';
+import { Component, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { LayoutService } from '@/app/layout/service/layout.service';
+import { TOOL_NAVIGATION_GROUPS } from '@/app/core/tooling/tool-definitions';
 
 @Component({
     selector: 'app-topbar',
@@ -25,34 +25,64 @@ import { LayoutService } from '@/app/layout/service/layout.service';
         </div>
 
         <nav class="layout-topbar-nav">
-            <a routerLink="/" routerLinkActive="topnav-active" [routerLinkActiveOptions]="{ exact: true }" class="topnav-item">
+            <a routerLink="/" routerLinkActive="topnav-active" [routerLinkActiveOptions]="{ exact: true }" class="topnav-item topnav-item--home">
                 <i class="pi pi-home"></i>
                 <span>Home</span>
             </a>
-            <a routerLink="/code-compare" routerLinkActive="topnav-active" class="topnav-item">
-                <i class="pi pi-code"></i>
-                <span>Code Compare</span>
-            </a>
-            <a routerLink="/code-formatter" routerLinkActive="topnav-active" class="topnav-item">
-                <i class="pi pi-align-left"></i>
-                <span>Code Formatter</span>
-            </a>
-            <a routerLink="/json-tools" routerLinkActive="topnav-active" class="topnav-item">
-                <i class="pi pi-database"></i>
-                <span>JSON Tools</span>
-            </a>
-            <a routerLink="/regex-tester" routerLinkActive="topnav-active" class="topnav-item">
-                <i class="pi pi-search"></i>
-                <span>Regex Tester</span>
-            </a>
-            <a routerLink="/encode-decode" routerLinkActive="topnav-active" class="topnav-item">
-                <i class="pi pi-lock"></i>
-                <span>Encode / Decode</span>
-            </a>
-            <a routerLink="/dummy-file-generator" routerLinkActive="topnav-active" class="topnav-item">
-                <i class="pi pi-file-plus"></i>
-                <span>Dummy File Generator</span>
-            </a>
+            @for (group of navigationGroups; track group.category.key) {
+                <div
+                    class="topnav-group"
+                    (mouseenter)="setActiveCategory(group.category.key)"
+                    (mouseleave)="clearActiveCategory()"
+                >
+                    <button
+                        type="button"
+                        class="topnav-item topnav-item--category"
+                        [class.topnav-active]="activeCategory() === group.category.key || isGroupActive(group.category.key)"
+                        (click)="toggleCategory(group.category.key)"
+                    >
+                        <i [class]="group.category.icon"></i>
+                        <span>{{ group.category.label }}</span>
+                        <small>{{ group.tools.length }}</small>
+                    </button>
+
+                    @if (activeCategory() === group.category.key) {
+                        <div class="topnav-panel">
+                            <div class="topnav-panel__head">
+                                <div>
+                                    <p>{{ group.category.label }}</p>
+                                    <h3>{{ group.category.description }}</h3>
+                                </div>
+                                <span>{{ liveCount(group.tools) }} live / {{ plannedCount(group.tools) }} planned</span>
+                            </div>
+
+                            <div class="topnav-panel__grid">
+                                @for (tool of group.tools; track tool.label) {
+                                    @if (tool.route) {
+                                        <a class="topnav-tool" [routerLink]="tool.route" (click)="clearActiveCategory()">
+                                            <div class="topnav-tool__row">
+                                                <i [class]="tool.icon"></i>
+                                                <strong>{{ tool.label }}</strong>
+                                            </div>
+                                            <span class="topnav-tool__badge">{{ tool.badge || (tool.status === 'new' ? 'New' : 'Live') }}</span>
+                                            <p>{{ tool.description }}</p>
+                                        </a>
+                                    } @else {
+                                        <div class="topnav-tool topnav-tool--planned">
+                                            <div class="topnav-tool__row">
+                                                <i [class]="tool.icon"></i>
+                                                <strong>{{ tool.label }}</strong>
+                                            </div>
+                                            <span class="topnav-tool__badge">{{ tool.badge || 'Planned' }}</span>
+                                            <p>{{ tool.description }}</p>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
         </nav>
 
         <div class="layout-topbar-actions">
@@ -68,11 +98,38 @@ import { LayoutService } from '@/app/layout/service/layout.service';
     </div>`
 })
 export class AppTopbar {
-    items!: MenuItem[];
-
     layoutService = inject(LayoutService);
+    readonly navigationGroups = TOOL_NAVIGATION_GROUPS;
+    readonly activeCategory = signal<string | null>(null);
 
     toggleDarkMode() {
         this.layoutService.toggleDarkTheme();
+    }
+
+    setActiveCategory(categoryKey: string) {
+        this.activeCategory.set(categoryKey);
+    }
+
+    clearActiveCategory() {
+        this.activeCategory.set(null);
+    }
+
+    toggleCategory(categoryKey: string) {
+        this.activeCategory.update((current) => (current === categoryKey ? null : categoryKey));
+    }
+
+    liveCount(tools: Array<{ route: string | null }>) {
+        return tools.filter((tool) => !!tool.route).length;
+    }
+
+    plannedCount(tools: Array<{ route: string | null }>) {
+        return tools.filter((tool) => !tool.route).length;
+    }
+
+    isGroupActive(categoryKey: string) {
+        const group = this.navigationGroups.find((item) => item.category.key === categoryKey);
+        const activePath = this.layoutService.layoutState().activePath;
+
+        return group?.tools.some((tool) => !!tool.route && activePath === tool.route) ?? false;
     }
 }
