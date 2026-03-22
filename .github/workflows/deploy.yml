@@ -6,6 +6,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout source
@@ -16,7 +18,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -24,6 +26,11 @@ jobs:
 
       - name: Build
         run: npm run build -- --base-href /DevWorkspace/
+
+      - name: Prepare GitHub Pages entrypoints
+        run: |
+          cp dist/devworkspace/browser/index.csr.html dist/devworkspace/browser/index.html
+          cp dist/devworkspace/browser/index.csr.html dist/devworkspace/browser/404.html
 
       - name: Deploy to DevWorkspace repo
         uses: peaceiris/actions-gh-pages@v4
