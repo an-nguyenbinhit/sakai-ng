@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
+import { LIVE_MENU_TOOLS } from '@/app/core/tooling/tool-definitions';
 
 @Component({
     selector: 'app-menu',
@@ -29,14 +30,11 @@ export class AppMenu {
             },
             {
                 label: 'Tools',
-                items: [
-                    { label: 'Code Compare', icon: 'pi pi-fw pi-code', routerLink: ['/code-compare'] },
-                    { label: 'Code Formatter', icon: 'pi pi-fw pi-align-left', routerLink: ['/code-formatter'] },
-                    { label: 'JSON Tools', icon: 'pi pi-fw pi-wrench', routerLink: ['/json-tools'] },
-                    { label: 'Regex Tester', icon: 'pi pi-fw pi-search', routerLink: ['/regex-tester'] },
-                    { label: 'Encode / Decode', icon: 'pi pi-fw pi-sync', routerLink: ['/encode-decode'] },
-                    { label: 'Dummy File Generator', icon: 'pi pi-fw pi-file-plus', routerLink: ['/dummy-file-generator'] }
-                ]
+                items: LIVE_MENU_TOOLS.map((tool) => ({
+                    label: tool.label,
+                    icon: `pi pi-fw ${tool.icon.replace('pi ', '')}`,
+                    routerLink: [tool.route!]
+                }))
             }
         ];
     }

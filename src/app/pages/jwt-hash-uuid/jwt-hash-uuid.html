@@ -1,0 +1,99 @@
+<p-toast></p-toast>
+
+<app-tool-page-shell eyebrow="Encode & Security" title="JWT / Hash / UUID" description="Inspect JWTs, generate local-only hashes, and create stable identifiers without sending data to any server." [badges]="['Phase 1', 'Security helpers']" [stats]="shellStats">
+    <div tool-actions class="tab-row">
+        @for (tab of tabs; track tab.key) {
+            <button pButton type="button" [label]="tab.label" [severity]="activeTab() === tab.key ? undefined : 'secondary'" [outlined]="activeTab() !== tab.key" (click)="setTab(tab.key)"></button>
+        }
+    </div>
+
+    @if (activeTab() === 'jwt') {
+        <section class="section-grid">
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>JWT Input</p><h2>Token inspector</h2></div>
+                    <div class="panel-actions">
+                        <button pButton type="button" label="Sample" severity="secondary" outlined="true" (click)="loadJwtSample()"></button>
+                        <button pButton type="button" label="Decode" (click)="decodeJwt()"></button>
+                    </div>
+                </header>
+                <textarea pTextarea [ngModel]="jwtToken()" (ngModelChange)="jwtToken.set($event)" rows="8" class="workspace-textarea"></textarea>
+                @if (jwtError()) { <p class="error-text">{{ jwtError() }}</p> }
+            </article>
+
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>Header</p><h2>Decoded header</h2></div>
+                    <button pButton type="button" icon="pi pi-copy" label="Copy" severity="secondary" outlined="true" (click)="copyValue(jwtHeader(), 'JWT header')"></button>
+                </header>
+                <textarea pTextarea [ngModel]="jwtHeader()" rows="8" class="workspace-textarea" readonly></textarea>
+            </article>
+
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>Payload</p><h2>Decoded payload</h2></div>
+                    <button pButton type="button" icon="pi pi-copy" label="Copy" severity="secondary" outlined="true" (click)="copyValue(jwtPayload(), 'JWT payload')"></button>
+                </header>
+                <textarea pTextarea [ngModel]="jwtPayload()" rows="10" class="workspace-textarea" readonly></textarea>
+            </article>
+
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>Signature</p><h2>Raw signature segment</h2></div>
+                    <button pButton type="button" icon="pi pi-copy" label="Copy" severity="secondary" outlined="true" (click)="copyValue(jwtSignature(), 'JWT signature')"></button>
+                </header>
+                <textarea pTextarea [ngModel]="jwtSignature()" rows="10" class="workspace-textarea" readonly></textarea>
+            </article>
+        </section>
+    }
+
+    @if (activeTab() === 'hash') {
+        <section class="section-grid section-grid--single">
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>Hash</p><h2>Text or file digest</h2></div>
+                    <div class="panel-actions">
+                        <select class="native-select" [ngModel]="hashAlgorithm()" (ngModelChange)="hashAlgorithm.set($event); hashText()">
+                            @for (algorithm of hashAlgorithms; track algorithm.value) {
+                                <option [value]="algorithm.value">{{ algorithm.label }}</option>
+                            }
+                        </select>
+                        <label class="file-button"><input type="file" (change)="hashFile($event)" /><span>Hash file</span></label>
+                        <button pButton type="button" label="Hash text" (click)="hashText()"></button>
+                    </div>
+                </header>
+                <textarea pTextarea [ngModel]="hashInput()" (ngModelChange)="hashInput.set($event)" rows="8" class="workspace-textarea"></textarea>
+                <div class="hash-result">
+                    <p><strong>Algorithm:</strong> {{ hashAlgorithm().toUpperCase() }}</p>
+                    @if (hashFileName()) { <p><strong>File:</strong> {{ hashFileName() }}</p> }
+                    <textarea pTextarea [ngModel]="hashOutput()" rows="4" class="workspace-textarea" readonly></textarea>
+                    <button pButton type="button" icon="pi pi-copy" label="Copy digest" severity="contrast" (click)="copyValue(hashOutput(), 'Hash digest')"></button>
+                </div>
+            </article>
+        </section>
+    }
+
+    @if (activeTab() === 'ids') {
+        <section class="section-grid section-grid--single">
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>IDs</p><h2>Generate identifiers</h2></div>
+                    <div class="panel-actions">
+                        <input type="number" class="native-input" [ngModel]="idQuantity()" (ngModelChange)="idQuantity.set($event)" min="1" max="20" />
+                        <button pButton type="button" label="UUID" (click)="generateIds('uuid')"></button>
+                        <button pButton type="button" label="ULID" severity="secondary" outlined="true" (click)="generateIds('ulid')"></button>
+                        <button pButton type="button" label="Nano ID" severity="secondary" outlined="true" (click)="generateIds('nanoid')"></button>
+                    </div>
+                </header>
+                <div class="generated-list">
+                    @for (value of generatedIds(); track value) {
+                        <div class="generated-item">
+                            <code>{{ value }}</code>
+                            <button pButton type="button" icon="pi pi-copy" severity="secondary" outlined="true" (click)="copyValue(value, 'Generated ID')"></button>
+                        </div>
+                    }
+                </div>
+            </article>
+        </section>
+    }
+</app-tool-page-shell>

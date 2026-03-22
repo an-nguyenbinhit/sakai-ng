@@ -1,0 +1,89 @@
+<p-toast></p-toast>
+
+<app-tool-page-shell eyebrow="Encode & Security" title="URL Tools" description="Parse links into editable parts, rebuild query strings, and handle Base64, URL, HTML, and JSON transport-safe text flows." [badges]="['Phase 1', 'Transport helpers']" [stats]="shellStats">
+    <div tool-actions class="tab-row">
+        @for (tab of tabs; track tab.key) {
+            <button pButton type="button" [label]="tab.label" [severity]="activeTab() === tab.key ? undefined : 'secondary'" [outlined]="activeTab() !== tab.key" (click)="setTab(tab.key)"></button>
+        }
+    </div>
+
+    @if (activeTab() === 'parser') {
+        <section class="section-grid">
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>Parser</p><h2>URL breakdown</h2></div>
+                    <button pButton type="button" label="Parse" (click)="parseUrl()"></button>
+                </header>
+
+                <div class="field-stack">
+                    <label class="field-label" for="urlInput">URL</label>
+                    <input pInputText id="urlInput" [ngModel]="urlInput()" (ngModelChange)="urlInput.set($event)" />
+                </div>
+
+                @if (urlError()) { <p class="error-text">{{ urlError() }}</p> }
+
+                <div class="field-stack">
+                    <label class="field-label">Origin</label>
+                    <input pInputText [ngModel]="urlState().origin" (ngModelChange)="updateOrigin($event)" />
+                </div>
+                <div class="field-stack">
+                    <label class="field-label">Pathname</label>
+                    <input pInputText [ngModel]="urlState().pathname" (ngModelChange)="updatePathname($event)" />
+                </div>
+                <div class="field-stack">
+                    <label class="field-label">Hash</label>
+                    <input pInputText [ngModel]="urlState().hash" (ngModelChange)="updateHash($event)" />
+                </div>
+            </article>
+
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>Query Params</p><h2>Editable entries</h2></div>
+                    <div class="panel-actions">
+                        <button pButton type="button" label="Add param" severity="secondary" outlined="true" (click)="addParam()"></button>
+                        <button pButton type="button" label="Build URL" (click)="rebuildUrl()"></button>
+                    </div>
+                </header>
+
+                <div class="param-list">
+                    @for (param of urlState().params; track $index) {
+                        <div class="param-row">
+                            <input pInputText [ngModel]="param.key" (ngModelChange)="updateParam($index, { key: $event })" placeholder="key" />
+                            <input pInputText [ngModel]="param.value" (ngModelChange)="updateParam($index, { value: $event })" placeholder="value" />
+                            <button pButton type="button" icon="pi pi-times" severity="danger" text="true" (click)="removeParam($index)"></button>
+                        </div>
+                    }
+                </div>
+
+                <div class="built-url">
+                    <label class="field-label">Built URL</label>
+                    <textarea pTextarea [ngModel]="builtUrl()" rows="5" class="workspace-textarea" readonly></textarea>
+                    <button pButton type="button" icon="pi pi-copy" label="Copy built URL" severity="contrast" (click)="copyBuiltUrl()"></button>
+                </div>
+            </article>
+        </section>
+    }
+
+    @if (activeTab() === 'encoders') {
+        <section class="section-grid section-grid--single">
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>Transport</p><h2>Encode or decode text</h2></div>
+                    <div class="panel-actions">
+                        <select class="native-input" [ngModel]="transportMode()" (ngModelChange)="transportMode.set($event)">
+                            @for (encoder of encoders; track encoder.value) {
+                                <option [value]="encoder.value">{{ encoder.label }}</option>
+                            }
+                        </select>
+                        <button pButton type="button" label="Encode" (click)="encode()"></button>
+                        <button pButton type="button" label="Decode" severity="secondary" outlined="true" (click)="decode()"></button>
+                    </div>
+                </header>
+
+                <textarea pTextarea [ngModel]="transportInput()" (ngModelChange)="transportInput.set($event)" rows="7" class="workspace-textarea"></textarea>
+                @if (transportError()) { <p class="error-text">{{ transportError() }}</p> }
+                <textarea pTextarea [ngModel]="transportOutput()" rows="7" class="workspace-textarea" readonly></textarea>
+            </article>
+        </section>
+    }
+</app-tool-page-shell>

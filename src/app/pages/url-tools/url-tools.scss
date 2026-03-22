@@ -1,0 +1,103 @@
+:host {
+    display: block;
+    padding: 1rem;
+}
+
+.tab-row,
+.panel-actions,
+.field-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.field-stack {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.section-grid {
+    display: grid;
+    gap: 1rem;
+
+    @media (min-width: 1100px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.section-grid--single {
+    grid-template-columns: 1fr;
+}
+
+.workspace-panel {
+    border: 1px solid var(--p-surface-200);
+    border-radius: 1rem;
+    background: var(--p-surface-0);
+    padding: 1rem;
+
+    :host-context(.app-dark) & {
+        background: var(--p-surface-900);
+        border-color: var(--p-surface-700);
+    }
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: start;
+    margin-bottom: 0.75rem;
+}
+
+.panel-header p,
+.panel-header h2,
+.field-label {
+    margin: 0;
+}
+
+.panel-header p,
+.field-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--p-primary-500);
+}
+
+.param-list,
+.built-url {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.param-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 0.75rem;
+}
+
+.workspace-textarea {
+    width: 100%;
+    font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.native-input {
+    min-height: 2.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--p-surface-300);
+    padding: 0.7rem 0.85rem;
+    background: var(--p-surface-0);
+    color: var(--p-surface-900);
+
+    :host-context(.app-dark) & {
+        background: var(--p-surface-950);
+        color: var(--p-surface-0);
+        border-color: var(--p-surface-700);
+    }
+}
+
+.error-text {
+    margin: 0.75rem 0 0;
+    color: #b91c1c;
+}

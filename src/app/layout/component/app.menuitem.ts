@@ -1,19 +1,18 @@
 import { Component, computed, inject, input, signal, PLATFORM_ID } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RippleModule } from 'primeng/ripple';
 import { LayoutService } from '@/app/layout/service/layout.service';
 import { filter } from 'rxjs/operators';
 
 @Component({
     selector: '[app-menuitem]',
-    imports: [CommonModule, RouterModule, RippleModule],
+    imports: [CommonModule, RouterModule],
     template: `
         @if (root() && isVisible()) {
             <div class="layout-menuitem-root-text">{{ item().label }}</div>
         }
         @if ((!hasRouterLink() || hasChildren()) && isVisible()) {
-            <a [attr.href]="item().url" (click)="itemClick($event)" [ngClass]="item().class" [attr.target]="item().target" tabindex="0" pRipple>
+            <a [attr.href]="item().url" (click)="itemClick($event)" [ngClass]="item().class" [attr.target]="item().target" tabindex="0">
                 <i [ngClass]="item().icon" class="layout-menuitem-icon"></i>
                 <span class="layout-menuitem-text">{{ item().label }}</span>
                 @if (hasChildren()) {
@@ -37,7 +36,6 @@ import { filter } from 'rxjs/operators';
                 [queryParams]="item().queryParams"
                 [attr.target]="item().target"
                 tabindex="0"
-                pRipple
             >
                 <i [ngClass]="item().icon" class="layout-menuitem-icon"></i>
                 <span class="layout-menuitem-text">{{ item().label }}</span>
@@ -144,16 +142,6 @@ export class AppMenuitem {
         }
     }
 
-    ngAfterViewInit() {
-        if (!isPlatformBrowser(this.platformId)) {
-            return;
-        }
-
-        setTimeout(() => {
-            this.initialized.set(true);
-        });
-    }
-
     updateActiveStateFromRoute() {
         const item = this.item();
         if (!item?.routerLink) return;
@@ -210,5 +198,9 @@ export class AppMenuitem {
                 menuHoverActive: false
             }));
         }
+    }
+
+    ngAfterViewInit() {
+        this.initialized.set(isPlatformBrowser(this.platformId));
     }
 }

@@ -61,6 +61,46 @@ export const appRoutes: Routes = [
                 data: {
                     description: 'Generate dummy files for testing purposes, specifying size, extension, and content.'
                 }
+            },
+            {
+                path: 'data-converter',
+                loadComponent: () => import('./app/pages/data-converter/data-converter').then((m) => m.DataConverter),
+                title: 'Data Converter for JSON, YAML, TOML, XML, CSV & TSV',
+                data: {
+                    description: 'Convert structured data between JSON, YAML, TOML, XML, CSV, and TSV with browser-only tooling and formatting shortcuts.'
+                }
+            },
+            {
+                path: 'text-utils',
+                loadComponent: () => import('./app/pages/text-utils/text-utils').then((m) => m.TextUtils),
+                title: 'Text Utilities for Cleanup, Sorting & Slugify',
+                data: {
+                    description: 'Clean up text quickly with line sorting, dedupe, case conversion, trimming, blank line removal, and slug generation.'
+                }
+            },
+            {
+                path: 'jwt-hash-uuid',
+                loadComponent: () => import('./app/pages/jwt-hash-uuid/jwt-hash-uuid').then((m) => m.JwtHashUuid),
+                title: 'JWT Decoder, Hash Generator & UUID Tools',
+                data: {
+                    description: 'Inspect JWT payloads, generate MD5 and SHA hashes, and create UUID, ULID, and Nano ID values locally in your browser.'
+                }
+            },
+            {
+                path: 'timestamp-cron',
+                loadComponent: () => import('./app/pages/timestamp-cron/timestamp-cron').then((m) => m.TimestampCron),
+                title: 'Timestamp Converter & Cron Expression Helper',
+                data: {
+                    description: 'Convert Unix timestamps, preview timezones, explain cron expressions, and inspect upcoming run times.'
+                }
+            },
+            {
+                path: 'url-tools',
+                loadComponent: () => import('./app/pages/url-tools/url-tools').then((m) => m.UrlTools),
+                title: 'URL Parser, Query Builder & Transport Encoders',
+                data: {
+                    description: 'Parse URLs, edit query parameters, and encode or decode Base64, URL, HTML, and JSON string payloads.'
+                }
             }
         ]
     },

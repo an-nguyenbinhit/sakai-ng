@@ -1,0 +1,81 @@
+<p-toast></p-toast>
+
+<app-tool-page-shell
+    eyebrow="Convert & Transform"
+    title="Data Converter"
+    description="Translate JSON, YAML, TOML, XML, CSV, and TSV with local-only conversions and JSON transport shortcuts."
+    [badges]="['Phase 1', 'Offline-ready']"
+    [stats]="shellStats()"
+>
+    <div tool-actions class="workspace-toolbar">
+        <div class="toolbar-group">
+            <select class="native-select" [ngModel]="inputFormat()" (ngModelChange)="inputFormat.set($event); onFormatChange()">
+                @for (option of formatOptions; track option.value) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                }
+            </select>
+            <button pButton type="button" icon="pi pi-arrow-right-arrow-left" label="Swap" severity="secondary" outlined="true" (click)="swapFormats()"></button>
+            <select class="native-select" [ngModel]="outputFormat()" (ngModelChange)="outputFormat.set($event); convert()">
+                @for (option of formatOptions; track option.value) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="toolbar-group">
+            <button pButton type="button" icon="pi pi-star" label="Sample" severity="secondary" outlined="true" (click)="loadSample()"></button>
+            <label class="file-button">
+                <input type="file" accept=".json,.yaml,.yml,.toml,.xml,.csv,.tsv,.txt" (change)="importFile($event)" />
+                <span>Import file</span>
+            </label>
+            <button pButton type="button" icon="pi pi-play" label="Convert" (click)="convert()"></button>
+            <button pButton type="button" icon="pi pi-copy" label="Copy output" severity="contrast" (click)="copyOutput()"></button>
+            <button pButton type="button" icon="pi pi-download" label="Download" severity="secondary" outlined="true" (click)="downloadOutput()"></button>
+        </div>
+    </div>
+
+    @if (inputFormat() === 'json') {
+        <div class="shortcut-row">
+            <button pButton type="button" label="Format JSON" size="small" severity="secondary" outlined="true" (click)="applyJsonShortcut('format')"></button>
+            <button pButton type="button" label="Minify JSON" size="small" severity="secondary" outlined="true" (click)="applyJsonShortcut('minify')"></button>
+            <button pButton type="button" label="Escape String" size="small" severity="secondary" outlined="true" (click)="applyJsonShortcut('escape')"></button>
+            <button pButton type="button" label="Stringify Literal" size="small" severity="secondary" outlined="true" (click)="applyJsonShortcut('stringify')"></button>
+        </div>
+    }
+
+    @if (error()) {
+        <div class="status-banner status-banner--error">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span>{{ error() }}</span>
+        </div>
+    } @else {
+        <div class="status-banner">
+            <i class="pi pi-check-circle"></i>
+            <span>Conversion succeeded. Use swap to keep chaining transforms between formats.</span>
+        </div>
+    }
+
+    <section class="workspace-grid">
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Input</p>
+                    <h2>{{ inputFormat().toUpperCase() }}</h2>
+                </div>
+                <span>{{ inputMetrics().lines }} lines · {{ inputMetrics().bytes }} bytes</span>
+            </header>
+            <textarea pTextarea [ngModel]="inputText()" (ngModelChange)="inputText.set($event)" rows="18" class="workspace-textarea"></textarea>
+        </article>
+
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Output</p>
+                    <h2>{{ outputFormat().toUpperCase() }}</h2>
+                </div>
+                <span>{{ outputMetrics().lines }} lines · {{ outputMetrics().bytes }} bytes</span>
+            </header>
+            <textarea pTextarea [ngModel]="outputText()" rows="18" class="workspace-textarea" readonly></textarea>
+        </article>
+    </section>
+</app-tool-page-shell>

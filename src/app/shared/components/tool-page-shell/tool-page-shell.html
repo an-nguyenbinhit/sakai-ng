@@ -1,0 +1,37 @@
+<section class="tool-shell">
+    <header class="tool-shell__hero">
+        <div class="tool-shell__copy">
+            <p class="tool-shell__eyebrow">{{ eyebrow }}</p>
+            <div class="tool-shell__title-row">
+                <h1>{{ title }}</h1>
+                @if (badges.length) {
+                    <div class="tool-shell__badges">
+                        @for (badge of badges; track badge) {
+                            <span class="tool-shell__badge">{{ badge }}</span>
+                        }
+                    </div>
+                }
+            </div>
+            <p class="tool-shell__description">{{ description }}</p>
+        </div>
+
+        @if (stats.length) {
+            <div class="tool-shell__stats">
+                @for (stat of stats; track stat.label) {
+                    <div class="tool-shell__stat">
+                        <i [class]="stat.icon"></i>
+                        <span>{{ stat.label }}</span>
+                    </div>
+                }
+            </div>
+        }
+    </header>
+
+    <section class="tool-shell__actions">
+        <ng-content select="[tool-actions]"></ng-content>
+    </section>
+
+    <section class="tool-shell__content">
+        <ng-content></ng-content>
+    </section>
+</section>

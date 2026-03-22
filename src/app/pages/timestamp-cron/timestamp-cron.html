@@ -1,0 +1,98 @@
+<p-toast></p-toast>
+
+<app-tool-page-shell eyebrow="Time & Generators" title="Timestamp & Cron" description="Convert epoch values, preview timezone outputs, and turn cron strings into human-readable schedules with upcoming run previews." [badges]="['Phase 1', 'Scheduling helpers']" [stats]="shellStats">
+    <div tool-actions class="tab-row">
+        @for (tab of tabs; track tab.key) {
+            <button pButton type="button" [label]="tab.label" [severity]="activeTab() === tab.key ? undefined : 'secondary'" [outlined]="activeTab() !== tab.key" (click)="setTab(tab.key)"></button>
+        }
+    </div>
+
+    @if (activeTab() === 'timestamp') {
+        <section class="section-grid">
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>Timestamp</p><h2>Epoch to human time</h2></div>
+                    <div class="panel-actions">
+                        <button pButton type="button" label="Now" severity="secondary" outlined="true" (click)="useNow()"></button>
+                        <button pButton type="button" label="Convert" (click)="analyzeTimestamp()"></button>
+                    </div>
+                </header>
+
+                <div class="field-stack">
+                    <label class="field-label" for="timestampInput">Unix timestamp</label>
+                    <input pInputText id="timestampInput" [ngModel]="timestampInput()" (ngModelChange)="timestampInput.set($event)" />
+                </div>
+
+                <div class="field-stack">
+                    <label class="field-label" for="dateInput">Or pick a local date/time</label>
+                    <input id="dateInput" type="datetime-local" class="native-input" [ngModel]="dateInput()" (ngModelChange)="dateInput.set($event)" />
+                    <button pButton type="button" label="Use date input" severity="secondary" outlined="true" (click)="analyzeDate()"></button>
+                </div>
+
+                @if (timestampError()) { <p class="error-text">{{ timestampError() }}</p> }
+            </article>
+
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>Snapshot</p><h2>Resolved values</h2></div>
+                    <button pButton type="button" icon="pi pi-copy" label="Copy ISO" severity="secondary" outlined="true" (click)="copyIso()"></button>
+                </header>
+
+                @if (timestampSnapshot(); as snapshot) {
+                    <div class="snapshot-grid">
+                        <div class="snapshot-item"><span>ISO</span><code>{{ snapshot.iso }}</code></div>
+                        <div class="snapshot-item"><span>Unix seconds</span><code>{{ snapshot.unixSeconds }}</code></div>
+                        <div class="snapshot-item"><span>Unix ms</span><code>{{ snapshot.unixMilliseconds }}</code></div>
+                        <div class="snapshot-item"><span>Local</span><code>{{ snapshot.local }}</code></div>
+                    </div>
+                }
+            </article>
+
+            <article class="workspace-panel section-grid__full">
+                <header class="panel-header"><div><p>Timezones</p><h2>Preview cards</h2></div></header>
+                <div class="preview-grid">
+                    @for (preview of timezonePreviews(); track preview.timezone) {
+                        <div class="preview-card">
+                            <strong>{{ preview.timezone }}</strong>
+                            <span>{{ preview.value }}</span>
+                        </div>
+                    }
+                </div>
+            </article>
+        </section>
+    }
+
+    @if (activeTab() === 'cron') {
+        <section class="section-grid section-grid--single">
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>Cron</p><h2>Explain schedule</h2></div>
+                    <div class="panel-actions">
+                        <select class="native-input" [ngModel]="cronTimezone()" (ngModelChange)="cronTimezone.set($event); explainCron()">
+                            @for (timezone of timezones; track timezone.value) {
+                                <option [value]="timezone.value">{{ timezone.label }}</option>
+                            }
+                        </select>
+                        <button pButton type="button" label="Explain" (click)="explainCron()"></button>
+                    </div>
+                </header>
+
+                <div class="field-stack">
+                    <label class="field-label" for="cronExpression">Cron expression</label>
+                    <input pInputText id="cronExpression" [ngModel]="cronExpression()" (ngModelChange)="cronExpression.set($event)" />
+                </div>
+
+                @if (cronError()) {
+                    <p class="error-text">{{ cronError() }}</p>
+                } @else {
+                    <div class="cron-summary"><strong>{{ cronDescription() }}</strong></div>
+                    <div class="runs-list">
+                        @for (run of cronRuns(); track run) {
+                            <div class="run-item"><span>{{ run }}</span></div>
+                        }
+                    </div>
+                }
+            </article>
+        </section>
+    }
+</app-tool-page-shell>
