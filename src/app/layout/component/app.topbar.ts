@@ -54,7 +54,7 @@ import { TOOL_NAVIGATION_GROUPS } from '@/app/core/tooling/tool-definitions';
                                     <p>{{ group.category.label }}</p>
                                     <h3>{{ group.category.description }}</h3>
                                 </div>
-                                <span>{{ liveCount(group.tools) }} live / {{ plannedCount(group.tools) }} planned</span>
+                                <span>{{ group.tools.length }} tools@if (plannedCount(group.tools)) { / {{ plannedCount(group.tools) }} planned }</span>
                             </div>
 
                             <div class="topnav-panel__grid">
@@ -65,7 +65,9 @@ import { TOOL_NAVIGATION_GROUPS } from '@/app/core/tooling/tool-definitions';
                                                 <i [class]="tool.icon"></i>
                                                 <strong>{{ tool.label }}</strong>
                                             </div>
-                                            <span class="topnav-tool__badge">{{ tool.badge || (tool.status === 'new' ? 'New' : 'Live') }}</span>
+                                            @if (tool.status === 'planned') {
+                                                <span class="topnav-tool__badge">{{ tool.badge || 'Planned' }}</span>
+                                            }
                                             <p>{{ tool.description }}</p>
                                         </a>
                                     } @else {
@@ -117,10 +119,6 @@ export class AppTopbar {
 
     toggleCategory(categoryKey: string) {
         this.activeCategory.update((current) => (current === categoryKey ? null : categoryKey));
-    }
-
-    liveCount(tools: Array<{ route: string | null }>) {
-        return tools.filter((tool) => !!tool.route).length;
     }
 
     plannedCount(tools: Array<{ route: string | null }>) {

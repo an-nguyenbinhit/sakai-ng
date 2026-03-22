@@ -42,7 +42,7 @@ export class AppMenu {
                     routerLink: tool.route ? [tool.route] : undefined,
                     path: tool.route ?? undefined,
                     disabled: !tool.route,
-                    badge: tool.badge || (tool.status === 'planned' ? 'Planned' : tool.status === 'new' ? 'New' : 'Live'),
+                    badge: tool.status === 'planned' ? tool.badge || 'Planned' : undefined,
                     description: tool.description,
                     class: tool.route ? '' : 'menu-item-disabled'
                 }))
