@@ -1,14 +1,16 @@
-import { Component, computed, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Component, computed, signal, ViewEncapsulation } from '@angular/core';
+import { HomeCategoryStack } from './home-category-stack';
+import { HomeHero } from './home-hero';
+import { HomeSearchPanel } from './home-search-panel';
 import { TOOL_CATEGORIES, TOOL_DEFINITIONS, ToolCategoryDefinition, ToolDefinition } from '@/app/core/tooling/tool-definitions';
 
 @Component({
     selector: 'p-home',
     standalone: true,
-    imports: [RouterModule, FormsModule],
+    imports: [HomeHero, HomeSearchPanel, HomeCategoryStack],
     templateUrl: './home.html',
-    styleUrl: './home.scss'
+    styleUrl: './home.scss',
+    encapsulation: ViewEncapsulation.None
 })
 export class Home {
     readonly tools = TOOL_DEFINITIONS;
@@ -44,9 +46,5 @@ export class Home {
 
     onQueryChange(value: string) {
         this.searchQuery.set(value);
-    }
-
-    trackCategory(_: number, section: { category: ToolCategoryDefinition; tools: ToolDefinition[] }) {
-        return section.category.key;
     }
 }

@@ -39,15 +39,12 @@
                         ],
                         "scripts": [],
                         "server": "src/main.server.ts",
-                        "outputMode": "static",
+                        "outputMode": "server",
                         "security": {
                             "allowedHosts": []
                         },
                         "ssr": {
                             "entry": "src/server.ts"
-                        },
-                        "prerender": {
-                            "routesFile": "routes.txt"
                         }
                     },
                     "configurations": {

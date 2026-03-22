@@ -1,139 +1,93 @@
 <div class="home-page">
-    <section class="hero-wrapper">
-        <div class="hero-copy">
-            <p class="hero-eyebrow">Developer Workspace</p>
-            <h1>
-                Frontend and data tools
-                <span>grouped by real workflows</span>
-            </h1>
-            <p class="hero-description">
-                DevWorkspace is shifting from a flat utility list into a browser-only portal. Browse live tools, see what is shipping next, and move through categories built around day-to-day engineering tasks.
-            </p>
-        </div>
+    <div aria-live="polite" aria-atomic="true">
+        @defer (on immediate; hydrate on immediate) {
+            <app-home-hero [toolCount]="filteredTools().length" [categoryCount]="categories.length"></app-home-hero>
+        } @placeholder {
+            <section class="hero-wrapper hero-wrapper--placeholder" aria-hidden="true">
+                <div class="hero-copy">
+                    <span class="skeleton-line skeleton-line--eyebrow"></span>
+                    <span class="skeleton-line skeleton-line--title"></span>
+                    <span class="skeleton-line skeleton-line--title skeleton-line--title-short"></span>
+                    <span class="skeleton-line skeleton-line--body"></span>
+                    <span class="skeleton-line skeleton-line--body skeleton-line--body-short"></span>
+                </div>
+                <div class="hero-panels">
+                    <span class="skeleton-pill"></span>
+                    <span class="skeleton-pill"></span>
+                    <span class="skeleton-pill"></span>
+                    <span class="skeleton-pill"></span>
+                </div>
+            </section>
+        }
+    </div>
 
-        <div class="hero-panels">
-            <div class="stat-chip">
-                <i class="pi pi-th-large"></i>
-                <span>{{ filteredTools().length }} tools listed</span>
-            </div>
-            <div class="stat-chip">
-                <i class="pi pi-folder-open"></i>
-                <span>{{ categories.length }} categories</span>
-            </div>
-            <div class="stat-chip">
-                <i class="pi pi-wifi"></i>
-                <span>Client-side only</span>
-            </div>
-            <div class="stat-chip">
-                <i class="pi pi-shield"></i>
-                <span>Zero data collection</span>
-            </div>
-        </div>
-    </section>
+    <div aria-live="polite" aria-atomic="true">
+        @defer (on idle; hydrate on interaction) {
+            <app-home-search-panel [query]="searchQuery()" (queryChange)="onQueryChange($event)" (clearQuery)="clearSearch()"></app-home-search-panel>
+        } @placeholder {
+            <section class="search-panel search-panel--placeholder" aria-busy="true">
+                <div class="search-wrap">
+                    <i class="pi pi-search search-icon"></i>
+                    <input type="text" placeholder="Preparing search..." disabled aria-label="Search tools loading" />
+                </div>
+                <p class="search-caption">Search becomes interactive as soon as the portal search bundle is ready.</p>
+            </section>
+        }
+    </div>
 
-    <section class="search-panel">
-        <div class="search-wrap">
-            <i class="pi pi-search search-icon"></i>
-            <input type="text" placeholder="Search by tool, workflow, tag, or category..." [value]="searchQuery()" (input)="onQueryChange($any($event.target).value)" />
-            @if (searchQuery()) {
-                <button class="clear-btn" (click)="clearSearch()" title="Clear">
-                    <i class="pi pi-times"></i>
-                </button>
-            }
-        </div>
-        <p class="search-caption">Search matches label, description, tags, keywords, and category name.</p>
-    </section>
-
-    <section class="category-stack">
-        <div class="section-heading">
-            <h2>
-                @if (isSearchActive()) {
-                    {{ filteredTools().length }} result{{ filteredTools().length !== 1 ? 's' : '' }} for "{{ searchQuery() }}"
-                } @else {
-                    Tool categories
-                }
-            </h2>
-            <p>Live tools are clickable. Planned modules stay visible here until their route ships.</p>
-        </div>
-
-        @for (section of categorySections(); track trackCategory($index, section)) {
-            @if (section.tools.length) {
-                <article class="category-block">
-                    <div class="category-header">
-                        <div>
-                            <p class="category-eyebrow">{{ section.category.label }}</p>
-                            <h3>{{ section.category.description }}</h3>
-                        </div>
-                        <i [class]="section.category.icon"></i>
+    <div aria-live="polite" aria-atomic="true">
+        @defer (on viewport; hydrate on viewport) {
+            <app-home-category-stack
+                [sections]="categorySections()"
+                [isSearchActive]="isSearchActive()"
+                [filteredCount]="filteredTools().length"
+                [query]="searchQuery()"
+                (clearQuery)="clearSearch()"
+            ></app-home-category-stack>
+        } @placeholder {
+            <section class="category-stack category-stack--placeholder" aria-busy="true">
+                <div class="section-heading">
+                    <div class="section-heading__copy">
+                        <span class="skeleton-line skeleton-line--section-title"></span>
+                        <span class="skeleton-line skeleton-line--body"></span>
                     </div>
+                </div>
 
-                    <div class="tool-grid">
-                        @for (tool of section.tools; track tool.label) {
-                            @if (tool.route) {
-                                <a class="tool-card" [routerLink]="tool.route">
+                @for (section of [1, 2]; track section) {
+                    <article class="category-block category-block--placeholder" aria-hidden="true">
+                        <div class="category-header">
+                            <div class="category-header__copy">
+                                <span class="skeleton-line skeleton-line--eyebrow"></span>
+                                <span class="skeleton-line skeleton-line--body"></span>
+                            </div>
+                            <span class="skeleton-icon"></span>
+                        </div>
+
+                        <div class="tool-grid">
+                            @for (card of [1, 2, 3]; track card) {
+                                <div class="tool-card tool-card--placeholder">
                                     <div class="tool-card__header">
-                                        <div class="tool-card__icon">
-                                            <i [class]="tool.icon"></i>
-                                        </div>
+                                        <span class="skeleton-tile"></span>
                                         <div class="tool-card__meta">
-                                            <span class="tool-card__status">{{ tool.badge || (tool.status === 'new' ? 'New' : 'Live') }}</span>
-                                            <span class="tool-card__offline">{{ tool.supportsOffline ? 'Offline-ready' : 'Online' }}</span>
+                                            <span class="skeleton-pill skeleton-pill--small"></span>
+                                            <span class="skeleton-pill skeleton-pill--small"></span>
                                         </div>
                                     </div>
-
                                     <div class="tool-card__body">
-                                        <h4>{{ tool.label }}</h4>
-                                        <p>{{ tool.description }}</p>
+                                        <span class="skeleton-line skeleton-line--card-title"></span>
+                                        <span class="skeleton-line skeleton-line--body"></span>
+                                        <span class="skeleton-line skeleton-line--body skeleton-line--body-short"></span>
                                     </div>
-
                                     <div class="tool-card__tags">
-                                        @for (tag of tool.tags; track tag) {
-                                            <span class="tool-tag">{{ tag }}</span>
-                                        }
-                                        @if (tool.supportsFiles) {
-                                            <span class="tool-tag tool-tag--accent">Files</span>
-                                        }
-                                    </div>
-                                </a>
-                            } @else {
-                                <div class="tool-card tool-card--planned">
-                                    <div class="tool-card__header">
-                                        <div class="tool-card__icon">
-                                            <i [class]="tool.icon"></i>
-                                        </div>
-                                        <div class="tool-card__meta">
-                                            <span class="tool-card__status">{{ tool.badge || 'Planned' }}</span>
-                                            <span class="tool-card__offline">{{ tool.supportsOffline ? 'Offline-ready' : 'Online' }}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="tool-card__body">
-                                        <h4>{{ tool.label }}</h4>
-                                        <p>{{ tool.description }}</p>
-                                    </div>
-
-                                    <div class="tool-card__tags">
-                                        @for (tag of tool.tags; track tag) {
-                                            <span class="tool-tag">{{ tag }}</span>
-                                        }
+                                        <span class="skeleton-pill skeleton-pill--small"></span>
+                                        <span class="skeleton-pill skeleton-pill--small"></span>
                                     </div>
                                 </div>
                             }
-                        }
-                    </div>
-                </article>
-            }
+                        </div>
+                    </article>
+                }
+            </section>
         }
-
-        @if (filteredTools().length === 0) {
-            <div class="empty-state">
-                <i class="pi pi-search-minus"></i>
-                <div>
-                    <p class="m-0 font-medium text-surface-500">No tools found</p>
-                    <p class="m-0 text-sm text-surface-400 mt-1">Try a different keyword or clear the search.</p>
-                </div>
-                <button class="empty-state__button" (click)="clearSearch()">Clear search</button>
-            </div>
-        }
-    </section>
+    </div>
 </div>

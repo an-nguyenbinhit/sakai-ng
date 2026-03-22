@@ -7,7 +7,7 @@ import { providePrimeNG } from 'primeng/config';
 import { provideMonacoEditor } from 'ngx-monaco-editor-v2';
 import { appRoutes } from './app.routes';
 import { isDevMode } from '@angular/core';
-import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { provideClientHydration, withIncrementalHydration } from '@angular/platform-browser';
 import { TitleStrategy } from '@angular/router';
 import { SeoStrategy } from './app/core/services/seo.service';
 
@@ -23,6 +23,6 @@ export const appConfig: ApplicationConfig = {
             enabled: !isDevMode(),
             registrationStrategy: 'registerWhenStable:30000'
         }),
-        provideClientHydration(withEventReplay())
+        provideClientHydration(withIncrementalHydration())
     ]
 };
