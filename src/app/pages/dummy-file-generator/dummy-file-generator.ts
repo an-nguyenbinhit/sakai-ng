@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
@@ -13,6 +13,8 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
 import { MessageService } from 'primeng/api';
+import { ToolPageShell } from '@/app/shared/components/tool-page-shell/tool-page-shell';
+import { BrowserService } from '@/app/shared/services/browser.service';
 
 interface FileType {
     label: string;
@@ -27,12 +29,14 @@ export interface JsonField {
 
 @Component({
     selector: 'app-dummy-file-generator',
-    imports: [CommonModule, FormsModule, SelectModule, InputNumberModule, InputTextModule, EditorModule, CheckboxModule, ToggleSwitchModule, ProgressBarModule, ButtonModule, ToastModule, TooltipModule],
+    imports: [CommonModule, FormsModule, SelectModule, InputNumberModule, InputTextModule, EditorModule, CheckboxModule, ToggleSwitchModule, ProgressBarModule, ButtonModule, ToastModule, TooltipModule, ToolPageShell],
     providers: [MessageService],
     templateUrl: './dummy-file-generator.html',
     styleUrl: './dummy-file-generator.scss'
 })
 export class DummyFileGeneratorComponent {
+    private readonly browserService = inject(BrowserService);
+
     sizePresets: number[] = [1, 10, 50, 100, 200];
 
     fileTypes: FileType[] = [
@@ -55,7 +59,7 @@ export class DummyFileGeneratorComponent {
 
     private getTodayDateStr(): string {
         const d = new Date();
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
     }
 
     private buildDefaultBaseName(sizeMb: number): string {
@@ -64,6 +68,14 @@ export class DummyFileGeneratorComponent {
 
     get outputFileName(): string {
         return `${this.outputFileBaseName}.${this.selectedFileType}`;
+    }
+
+    shellStats() {
+        return [
+            { icon: 'pi pi-file', label: `${this.selectedFileType.toUpperCase()} output` },
+            { icon: 'pi pi-database', label: `${this.fileSizeInMb} MB target` },
+            { icon: 'pi pi-bolt', label: this.addRandomNoise ? 'Noise enabled' : 'Deterministic payload' }
+        ];
     }
 
     // --- Format helpers ---
@@ -92,7 +104,7 @@ export class DummyFileGeneratorComponent {
 
     syncDefaultFileName(): void {
         // Only auto-update if the baseName still matches the default pattern
-        const pattern = /^dummy_\d{4}-\d{2}-\d{2}_\d+mb$/;
+        const pattern = /^dummy_\d{8}_\d+mb$/;
         if (pattern.test(this.outputFileBaseName)) {
             this.outputFileBaseName = this.buildDefaultBaseName(this.fileSizeInMb);
         }
@@ -116,15 +128,25 @@ export class DummyFileGeneratorComponent {
     }
     isGenerating: boolean = false;
 
-    constructor(private messageService: MessageService) { }
+    constructor(private messageService: MessageService) {}
 
     private decodeHtmlEntities(html: string): string {
-        const txt = document.createElement('textarea');
+        const nativeWindow = this.browserService.nativeWindow;
+        if (!nativeWindow) {
+            return html;
+        }
+
+        const txt = nativeWindow.document.createElement('textarea');
         txt.innerHTML = html;
         return txt.value;
     }
 
     generateFile() {
+        if (!this.browserService.isBrowser) {
+            this.messageService.add({ severity: 'warn', summary: 'Unavailable', detail: 'File generation is only available in the browser.' });
+            return;
+        }
+
         if (!this.fileSizeInMb || this.fileSizeInMb < 1) {
             this.messageService.add({ severity: 'error', summary: 'Invalid Size', detail: 'File size must be at least 1 MB.' });
             return;
@@ -203,17 +225,24 @@ export class DummyFileGeneratorComponent {
         this.progressValue = 100;
 
         // Trigger download
-        const blob = new Blob([finalBuffer as any], { type: typeInfo.mime });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const nativeWindow = this.browserService.nativeWindow;
+        if (!nativeWindow) {
+            this.isGenerating = false;
+            this.messageService.add({ severity: 'warn', summary: 'Unavailable', detail: 'File download is unavailable in this context.' });
+            return;
+        }
+
+        const blob = new Blob([finalBuffer as BlobPart], { type: typeInfo.mime });
+        const url = URL.createObjectURL(blob);
+        const link = nativeWindow.document.createElement('a');
         link.href = url;
         link.download = this.outputFileName;
-        document.body.appendChild(link);
+        nativeWindow.document.body.appendChild(link);
         link.click();
 
         // Cleanup
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+        nativeWindow.document.body.removeChild(link);
+        URL.revokeObjectURL(url);
 
         this.isGenerating = false;
         this.messageService.add({ severity: 'success', summary: 'Success', detail: `File generated: ${this.outputFileName}` });
@@ -409,7 +438,12 @@ export class DummyFileGeneratorComponent {
     }
 
     private createBaseImageWithText(text: string, mimeType: 'image/jpeg' | 'image/png'): Uint8Array {
-        const canvas = document.createElement('canvas');
+        const nativeWindow = this.browserService.nativeWindow;
+        if (!nativeWindow) {
+            return new Uint8Array();
+        }
+
+        const canvas = nativeWindow.document.createElement('canvas');
         canvas.width = 800;
         canvas.height = 600;
         const ctx = canvas.getContext('2d');
@@ -450,7 +484,7 @@ export class DummyFileGeneratorComponent {
         
         const dataUrl = canvas.toDataURL(mimeType, 0.9);
         const base64 = dataUrl.split(',')[1];
-        const binaryString = window.atob(base64);
+        const binaryString = nativeWindow.atob(base64);
         const len = binaryString.length;
         const bytes = new Uint8Array(len);
         for (let i = 0; i < len; i++) {
