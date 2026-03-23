@@ -10,8 +10,16 @@
     --dummy-input-bg: var(--p-surface-0);
     --dummy-pill-bg: color-mix(in srgb, var(--p-surface-0) 86%, var(--p-primary-50) 14%);
     --dummy-pill-active: linear-gradient(135deg, color-mix(in srgb, var(--p-primary-100) 76%, white) 0%, color-mix(in srgb, var(--p-primary-200) 34%, white) 100%);
-    --dummy-banner-bg: linear-gradient(135deg, color-mix(in srgb, var(--p-primary-50) 72%, white) 0%, color-mix(in srgb, var(--p-surface-0) 84%, var(--p-primary-100) 16%) 100%);
-    --dummy-banner-border: color-mix(in srgb, var(--p-primary-300) 46%, transparent);
+    --dummy-border-hover: color-mix(in srgb, var(--p-primary-400) 55%, transparent);
+    --dummy-border-hover-soft: color-mix(in srgb, var(--p-primary-400) 52%, transparent);
+    --dummy-border-hover-strong: color-mix(in srgb, var(--p-primary-400) 56%, transparent);
+    --dummy-border-active: color-mix(in srgb, var(--p-primary-500) 60%, transparent);
+    --dummy-border-focus: color-mix(in srgb, var(--p-primary-500) 72%, transparent);
+    --dummy-ring-soft: 0 0 0 3px color-mix(in srgb, var(--p-primary-500) 14%, transparent);
+    --dummy-ring: 0 0 0 3px color-mix(in srgb, var(--p-primary-500) 16%, transparent);
+    --dummy-button-tint: color-mix(in srgb, var(--p-primary-100) 55%, transparent);
+    --dummy-button-text: color-mix(in srgb, var(--p-primary-700) 72%, black);
+    --dummy-mono-font: 'Consolas', 'Monaco', monospace;
 
     :host-context(.app-dark) & {
         --dummy-panel-bg: var(--p-surface-900);
@@ -24,8 +32,7 @@
         --dummy-input-bg: var(--p-surface-950);
         --dummy-pill-bg: color-mix(in srgb, var(--p-surface-900) 86%, var(--p-primary-950) 14%);
         --dummy-pill-active: linear-gradient(135deg, color-mix(in srgb, var(--p-primary-900) 64%, var(--p-surface-900)) 0%, color-mix(in srgb, var(--p-primary-700) 20%, var(--p-surface-900)) 100%);
-        --dummy-banner-bg: linear-gradient(135deg, color-mix(in srgb, var(--p-primary-950) 70%, var(--p-surface-900)) 0%, color-mix(in srgb, var(--p-surface-900) 84%, var(--p-primary-900) 16%) 100%);
-        --dummy-banner-border: color-mix(in srgb, var(--p-primary-500) 38%, var(--p-surface-700));
+        --dummy-button-text: var(--p-primary-200);
     }
 }
 
@@ -47,11 +54,17 @@
     overflow: hidden;
 }
 
-.panel-header {
+.panel-header,
+.field-row,
+.section-heading,
+.download-panel__header {
     display: flex;
     justify-content: space-between;
     gap: 1rem;
     align-items: end;
+}
+
+.panel-header {
     padding: 1.2rem 1.25rem;
     border-bottom: 1px solid var(--dummy-panel-border);
 }
@@ -99,15 +112,6 @@
     gap: 0.7rem;
 }
 
-.field-row,
-.section-heading,
-.download-panel__header {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    align-items: end;
-}
-
 .field-label,
 .dummy-generator-page label {
     color: var(--dummy-text);
@@ -130,17 +134,16 @@
     font-size: 0.82rem;
     font-weight: 700;
     cursor: pointer;
-    transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
 }
 
 .size-preset-button:hover {
     transform: translateY(-1px);
-    border-color: color-mix(in srgb, var(--p-primary-400) 55%, transparent);
+    border-color: var(--dummy-border-hover);
 }
 
 .size-preset-button--active {
     background: var(--dummy-pill-active);
-    border-color: color-mix(in srgb, var(--p-primary-500) 60%, transparent);
+    border-color: var(--dummy-border-active);
 }
 
 .toggle-card,
@@ -178,10 +181,6 @@
     padding: 1rem;
 }
 
-.download-panel--top {
-    order: -1;
-}
-
 .output-file-shell {
     display: flex;
     align-items: center;
@@ -190,13 +189,12 @@
     border-radius: 0.95rem;
     overflow: hidden;
     background: var(--dummy-input-bg);
-    transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .output-file-shell:hover,
 .output-file-shell:focus-within {
-    border-color: color-mix(in srgb, var(--p-primary-400) 60%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--p-primary-500) 14%, transparent);
+    border-color: var(--dummy-border-active);
+    box-shadow: var(--dummy-ring-soft);
 }
 
 .output-file-shell span {
@@ -218,7 +216,7 @@
     color: var(--dummy-text);
     padding-inline: 0.95rem;
     height: 2.9rem;
-    font-family: 'Consolas', 'Monaco', monospace;
+    font-family: var(--dummy-mono-font);
     font-weight: 700;
 }
 
@@ -233,21 +231,20 @@
     flex-wrap: wrap;
 }
 
-.download-panel__meta-item {
-    min-width: 0;
-    overflow-wrap: anywhere;
-}
-
 .content-intro,
 .editor-panel,
 .json-schema-panel {
     padding: 1rem;
 }
 
-.content-intro {
+.content-intro,
+.toggle-card {
     display: flex;
     justify-content: space-between;
     gap: 1rem;
+}
+
+.content-intro {
     align-items: start;
 }
 
@@ -284,11 +281,6 @@
     margin-bottom: 0.9rem;
 }
 
-.editor-panel,
-.json-schema-panel {
-    box-shadow: inset 0 1px 0 color-mix(in srgb, white 45%, transparent);
-}
-
 .json-schema-row {
     display: flex;
     align-items: center;
@@ -297,12 +289,11 @@
     border: 1px solid var(--dummy-panel-border);
     border-radius: 1rem;
     background: var(--dummy-panel-bg);
-    transition: border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
 }
 
 .json-schema-row:hover {
     transform: translateY(-1px);
-    border-color: color-mix(in srgb, var(--p-primary-400) 55%, transparent);
+    border-color: var(--dummy-border-hover);
 }
 
 .json-schema-row__inputs {
@@ -321,7 +312,6 @@
     background: var(--dummy-input-bg);
     color: var(--dummy-text);
     padding: 0.85rem 1rem;
-    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
 }
 
 .dummy-textarea::placeholder,
@@ -333,21 +323,21 @@
 .dummy-textarea:hover,
 .dummy-text-input:hover,
 .json-field-name:hover {
-    border-color: color-mix(in srgb, var(--p-primary-400) 52%, transparent);
+    border-color: var(--dummy-border-hover-soft);
 }
 
 .dummy-textarea:focus,
 .dummy-text-input:focus,
 .json-field-name:focus {
     outline: none;
-    border-color: color-mix(in srgb, var(--p-primary-500) 72%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--p-primary-500) 16%, transparent);
+    border-color: var(--dummy-border-focus);
+    box-shadow: var(--dummy-ring);
 }
 
 .dummy-textarea {
     min-height: 15rem;
     resize: vertical;
-    font-family: 'Consolas', 'Monaco', monospace;
+    font-family: var(--dummy-mono-font);
     line-height: 1.6;
 }
 
@@ -370,41 +360,26 @@
         background: var(--dummy-input-bg);
         color: var(--dummy-text);
         border-radius: 1rem;
-        transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
     }
 
     .dummy-select .p-select:hover,
     .dummy-number-input .p-inputnumber:hover,
     .json-type-select .p-select:hover {
-        border-color: color-mix(in srgb, var(--p-primary-400) 56%, transparent);
+        border-color: var(--dummy-border-hover-strong);
     }
 
     .dummy-select .p-select.p-focus,
     .dummy-number-input .p-inputnumber.p-inputwrapper-focus,
     .json-type-select .p-select.p-focus {
-        border-color: color-mix(in srgb, var(--p-primary-500) 72%, transparent);
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--p-primary-500) 16%, transparent);
-    }
-
-    .dummy-number-input .p-inputnumber-button {
-        transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+        border-color: var(--dummy-border-focus);
+        box-shadow: var(--dummy-ring);
     }
 
     .dummy-number-input .p-inputnumber-button:hover {
-        background: color-mix(in srgb, var(--p-primary-100) 55%, transparent);
-        color: color-mix(in srgb, var(--p-primary-700) 72%, black);
+        background: var(--dummy-button-tint);
+        color: var(--dummy-button-text);
     }
 
-    .json-add-button.p-button:hover,
-    .json-delete-button.p-button:not(:disabled):hover,
-    .download-button.p-button:not(:disabled):hover {
-        transform: translateY(-1px);
-    }
-
-    .p-tooltip .p-tooltip-text {
-        max-width: 22rem;
-        line-height: 1.45;
-    }
 }
 
 @media (max-width: 1100px) {

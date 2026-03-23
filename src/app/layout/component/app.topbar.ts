@@ -34,7 +34,7 @@ import { TOOL_NAVIGATION_GROUPS } from '@/app/core/tooling/tool-definitions';
                     class="topnav-group"
                     [class.topnav-group--align-right]="isTrailingGroup($index)"
                     (mouseenter)="setActiveCategory(group.category.key)"
-                    (mouseleave)="clearActiveCategory()"
+                    (mouseleave)="scheduleClearActiveCategory()"
                 >
                     <button
                         type="button"
@@ -48,7 +48,7 @@ import { TOOL_NAVIGATION_GROUPS } from '@/app/core/tooling/tool-definitions';
                     </button>
 
                     @if (activeCategory() === group.category.key) {
-                        <div class="topnav-panel">
+                        <div class="topnav-panel" (mouseenter)="setActiveCategory(group.category.key)" (mouseleave)="scheduleClearActiveCategory()">
                             <div class="topnav-panel__head">
                                 <div>
                                     <p>{{ group.category.label }}</p>
@@ -104,20 +104,32 @@ export class AppTopbar {
     layoutService = inject(LayoutService);
     readonly navigationGroups = TOOL_NAVIGATION_GROUPS;
     readonly activeCategory = signal<string | null>(null);
+    private hideMenuTimeout: ReturnType<typeof setTimeout> | null = null;
 
     toggleDarkMode() {
         this.layoutService.toggleDarkTheme();
     }
 
     setActiveCategory(categoryKey: string) {
+        this.clearHideTimer();
         this.activeCategory.set(categoryKey);
     }
 
+    scheduleClearActiveCategory() {
+        this.clearHideTimer();
+        this.hideMenuTimeout = setTimeout(() => {
+            this.activeCategory.set(null);
+            this.hideMenuTimeout = null;
+        }, 180);
+    }
+
     clearActiveCategory() {
+        this.clearHideTimer();
         this.activeCategory.set(null);
     }
 
     toggleCategory(categoryKey: string) {
+        this.clearHideTimer();
         this.activeCategory.update((current) => (current === categoryKey ? null : categoryKey));
     }
 
@@ -134,5 +146,12 @@ export class AppTopbar {
 
     isTrailingGroup(index: number) {
         return index >= this.navigationGroups.length - 2;
+    }
+
+    private clearHideTimer() {
+        if (this.hideMenuTimeout) {
+            clearTimeout(this.hideMenuTimeout);
+            this.hideMenuTimeout = null;
+        }
     }
 }
