@@ -125,6 +125,14 @@ export const appRoutes: Routes = [
                 data: {
                     description: 'Generate seeded mock JSON fixtures with names, emails, dates, enums, and numeric fields from a lightweight field model.'
                 }
+            },
+            {
+                path: 'color-tools',
+                loadComponent: () => import('./app/pages/color-tools/color-tools').then((m) => m.ColorTools),
+                title: 'Color Tools for HEX, Gradients & Contrast',
+                data: {
+                    description: 'Convert HEX to RGB, HSL, and OKLCH, generate linear gradients, and check WCAG contrast ratios locally in the browser.'
+                }
             }
         ]
     },

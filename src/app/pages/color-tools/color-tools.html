@@ -1,0 +1,227 @@
+<p-toast></p-toast>
+
+<app-tool-page-shell
+    eyebrow="Frontend Helpers"
+    title="Color Tools"
+    description="Convert HEX into UI-friendly color spaces, generate linear gradients, and check WCAG contrast before locking design tokens."
+    [badges]="['New', 'Offline-ready']"
+    [stats]="shellStats()"
+>
+    <div tool-actions class="tab-row">
+        @for (tab of tabs; track tab.key) {
+            <button pButton type="button" [label]="tab.label" [severity]="activeTab() === tab.key ? undefined : 'secondary'" [outlined]="activeTab() !== tab.key" (click)="setTab(tab.key)"></button>
+        }
+
+        <label class="toggle-chip">
+            <input type="checkbox" [ngModel]="autoApply()" (ngModelChange)="setAutoApply($event)" />
+            <span>Auto apply</span>
+        </label>
+    </div>
+
+    @if (activeTab() === 'converter') {
+        <section class="section-grid">
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>Convert</p><h2>Color converter</h2></div>
+                    <button pButton type="button" label="Apply HEX" (click)="applyConverterColor()"></button>
+                </header>
+
+                <div class="field-stack">
+                    <label class="field-label" for="converterHex">HEX input</label>
+                    <div class="color-input-row">
+                        <input class="color-picker" type="color" [ngModel]="converterColor()" (ngModelChange)="onConverterInputChange($event)" />
+                        <input pInputText id="converterHex" [ngModel]="converterInput()" (ngModelChange)="onConverterInputChange($event)" placeholder="#3b82f6" />
+                    </div>
+                </div>
+
+                @if (converterError()) {
+                    <p class="error-text">{{ converterError() }}</p>
+                }
+
+                <div class="swatch-card" [style.background]="converterValue().hex" [style.color]="converterValue().bestTextColor">
+                    <span>Preview</span>
+                    <strong>{{ converterValue().hex }}</strong>
+                    <small>{{ converterValue().rgbString }}</small>
+                </div>
+            </article>
+
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>Output</p><h2>Color spaces</h2></div>
+                    <button pButton type="button" icon="pi pi-copy" label="Copy HEX" severity="contrast" (click)="copyValue(converterValue().hex, 'HEX value copied to clipboard.')"></button>
+                </header>
+
+                <div class="result-list">
+                    <div class="result-item">
+                        <div>
+                            <p class="field-label">HEX</p>
+                            <code>{{ converterValue().hex }}</code>
+                        </div>
+                        <button pButton type="button" icon="pi pi-copy" text="true" (click)="copyValue(converterValue().hex, 'HEX value copied to clipboard.')"></button>
+                    </div>
+                    <div class="result-item">
+                        <div>
+                            <p class="field-label">RGB</p>
+                            <code>{{ converterValue().rgbString }}</code>
+                        </div>
+                        <button pButton type="button" icon="pi pi-copy" text="true" (click)="copyValue(converterValue().rgbString, 'RGB value copied to clipboard.')"></button>
+                    </div>
+                    <div class="result-item">
+                        <div>
+                            <p class="field-label">HSL</p>
+                            <code>{{ converterValue().hslString }}</code>
+                        </div>
+                        <button pButton type="button" icon="pi pi-copy" text="true" (click)="copyValue(converterValue().hslString, 'HSL value copied to clipboard.')"></button>
+                    </div>
+                    <div class="result-item">
+                        <div>
+                            <p class="field-label">OKLCH</p>
+                            <code>{{ converterValue().oklchString }}</code>
+                        </div>
+                        <button pButton type="button" icon="pi pi-copy" text="true" (click)="copyValue(converterValue().oklchString, 'OKLCH value copied to clipboard.')"></button>
+                    </div>
+                    <div class="result-item">
+                        <div>
+                            <p class="field-label">Suggested text</p>
+                            <code>{{ converterValue().bestTextColor }}</code>
+                        </div>
+                        <button pButton type="button" icon="pi pi-copy" text="true" (click)="copyValue(converterValue().bestTextColor, 'Suggested text color copied to clipboard.')"></button>
+                    </div>
+                </div>
+            </article>
+        </section>
+    }
+
+    @if (activeTab() === 'gradient') {
+        <section class="section-grid">
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>Build</p><h2>Gradient controls</h2></div>
+                    <button pButton type="button" icon="pi pi-copy" label="Copy CSS" severity="contrast" (click)="copyValue(gradientValue().css, 'Gradient CSS copied to clipboard.')"></button>
+                </header>
+
+                <div class="field-stack">
+                    <label class="field-label">Start color</label>
+                    <div class="color-input-row">
+                        <input class="color-picker" type="color" [ngModel]="gradientStartColor()" (ngModelChange)="onGradientStartInputChange($event)" />
+                        <input pInputText [ngModel]="gradientStartInput()" (ngModelChange)="onGradientStartInputChange($event)" placeholder="#0f172a" />
+                        <button pButton type="button" label="Apply" severity="secondary" outlined="true" (click)="applyGradientStartColor()"></button>
+                    </div>
+                </div>
+
+                <div class="field-stack">
+                    <label class="field-label">End color</label>
+                    <div class="color-input-row">
+                        <input class="color-picker" type="color" [ngModel]="gradientEndColor()" (ngModelChange)="onGradientEndInputChange($event)" />
+                        <input pInputText [ngModel]="gradientEndInput()" (ngModelChange)="onGradientEndInputChange($event)" placeholder="#38bdf8" />
+                        <button pButton type="button" label="Apply" severity="secondary" outlined="true" (click)="applyGradientEndColor()"></button>
+                    </div>
+                </div>
+
+                <div class="field-grid">
+                    <div class="field-stack">
+                        <label class="field-label" for="gradientAngle">Angle</label>
+                        <input id="gradientAngle" class="native-input" type="number" min="0" max="360" [ngModel]="gradientAngle()" (ngModelChange)="updateGradientAngle($event)" />
+                    </div>
+                    <div class="field-stack">
+                        <label class="field-label" for="gradientSteps">Stops</label>
+                        <input id="gradientSteps" class="native-input" type="number" min="2" max="12" [ngModel]="gradientSteps()" (ngModelChange)="updateGradientSteps($event)" />
+                    </div>
+                </div>
+
+                @if (gradientError()) {
+                    <p class="error-text">{{ gradientError() }}</p>
+                }
+            </article>
+
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>Preview</p><h2>Generated gradient</h2></div>
+                    <span class="panel-meta">{{ gradientValue().stops.length }} stops</span>
+                </header>
+
+                <div class="gradient-preview" [style.background]="gradientValue().css"></div>
+
+                <div class="css-block">
+                    <label class="field-label">CSS</label>
+                    <code>{{ gradientValue().css }}</code>
+                </div>
+
+                <div class="stop-list">
+                    @for (stop of gradientValue().stops; track trackStop($index, stop)) {
+                        <div class="stop-item">
+                            <div class="stop-swatch" [style.background]="stop.color"></div>
+                            <code>{{ stop.color }}</code>
+                            <span>{{ stop.position }}%</span>
+                        </div>
+                    }
+                </div>
+            </article>
+        </section>
+    }
+
+    @if (activeTab() === 'contrast') {
+        <section class="section-grid">
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>Check</p><h2>Foreground vs background</h2></div>
+                    <span class="panel-meta">{{ contrastValue().ratio.toFixed(2) }}:1</span>
+                </header>
+
+                <div class="field-stack">
+                    <label class="field-label">Foreground</label>
+                    <div class="color-input-row">
+                        <input class="color-picker" type="color" [ngModel]="contrastForeground()" (ngModelChange)="onContrastForegroundInputChange($event)" />
+                        <input pInputText [ngModel]="contrastForegroundInput()" (ngModelChange)="onContrastForegroundInputChange($event)" placeholder="#0f172a" />
+                        <button pButton type="button" label="Apply" severity="secondary" outlined="true" (click)="applyContrastForeground()"></button>
+                    </div>
+                </div>
+
+                <div class="field-stack">
+                    <label class="field-label">Background</label>
+                    <div class="color-input-row">
+                        <input class="color-picker" type="color" [ngModel]="contrastBackground()" (ngModelChange)="onContrastBackgroundInputChange($event)" />
+                        <input pInputText [ngModel]="contrastBackgroundInput()" (ngModelChange)="onContrastBackgroundInputChange($event)" placeholder="#f8fafc" />
+                        <button pButton type="button" label="Apply" severity="secondary" outlined="true" (click)="applyContrastBackground()"></button>
+                    </div>
+                </div>
+
+                @if (contrastError()) {
+                    <p class="error-text">{{ contrastError() }}</p>
+                }
+
+                <div class="contrast-preview" [style.background]="contrastBackground()" [style.color]="contrastForeground()">
+                    <p>Sample UI copy</p>
+                    <h3>Contrast preview for buttons, cards, and body text</h3>
+                    <span>{{ contrastForeground() }} on {{ contrastBackground() }}</span>
+                </div>
+            </article>
+
+            <article class="workspace-panel">
+                <header class="panel-header">
+                    <div><p>WCAG</p><h2>Accessibility status</h2></div>
+                    <button pButton type="button" icon="pi pi-copy" label="Copy ratio" severity="contrast" (click)="copyValue(contrastValue().ratio.toFixed(2), 'Contrast ratio copied to clipboard.')"></button>
+                </header>
+
+                <div class="wcag-grid">
+                    <div class="wcag-item" [class.wcag-item--pass]="contrastValue().normalAA">
+                        <strong>Normal AA</strong>
+                        <span>{{ contrastValue().normalAA ? 'Pass' : 'Fail' }}</span>
+                    </div>
+                    <div class="wcag-item" [class.wcag-item--pass]="contrastValue().normalAAA">
+                        <strong>Normal AAA</strong>
+                        <span>{{ contrastValue().normalAAA ? 'Pass' : 'Fail' }}</span>
+                    </div>
+                    <div class="wcag-item" [class.wcag-item--pass]="contrastValue().largeAA">
+                        <strong>Large AA</strong>
+                        <span>{{ contrastValue().largeAA ? 'Pass' : 'Fail' }}</span>
+                    </div>
+                    <div class="wcag-item" [class.wcag-item--pass]="contrastValue().largeAAA">
+                        <strong>Large AAA</strong>
+                        <span>{{ contrastValue().largeAAA ? 'Pass' : 'Fail' }}</span>
+                    </div>
+                </div>
+            </article>
+        </section>
+    }
+</app-tool-page-shell>

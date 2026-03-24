@@ -281,15 +281,17 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     {
         label: 'Color Tools',
         description: 'Convert color spaces, generate gradients, and check contrast before shipping UI tokens.',
-        route: null,
+        route: '/color-tools',
         icon: 'pi pi-palette',
         tags: ['Color', 'Contrast'],
         keywords: ['oklch', 'hex', 'rgb', 'css variables'],
         category: 'frontend-helpers',
-        badge: 'Planned',
-        status: 'planned',
+        badge: 'New',
+        status: 'new',
         supportsFiles: false,
-        supportsOffline: true
+        supportsOffline: true,
+        featured: true,
+        menuVisible: true
     },
     {
         label: 'Responsive Helper',
