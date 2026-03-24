@@ -39,6 +39,14 @@ export const appRoutes: Routes = [
                 }
             },
             {
+                path: 'container-check',
+                loadComponent: () => import('./app/pages/container-check/container-check').then((m) => m.ContainerCheck),
+                title: 'ISO 6346 Container Number Check & Check Digit Calculator',
+                data: {
+                    description: 'Validate ISO 6346 container numbers, calculate check digits, batch-review OCR-heavy lists, and explain common container number errors.'
+                }
+            },
+            {
                 path: 'regex-tester',
                 loadComponent: () => import('./app/pages/regex-tester/regex-tester').then((m) => m.RegexTester),
                 title: 'Online Regex Tester & Debugger',

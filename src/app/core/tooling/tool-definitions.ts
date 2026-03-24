@@ -117,6 +117,21 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
         menuVisible: true
     },
     {
+        label: 'Container Check',
+        description: 'Validate ISO 6346 container numbers, calculate check digits, and batch-review OCR-heavy lists.',
+        route: '/container-check',
+        icon: 'pi pi-box',
+        tags: ['Container', 'ISO 6346'],
+        keywords: ['container number', 'check digit', 'shipping', 'qc', 'ocr', 'bic'],
+        category: 'format-validate',
+        badge: 'New',
+        status: 'new',
+        supportsFiles: false,
+        supportsOffline: true,
+        featured: true,
+        menuVisible: true
+    },
+    {
         label: 'Regex Tester',
         description: 'Test and debug regular expressions with live match highlighting.',
         route: '/regex-tester',

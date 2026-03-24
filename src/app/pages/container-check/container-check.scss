@@ -1,0 +1,362 @@
+:host {
+    display: block;
+    padding: 1rem;
+}
+
+.workspace-toolbar,
+.toolbar-group,
+.shortcut-row,
+.summary-strip,
+.result-grid,
+.trace-summary,
+.generator-toolbar,
+.field-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.toolbar-group {
+    align-items: center;
+}
+
+.generator-toolbar,
+.field-inline {
+    align-items: center;
+}
+
+.toolbar-note {
+    font-size: 0.9rem;
+    color: var(--p-surface-600);
+}
+
+.workspace-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.workspace-grid--double {
+    @media (min-width: 1200px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.native-input {
+    min-height: 2.75rem;
+    min-width: 13rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--p-surface-300);
+    padding: 0.7rem 0.85rem;
+    background: var(--p-surface-0);
+    color: var(--p-surface-900);
+
+    :host-context(.app-dark) & {
+        background: var(--p-surface-950);
+        color: var(--p-surface-0);
+        border-color: var(--p-surface-700);
+    }
+}
+
+.native-input--compact {
+    min-width: 6rem;
+}
+
+.workspace-panel,
+.status-banner,
+.summary-pill,
+.result-card,
+.sample-card,
+.help-item,
+.help-note {
+    border: 1px solid var(--p-surface-200);
+    border-radius: 1rem;
+    background: var(--p-surface-0);
+
+    :host-context(.app-dark) & {
+        background: var(--p-surface-900);
+        border-color: var(--p-surface-700);
+    }
+}
+
+.workspace-panel,
+.status-banner,
+.summary-pill,
+.result-card,
+.help-item,
+.help-note {
+    padding: 1rem;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.panel-header p,
+.panel-header h2 {
+    margin: 0;
+}
+
+.panel-header p {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--p-primary-500);
+}
+
+.panel-header span {
+    font-size: 0.85rem;
+    color: var(--p-surface-500);
+}
+
+.field-stack,
+.issue-list,
+.samples-list,
+.help-stack {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.field-label {
+    font-weight: 600;
+}
+
+.field-hint {
+    font-size: 0.85rem;
+    color: var(--p-surface-500);
+}
+
+.workspace-textarea {
+    width: 100%;
+    min-height: 20rem;
+    font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.status-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    color: var(--p-surface-700);
+}
+
+.status-banner--success {
+    color: #047857;
+    background: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.18);
+}
+
+.status-banner--error {
+    color: #b91c1c;
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.18);
+}
+
+.result-grid,
+.trace-summary {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.result-card {
+    flex: 1 1 10rem;
+    display: grid;
+    gap: 0.35rem;
+}
+
+.result-card span {
+    font-size: 0.8rem;
+    color: var(--p-surface-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.result-card strong {
+    font-size: 1.05rem;
+    word-break: break-word;
+}
+
+.result-card--wide {
+    flex-basis: 100%;
+}
+
+.issue-chip {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.75rem;
+    align-items: start;
+    border-radius: 0.9rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid transparent;
+}
+
+.issue-chip strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    border-radius: 999px;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.78rem;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.issue-chip--error {
+    color: #b91c1c;
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.18);
+}
+
+.issue-chip--error strong {
+    background: rgba(239, 68, 68, 0.14);
+}
+
+.issue-chip--warning {
+    color: #92400e;
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.issue-chip--warning strong {
+    background: rgba(245, 158, 11, 0.18);
+}
+
+.issue-chip--info {
+    color: #1d4ed8;
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.issue-chip--info strong {
+    background: rgba(59, 130, 246, 0.16);
+}
+
+.table-wrap {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+.result-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.result-table th,
+.result-table td {
+    text-align: left;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--p-surface-200);
+    vertical-align: top;
+
+    :host-context(.app-dark) & {
+        border-bottom-color: var(--p-surface-700);
+    }
+}
+
+.result-table th {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--p-surface-500);
+}
+
+.summary-strip {
+    margin-top: 1rem;
+}
+
+.summary-pill {
+    min-width: 8rem;
+    display: grid;
+    gap: 0.3rem;
+}
+
+.summary-pill strong {
+    font-size: 1.4rem;
+}
+
+.status-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 5rem;
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+    background: rgba(16, 185, 129, 0.12);
+    color: #047857;
+    font-weight: 600;
+}
+
+.status-dot--invalid {
+    background: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+}
+
+.sample-card {
+    display: grid;
+    gap: 0.45rem;
+    padding: 1rem;
+    text-align: left;
+}
+
+.sample-card code {
+    color: var(--p-primary-600);
+}
+
+.sample-card span {
+    color: var(--p-surface-600);
+}
+
+.sample-card__header,
+.sample-card__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.sample-card__status {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.25rem 0.7rem;
+    background: rgba(16, 185, 129, 0.12);
+    color: #047857;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sample-card__status--invalid {
+    background: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+}
+
+.sample-card--invalid {
+    border-color: rgba(239, 68, 68, 0.28);
+    background: rgba(239, 68, 68, 0.08);
+
+    strong,
+    code,
+    span {
+        color: #b91c1c;
+    }
+}
+
+.help-note {
+    color: var(--p-surface-700);
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.error-text {
+    margin: 0.75rem 0 0;
+    color: #b91c1c;
+    font-weight: 600;
+}

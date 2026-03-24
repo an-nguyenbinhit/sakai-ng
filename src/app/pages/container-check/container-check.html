@@ -1,0 +1,315 @@
+<p-toast></p-toast>
+
+<app-tool-page-shell
+    eyebrow="Format & Validate"
+    title="Container Check"
+    description="Validate ISO 6346 container numbers, calculate check digits, batch-review OCR-heavy lists, and explain exactly which segment is wrong."
+    [badges]="['New', 'Offline-ready']"
+    [stats]="shellStats()"
+>
+    <div tool-actions class="workspace-toolbar">
+        <div class="toolbar-group">
+            <span class="toolbar-note">Auto-check is on for single input and batch input.</span>
+        </div>
+
+        <div class="toolbar-group">
+            <button pButton type="button" icon="pi pi-copy" label="Copy container" severity="secondary" [outlined]="true" (click)="copySingleContainer()"></button>
+            <button pButton type="button" icon="pi pi-copy" label="Copy result" severity="contrast" (click)="copySingleResult()"></button>
+            <button pButton type="button" icon="pi pi-clone" label="Copy valid rows" severity="secondary" [outlined]="true" (click)="copyBatch('valid')"></button>
+            <button pButton type="button" icon="pi pi-ban" label="Copy invalid rows" severity="secondary" [outlined]="true" (click)="copyBatch('invalid')"></button>
+            <button pButton type="button" icon="pi pi-download" label="Download CSV" severity="secondary" [outlined]="true" (click)="downloadBatchCsv()"></button>
+        </div>
+    </div>
+
+    <div class="shortcut-row">
+        @for (sample of samples; track trackBySample($index, sample)) {
+            <button
+                pButton
+                type="button"
+                [label]="sample.label"
+                size="small"
+                severity="secondary"
+                [outlined]="activeSampleLabel() !== sample.label"
+                (click)="loadSample(sample)"
+            ></button>
+        }
+    </div>
+
+    <section class="workspace-grid workspace-grid--double">
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Single Check</p>
+                    <h2>Validate full container number</h2>
+                </div>
+                <span>{{ normalizedPreview() || 'No normalized value yet' }}</span>
+            </header>
+
+            <div class="field-stack">
+                <label class="field-label" for="singleInput">Container number</label>
+                <input pInputText id="singleInput" [ngModel]="singleInput()" (ngModelChange)="onSingleInputChange($event)" placeholder="MSCU6639878" />
+                <span class="field-hint">Normalization removes spaces and hyphens, uppercases the value, and auto-validates as you type.</span>
+            </div>
+
+            <div class="status-banner" [class.status-banner--error]="!singleResult().isValid" [class.status-banner--success]="singleResult().isValid">
+                <i [class]="singleResult().isValid ? 'pi pi-verified' : 'pi pi-exclamation-triangle'"></i>
+                <span>
+                    @if (singleResult().isValid) {
+                        Valid structure. Expected check digit: {{ singleResult().expectedCheckDigit }}.
+                    } @else {
+                        Invalid structure or check digit. Review the issues below.
+                    }
+                </span>
+            </div>
+
+            <div class="result-grid">
+                <div class="result-card">
+                    <span>Owner code</span>
+                    <strong>{{ singleResult().parts.ownerCode || '---' }}</strong>
+                </div>
+                <div class="result-card">
+                    <span>Category</span>
+                    <strong>{{ singleResult().parts.equipmentCategory || '-' }}</strong>
+                </div>
+                <div class="result-card">
+                    <span>Serial</span>
+                    <strong>{{ singleResult().parts.serialNumber || '------' }}</strong>
+                </div>
+                <div class="result-card">
+                    <span>Check digit</span>
+                    <strong>{{ singleResult().parts.checkDigit || '-' }}</strong>
+                </div>
+            </div>
+
+            <div class="issue-list">
+                @if (singleResult().issues.length) {
+                    @for (issue of singleResult().issues; track issue.code + issue.message) {
+                        <div class="issue-chip" [class]="issueTone(issue)">
+                            <strong>{{ issue.severity | titlecase }}</strong>
+                            <span>{{ issue.message }}</span>
+                        </div>
+                    }
+                } @else {
+                    <div class="issue-chip issue-chip--info">
+                        <strong>Info</strong>
+                        <span>No validation issues found.</span>
+                    </div>
+                }
+            </div>
+        </article>
+
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Check Digit Calculator</p>
+                    <h2>Build a full number from the base code</h2>
+                </div>
+                <button pButton type="button" icon="pi pi-copy" label="Copy full code" severity="secondary" [outlined]="true" (click)="copyCalculatorResult()"></button>
+            </header>
+
+            <div class="field-stack">
+                <label class="field-label" for="calculatorInput">Owner code + category + serial</label>
+                <input pInputText id="calculatorInput" [ngModel]="calculatorBaseInput()" (ngModelChange)="onCalculatorInputChange($event)" placeholder="MSCU663987" />
+                <span class="field-hint">Expected format after normalization: 4 letters + 6 digits. Full code updates instantly.</span>
+            </div>
+
+            @if (calculatorResult().error) {
+                <p class="error-text">{{ calculatorResult().error }}</p>
+            } @else {
+                <div class="status-banner status-banner--success">
+                    <i class="pi pi-calculator"></i>
+                    <span>Calculated check digit {{ calculatorResult().checkDigit }}. Full code: {{ calculatorResult().fullCode }}</span>
+                </div>
+            }
+
+            <div class="trace-summary">
+                <div class="result-card">
+                    <span>Normalized base</span>
+                    <strong>{{ calculatorPreview() || '---' }}</strong>
+                </div>
+                <div class="result-card">
+                    <span>Computed digit</span>
+                    <strong>{{ calculatorResult().checkDigit ?? '-' }}</strong>
+                </div>
+                <div class="result-card result-card--wide">
+                    <span>Full container number</span>
+                    <strong>{{ calculatorResult().fullCode || 'Waiting for valid base input' }}</strong>
+                </div>
+            </div>
+
+            @if (calculatorWeightedSteps().length) {
+                <div class="table-wrap">
+                    <table class="result-table">
+                        <thead>
+                            <tr>
+                                <th>Pos</th>
+                                <th>Char</th>
+                                <th>Value</th>
+                                <th>Weight</th>
+                                <th>Product</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (step of calculatorWeightedSteps(); track step.index) {
+                                <tr>
+                                    <td>{{ step.index + 1 }}</td>
+                                    <td>{{ step.character }}</td>
+                                    <td>{{ step.numericValue }}</td>
+                                    <td>{{ step.weight }}</td>
+                                    <td>{{ step.product }}</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </article>
+    </section>
+
+    <section class="workspace-grid workspace-grid--double">
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Batch Validate</p>
+                    <h2>Review multiple container numbers at once</h2>
+                </div>
+                <span>{{ batchMetrics().lines }} lines | {{ batchMetrics().bytes }} bytes</span>
+            </header>
+
+            <div class="generator-toolbar">
+                <div class="field-inline">
+                    <label class="field-label" for="randomCount">Random rows</label>
+                    <input id="randomCount" type="number" min="1" max="500" class="native-input native-input--compact" [ngModel]="randomCount()" (ngModelChange)="onRandomCountChange($event)" />
+                </div>
+                <div class="toolbar-group">
+                    <button pButton type="button" label="Generate valid" size="small" severity="secondary" [outlined]="true" (click)="generateBatch('valid')"></button>
+                    <button pButton type="button" label="Generate invalid" size="small" severity="secondary" [outlined]="true" (click)="generateBatch('invalid')"></button>
+                    <button pButton type="button" label="Mixed list" size="small" (click)="generateBatch('mixed')"></button>
+                </div>
+            </div>
+
+            <textarea pTextarea [ngModel]="batchInput()" (ngModelChange)="onBatchInputChange($event)" rows="14" class="workspace-textarea" placeholder="One container number per line"></textarea>
+
+            <div class="summary-strip">
+                <div class="summary-pill">
+                    <strong>{{ batchResult().total }}</strong>
+                    <span>Total rows</span>
+                </div>
+                <div class="summary-pill">
+                    <strong>{{ batchResult().validCount }}</strong>
+                    <span>Valid</span>
+                </div>
+                <div class="summary-pill">
+                    <strong>{{ batchResult().invalidCount }}</strong>
+                    <span>Invalid</span>
+                </div>
+            </div>
+        </article>
+
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Batch Results</p>
+                    <h2>Normalized outcomes</h2>
+                </div>
+                <span>
+                    Showing {{ visibleBatchRows().length }}
+                    @if (batchResult().rows.length > visibleBatchRows().length) {
+                        of {{ batchResult().rows.length }}
+                    }
+                    rows
+                </span>
+            </header>
+
+            <div class="table-wrap">
+                <table class="result-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Normalized</th>
+                            <th>Expected</th>
+                            <th>Actual</th>
+                            <th>Summary</th>
+                            <th>Copy</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (row of visibleBatchRows(); track trackByBatchRow($index, row)) {
+                            <tr>
+                                <td>
+                                    <span class="status-dot" [class.status-dot--invalid]="!row.isValid">{{ row.isValid ? 'Valid' : 'Invalid' }}</span>
+                                </td>
+                                <td><code>{{ row.normalized || row.raw }}</code></td>
+                                <td>{{ row.expectedCheckDigit ?? '-' }}</td>
+                                <td>{{ row.actualCheckDigit ?? '-' }}</td>
+                                <td>{{ row.summary }}</td>
+                                <td>
+                                    <button pButton type="button" icon="pi pi-copy" size="small" severity="secondary" [text]="true" (click)="copyBatchRow(row)"></button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+
+    <section class="workspace-grid workspace-grid--double">
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Samples</p>
+                    <h2>Curated valid and invalid examples</h2>
+                </div>
+            </header>
+
+            <div class="samples-list">
+                @for (sample of samples; track trackBySample($index, sample)) {
+                    <article class="sample-card" [class.sample-card--invalid]="isInvalidSample(sample)">
+                        <div class="sample-card__header">
+                            <strong>{{ sample.label }}</strong>
+                            <span class="sample-card__status" [class.sample-card__status--invalid]="isInvalidSample(sample)">{{ isInvalidSample(sample) ? 'Invalid' : 'Valid' }}</span>
+                        </div>
+                        <code>{{ sample.input }}</code>
+                        <span>{{ sample.description }}</span>
+                        <div class="sample-card__actions">
+                            <button pButton type="button" label="Use sample" size="small" severity="secondary" [outlined]="true" (click)="loadSample(sample)"></button>
+                            <button pButton type="button" icon="pi pi-copy" label="Copy" size="small" severity="secondary" [text]="true" (click)="copySample(sample)"></button>
+                        </div>
+                    </article>
+                }
+            </div>
+        </article>
+
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Help</p>
+                    <h2>How to read the number</h2>
+                </div>
+            </header>
+
+            <div class="help-stack">
+                <div class="help-item">
+                    <strong>Owner code</strong>
+                    <span>First 3 letters. Identifies the owner or principal operator.</span>
+                </div>
+                <div class="help-item">
+                    <strong>Equipment category</strong>
+                    <span>Fourth letter must be U, J, or Z. U is the standard freight container category.</span>
+                </div>
+                <div class="help-item">
+                    <strong>Serial number</strong>
+                    <span>Six digits chosen by the owner. OCR errors usually happen here.</span>
+                </div>
+                <div class="help-item">
+                    <strong>Check digit</strong>
+                    <span>Last digit validates transmission accuracy using the ISO 6346 weighting algorithm.</span>
+                </div>
+                <div class="help-note">
+                    This tool validates structure and check digit offline only. It does not verify whether a BIC owner code is registered or active.
+                </div>
+            </div>
+        </article>
+    </section>
+</app-tool-page-shell>
