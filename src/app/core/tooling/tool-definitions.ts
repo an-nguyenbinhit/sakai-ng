@@ -296,15 +296,17 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     {
         label: 'Responsive Helper',
         description: 'Work with breakpoint presets, viewport notes, and responsive snippet generation.',
-        route: null,
+        route: '/responsive-helper',
         icon: 'pi pi-mobile',
         tags: ['Responsive', 'Breakpoints'],
         keywords: ['viewport', 'media query', 'layout'],
         category: 'frontend-helpers',
-        badge: 'Planned',
-        status: 'planned',
+        badge: 'New',
+        status: 'new',
         supportsFiles: false,
-        supportsOffline: true
+        supportsOffline: true,
+        featured: true,
+        menuVisible: true
     }
 ];
 

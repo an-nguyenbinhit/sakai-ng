@@ -1,0 +1,171 @@
+:host {
+    display: block;
+    padding: 1rem;
+}
+
+.tab-row,
+.field-stack,
+.notes-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.field-stack,
+.notes-list {
+    flex-direction: column;
+}
+
+.section-grid {
+    display: grid;
+    gap: 1rem;
+
+    @media (min-width: 1100px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.section-grid__full {
+    grid-column: 1 / -1;
+}
+
+.workspace-panel {
+    border: 1px solid var(--p-surface-200);
+    border-radius: 1rem;
+    background: var(--p-surface-0);
+    padding: 1rem;
+
+    :host-context(.app-dark) & {
+        background: var(--p-surface-900);
+        border-color: var(--p-surface-700);
+    }
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: start;
+    margin-bottom: 0.75rem;
+}
+
+.panel-header p,
+.panel-header h2,
+.field-label {
+    margin: 0;
+}
+
+.panel-header p,
+.field-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--p-primary-500);
+}
+
+.panel-meta,
+.preset-description {
+    color: var(--p-surface-500);
+}
+
+.native-input {
+    min-height: 2.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--p-surface-300);
+    padding: 0.7rem 0.85rem;
+    background: var(--p-surface-0);
+    color: var(--p-surface-900);
+
+    :host-context(.app-dark) & {
+        background: var(--p-surface-950);
+        color: var(--p-surface-0);
+        border-color: var(--p-surface-700);
+    }
+}
+
+.summary-card,
+.note-item,
+.breakpoint-card,
+.code-block {
+    border: 1px solid var(--p-surface-200);
+    border-radius: 0.85rem;
+    background: var(--p-surface-50);
+
+    :host-context(.app-dark) & {
+        background: var(--p-surface-950);
+        border-color: var(--p-surface-700);
+    }
+}
+
+.summary-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1rem;
+}
+
+.summary-card span {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--p-primary-500);
+}
+
+.note-item {
+    display: flex;
+    align-items: start;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+}
+
+.note-item i {
+    margin-top: 0.15rem;
+    color: var(--p-primary-500);
+}
+
+.breakpoint-grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.breakpoint-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+}
+
+.breakpoint-card strong,
+.breakpoint-card span,
+.breakpoint-card p,
+.preset-description {
+    margin: 0;
+}
+
+.breakpoint-card--active {
+    border-color: color-mix(in srgb, var(--p-primary-500) 45%, var(--p-surface-200));
+    background: color-mix(in srgb, var(--p-primary-500) 10%, var(--p-surface-0));
+
+    :host-context(.app-dark) & {
+        background: color-mix(in srgb, var(--p-primary-500) 16%, var(--p-surface-950));
+        border-color: color-mix(in srgb, var(--p-primary-500) 45%, var(--p-surface-700));
+    }
+}
+
+.code-block {
+    margin-top: 1rem;
+    overflow: auto;
+}
+
+.code-block pre {
+    margin: 0;
+    padding: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.code-block code {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}

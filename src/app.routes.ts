@@ -133,6 +133,14 @@ export const appRoutes: Routes = [
                 data: {
                     description: 'Convert HEX to RGB, HSL, and OKLCH, generate linear gradients, and check WCAG contrast ratios locally in the browser.'
                 }
+            },
+            {
+                path: 'responsive-helper',
+                loadComponent: () => import('./app/pages/responsive-helper/responsive-helper').then((m) => m.ResponsiveHelper),
+                title: 'Responsive Helper for Breakpoints, Viewports & Snippets',
+                data: {
+                    description: 'Inspect breakpoint presets, review viewport notes, and generate responsive CSS, SCSS, and Tailwind snippets locally in the browser.'
+                }
             }
         ]
     },

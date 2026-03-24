@@ -1,0 +1,104 @@
+<p-toast></p-toast>
+
+<app-tool-page-shell
+    eyebrow="Frontend Helpers"
+    title="Responsive Helper"
+    description="Work with framework breakpoint presets, annotate viewport behavior, and generate responsive snippets without leaving the browser."
+    [badges]="['New', 'Offline-ready']"
+    [stats]="shellStats()"
+>
+    <div tool-actions class="tab-row">
+        @for (preset of presets; track preset.id) {
+            <button
+                pButton
+                type="button"
+                [label]="preset.label"
+                [severity]="selectedPresetId() === preset.id ? undefined : 'secondary'"
+                [outlined]="selectedPresetId() !== preset.id"
+                (click)="setPreset(preset.id)"
+            ></button>
+        }
+    </div>
+
+    <section class="section-grid">
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div><p>Viewport</p><h2>Preset and dimensions</h2></div>
+                <span class="panel-meta">{{ selectedPreset().source }}</span>
+            </header>
+
+            <div class="field-stack">
+                <label class="field-label" for="viewportWidth">Viewport width</label>
+                <input id="viewportWidth" class="native-input" type="number" min="320" max="3840" [ngModel]="viewportWidth()" (ngModelChange)="updateViewportWidth($event)" />
+            </div>
+
+            <div class="field-stack">
+                <label class="field-label" for="viewportHeight">Viewport height</label>
+                <input id="viewportHeight" class="native-input" type="number" min="320" max="2160" [ngModel]="viewportHeight()" (ngModelChange)="updateViewportHeight($event)" />
+            </div>
+
+            <div class="field-stack">
+                <label class="field-label" for="selectorInput">Snippet selector</label>
+                <input id="selectorInput" pInputText [ngModel]="selectorInput()" (ngModelChange)="selectorInput.set($event)" placeholder=".responsive-shell" />
+            </div>
+
+            <div class="summary-card">
+                <span>Active breakpoint</span>
+                <strong>{{ viewportAnalysis().activeBreakpoint.label }}</strong>
+                <small>{{ viewportAnalysis().width }} x {{ viewportAnalysis().height }} / {{ viewportAnalysis().orientation }}</small>
+            </div>
+        </article>
+
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div><p>Notes</p><h2>Viewport guidance</h2></div>
+                <button pButton type="button" icon="pi pi-copy" label="Copy summary" severity="secondary" outlined="true" (click)="copyText(viewportAnalysis().notes.join('\n'), 'Viewport notes copied to clipboard.')"></button>
+            </header>
+
+            <p class="preset-description">{{ selectedPreset().description }}</p>
+
+            <div class="notes-list">
+                @for (note of viewportAnalysis().notes; track note) {
+                    <div class="note-item">
+                        <i class="pi pi-angle-right"></i>
+                        <span>{{ note }}</span>
+                    </div>
+                }
+            </div>
+        </article>
+
+        <article class="workspace-panel section-grid__full">
+            <header class="panel-header">
+                <div><p>Breakpoints</p><h2>Preset ranges</h2></div>
+                <span class="panel-meta">{{ selectedPreset().breakpoints.length }} ranges</span>
+            </header>
+
+            <div class="breakpoint-grid">
+                @for (breakpoint of selectedPreset().breakpoints; track breakpoint.label) {
+                    <div class="breakpoint-card" [class.breakpoint-card--active]="isBreakpointActive(breakpoint.minWidth, breakpoint.maxWidth)">
+                        <strong>{{ breakpoint.label }}</strong>
+                        <span>{{ getBreakpointRangeLabel(breakpoint.minWidth, breakpoint.maxWidth) }}</span>
+                        <p>{{ breakpoint.note }}</p>
+                    </div>
+                }
+            </div>
+        </article>
+
+        <article class="workspace-panel section-grid__full">
+            <header class="panel-header">
+                <div><p>Snippets</p><h2>Responsive code generation</h2></div>
+                <button pButton type="button" icon="pi pi-copy" label="Copy snippet" (click)="copyText(currentSnippet(), activeSnippetTab().toUpperCase() + ' snippet copied to clipboard.')"></button>
+            </header>
+
+            <div class="tab-row">
+                @for (tab of snippetTabs; track tab.key) {
+                    <button pButton type="button" [label]="tab.label" [severity]="activeSnippetTab() === tab.key ? undefined : 'secondary'" [outlined]="activeSnippetTab() !== tab.key" (click)="setSnippetTab(tab.key)"></button>
+                }
+            </div>
+
+            <div class="code-block">
+                <pre><code>{{ currentSnippet() }}</code></pre>
+            </div>
+        </article>
+    </section>
+</app-tool-page-shell>
