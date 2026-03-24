@@ -63,12 +63,18 @@
                             class="file-row"
                             [class.file-row--selected]="item.selected"
                             [class.file-row--warning]="item.status === 'warning'"
+                            [class.file-row--dragging]="draggedItemId() === item.id"
+                            [class.file-row--drop-before]="dragOverItemId() === item.id && dragInsertPosition() === 'before'"
+                            [class.file-row--drop-after]="dragOverItemId() === item.id && dragInsertPosition() === 'after'"
                             draggable="true"
                             (dragstart)="startDrag(item.id)"
                             (dragend)="cancelDrag()"
-                            (dragover)="$event.preventDefault()"
+                            (dragover)="onRowDragOver(item.id, $event)"
                             (drop)="dropOnItem(item.id)"
                         >
+                            <div class="file-row__handle" aria-hidden="true" title="Drag to reorder">
+                                <i class="pi pi-bars"></i>
+                            </div>
                             <label class="file-row__select">
                                 <input type="checkbox" [checked]="item.selected" (change)="onToggleSelection(item.id, $event)" />
                             </label>

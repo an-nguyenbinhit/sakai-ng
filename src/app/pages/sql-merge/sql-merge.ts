@@ -68,6 +68,8 @@ export class SqlMerge {
     readonly skippedDuplicates = signal(0);
     readonly lastActionMessage = signal('Drop SQL files here or use Add Files to start a merge job.');
     readonly draggedItemId = signal<string | null>(null);
+    readonly dragOverItemId = signal<string | null>(null);
+    readonly dragInsertPosition = signal<'before' | 'after' | null>(null);
     readonly lastGeneratedPreview = signal('');
     readonly editablePreview = signal('');
     readonly previewEditorComponent = signal<Type<unknown> | null>(null);
@@ -347,12 +349,41 @@ export class SqlMerge {
     }
 
     startDrag(itemId: string) {
+        if (this.isProcessing()) {
+            return;
+        }
+
         this.draggedItemId.set(itemId);
+    }
+
+    onRowDragOver(targetId: string, event: DragEvent) {
+        event.preventDefault();
+
+        const sourceId = this.draggedItemId();
+        if (!sourceId || sourceId === targetId) {
+            this.dragOverItemId.set(null);
+            this.dragInsertPosition.set(null);
+            return;
+        }
+
+        const row = event.currentTarget as HTMLElement | null;
+        if (!row) {
+            return;
+        }
+
+        const rect = row.getBoundingClientRect();
+        const offsetY = event.clientY - rect.top;
+        const position = offsetY < rect.height / 2 ? 'before' : 'after';
+        this.dragOverItemId.set(targetId);
+        this.dragInsertPosition.set(position);
     }
 
     dropOnItem(targetId: string) {
         const sourceId = this.draggedItemId();
+        const insertPosition = this.dragInsertPosition();
         this.draggedItemId.set(null);
+        this.dragOverItemId.set(null);
+        this.dragInsertPosition.set(null);
 
         if (!sourceId || sourceId === targetId) {
             return;
@@ -367,7 +398,9 @@ export class SqlMerge {
 
             const next = [...items];
             const [moved] = next.splice(sourceIndex, 1);
-            next.splice(targetIndex, 0, moved);
+            const adjustedTargetIndex = sourceIndex < targetIndex ? targetIndex - 1 : targetIndex;
+            const insertAt = insertPosition === 'after' ? adjustedTargetIndex + 1 : adjustedTargetIndex;
+            next.splice(insertAt, 0, moved);
             return next;
         });
         this.syncPreviewWithGenerated();
@@ -375,6 +408,8 @@ export class SqlMerge {
 
     cancelDrag() {
         this.draggedItemId.set(null);
+        this.dragOverItemId.set(null);
+        this.dragInsertPosition.set(null);
     }
 
     openFilePicker(fileInput: HTMLInputElement) {

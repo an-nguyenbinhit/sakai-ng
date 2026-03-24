@@ -58,8 +58,8 @@
                                 },
                                 {
                                     "type": "anyComponentStyle",
-                                    "maximumWarning": "10kb",
-                                    "maximumError": "20kb"
+                                    "maximumWarning": "14kb",
+                                    "maximumError": "24kb"
                                 }
                             ],
                             "outputHashing": "all",
@@ -69,8 +69,8 @@
                             "budgets": [
                                 {
                                     "type": "anyComponentStyle",
-                                    "maximumWarning": "10kb",
-                                    "maximumError": "20kb"
+                                    "maximumWarning": "14kb",
+                                    "maximumError": "24kb"
                                 }
                             ],
                             "optimization": false,
