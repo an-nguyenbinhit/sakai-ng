@@ -189,6 +189,21 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
         menuVisible: true
     },
     {
+        label: 'SQL Merge',
+        description: 'Merge multiple SQL scripts into one ordered output with preview, warnings, and manifest export.',
+        route: '/sql-merge',
+        icon: 'pi pi-file-export',
+        tags: ['SQL', 'Merge'],
+        keywords: ['sql merge', 'deployment script', 'combine sql files', 'go separator'],
+        category: 'convert-transform',
+        badge: 'New',
+        status: 'new',
+        supportsFiles: true,
+        supportsOffline: true,
+        featured: true,
+        menuVisible: true
+    },
+    {
         label: 'Text Utils',
         description: 'Clean, sort, dedupe, slugify, and reshape raw text with instant metrics.',
         route: '/text-utils',

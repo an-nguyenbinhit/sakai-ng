@@ -119,6 +119,14 @@ export const appRoutes: Routes = [
                 }
             },
             {
+                path: 'sql-merge',
+                loadComponent: () => import('./app/pages/sql-merge/sql-merge').then((m) => m.SqlMerge),
+                title: 'SQL Merge Tool for Combining Ordered SQL Scripts',
+                data: {
+                    description: 'Merge multiple SQL files into one deployment-ready script with ordering, preview, validation warnings, and manifest export.'
+                }
+            },
+            {
                 path: 'query-playground',
                 loadComponent: () => import('./app/pages/query-playground/query-playground').then((m) => m.QueryPlayground),
                 title: 'Query Playground for JSONPath & XPath',

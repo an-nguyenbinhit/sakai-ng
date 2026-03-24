@@ -1,0 +1,219 @@
+<p-toast></p-toast>
+
+<app-tool-page-shell
+    eyebrow="Convert & Transform"
+    title="SQL Merge"
+    description="Combine multiple SQL scripts into one deployment-ready output with local-only processing, ordering controls, preview, and manifest export."
+    [badges]="['Browser-local', 'SQL workflow']"
+    [stats]="shellStats()"
+>
+    <div tool-actions class="workspace-toolbar">
+        <div class="toolbar-group">
+            <label class="file-button" [class.file-button--disabled]="isProcessing()">
+                <input type="file" accept=".sql,.txt,.ddl,.dml,.prc,.fn,.view" multiple [disabled]="isProcessing()" (change)="onFileSelected($event)" />
+                <span>Add Files</span>
+            </label>
+            <button pButton type="button" icon="pi pi-trash" label="Remove Selected" severity="danger" [disabled]="!selectedCount() || isProcessing()" (click)="removeSelected()"></button>
+            <button pButton type="button" icon="pi pi-times" label="Clear All" severity="secondary" [outlined]="true" [disabled]="!items().length || isProcessing()" (click)="clearAll()"></button>
+            <button pButton type="button" icon="pi pi-download" label="Download SQL" [disabled]="!items().length || isProcessing()" (click)="downloadSql()"></button>
+            <button pButton type="button" icon="pi pi-file-export" label="Manifest JSON" severity="secondary" [outlined]="true" [disabled]="!items().length || isProcessing()" (click)="downloadManifest()"></button>
+        </div>
+
+        <div class="toolbar-group toolbar-group--samples">
+            @for (sample of samples; track sample.label) {
+                <button pButton type="button" size="small" severity="secondary" [outlined]="true" [label]="sample.label" (click)="loadSampleSet(sample)"></button>
+            }
+        </div>
+    </div>
+
+    <div class="status-banner" [class.status-banner--warning]="validationSummary().tone === 'warning'">
+        <i class="pi" [class.pi-check-circle]="validationSummary().tone === 'ok'" [class.pi-exclamation-triangle]="validationSummary().tone === 'warning'"></i>
+        <span>{{ validationSummary().text }}</span>
+    </div>
+
+    <section class="workspace-grid">
+        <article
+            class="workspace-panel drop-panel"
+            [class.drop-panel--dragging]="isDragging()"
+            (drop)="onDrop($event)"
+            (dragover)="onDragOver($event)"
+            (dragenter)="onDragEnter($event)"
+            (dragleave)="onDragLeave($event)"
+        >
+            <header class="panel-header">
+                <div>
+                    <p>Merge Queue</p>
+                    <h2>Selected Files</h2>
+                </div>
+                <span>{{ items().length }} files | {{ totalSize() }} bytes</span>
+            </header>
+
+            <div class="queue-toolbar">
+                <input pInputText type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" placeholder="Search by file name" />
+                <label class="inline-checkbox">
+                    <input type="checkbox" [checked]="areAllVisibleSelected()" (change)="onToggleSelectAll($event)" />
+                    <span>Select visible</span>
+                </label>
+            </div>
+
+            <div class="queue-toolbar queue-toolbar--reorder">
+                <button pButton type="button" size="small" label="Top" severity="secondary" [outlined]="true" [disabled]="!selectedCount()" (click)="moveSelected('top')"></button>
+                <button pButton type="button" size="small" label="Up" severity="secondary" [outlined]="true" [disabled]="!selectedCount()" (click)="moveSelected('up')"></button>
+                <button pButton type="button" size="small" label="Down" severity="secondary" [outlined]="true" [disabled]="!selectedCount()" (click)="moveSelected('down')"></button>
+                <button pButton type="button" size="small" label="Bottom" severity="secondary" [outlined]="true" [disabled]="!selectedCount()" (click)="moveSelected('bottom')"></button>
+            </div>
+
+            @if (!filteredItems().length) {
+                <div class="drop-empty">
+                    <i class="pi pi-upload"></i>
+                    <p>{{ items().length ? 'No files match the current search.' : lastActionMessage() }}</p>
+                </div>
+            } @else {
+                <div class="file-list">
+                    @for (item of filteredItems(); track item.id) {
+                        <div
+                            class="file-row"
+                            [class.file-row--selected]="item.selected"
+                            [class.file-row--warning]="item.status === 'warning'"
+                            draggable="true"
+                            (dragstart)="startDrag(item.id)"
+                            (dragend)="cancelDrag()"
+                            (dragover)="$event.preventDefault()"
+                            (drop)="dropOnItem(item.id)"
+                        >
+                            <label class="file-row__select">
+                                <input type="checkbox" [checked]="item.selected" (change)="onToggleSelection(item.id, $event)" />
+                            </label>
+                            <div class="file-row__content">
+                                <div class="file-row__title">
+                                    <strong>{{ item.name }}</strong>
+                                    <span>{{ item.size }} bytes</span>
+                                </div>
+                                @if (item.issues.length) {
+                                    <div class="file-row__issues">{{ item.issues.join(' | ') }}</div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </article>
+
+        <article class="workspace-panel options-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Merge Policy</p>
+                    <h2>Options</h2>
+                </div>
+                <span>Preview updates automatically</span>
+            </header>
+
+            <div class="option-grid">
+                <label class="field">
+                    <span>Output file name</span>
+                    <input pInputText type="text" [ngModel]="options().outputFileName" (ngModelChange)="updateOption('outputFileName', $event)" />
+                </label>
+
+                <label class="field">
+                    <span>Separator lines</span>
+                    <input pInputText type="number" min="1" max="6" [ngModel]="options().separatorLines" (ngModelChange)="updateOption('separatorLines', +$event || 1)" />
+                </label>
+
+                <label class="field">
+                    <span>Duplicate policy</span>
+                    <select class="native-select" [ngModel]="options().duplicatePolicy" (ngModelChange)="updateOption('duplicatePolicy', $event)">
+                        <option value="skip">Skip duplicates</option>
+                        <option value="keep-both">Keep both</option>
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span>Non-SQL files</span>
+                    <select class="native-select" [ngModel]="options().nonSqlPolicy" (ngModelChange)="updateOption('nonSqlPolicy', $event)">
+                        <option value="warn-and-allow">Warn and allow</option>
+                        <option value="block">Block</option>
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span>GO separator policy</span>
+                    <select class="native-select" [ngModel]="options().includeGoSeparator" (ngModelChange)="updateOption('includeGoSeparator', $event)">
+                        <option value="preserve">Preserve source GO</option>
+                        <option value="force-between-files">Force between files</option>
+                        <option value="off">Strip standalone GO</option>
+                    </select>
+                </label>
+
+                <div class="checkbox-grid">
+                    <label class="inline-checkbox">
+                        <input type="checkbox" [checked]="options().includeHeaders" (change)="onOptionCheckboxChange('includeHeaders', $event)" />
+                        <span>Include per-file headers</span>
+                    </label>
+                    <label class="inline-checkbox">
+                        <input type="checkbox" [checked]="options().includeFileStats" (change)="onOptionCheckboxChange('includeFileStats', $event)" />
+                        <span>Include file stats in header</span>
+                    </label>
+                    <label class="inline-checkbox">
+                        <input type="checkbox" [checked]="options().trimTrailingWhitespace" (change)="onOptionCheckboxChange('trimTrailingWhitespace', $event)" />
+                        <span>Trim trailing whitespace</span>
+                    </label>
+                    <label class="inline-checkbox">
+                        <input type="checkbox" [checked]="options().ensureTrailingNewline" (change)="onOptionCheckboxChange('ensureTrailingNewline', $event)" />
+                        <span>Ensure trailing newline</span>
+                    </label>
+                </div>
+
+                <label class="field field--full">
+                    <span>Header template</span>
+                    <textarea
+                        pTextarea
+                        rows="6"
+                        class="workspace-textarea workspace-textarea--header"
+                        [ngModel]="options().headerTemplate"
+                        (ngModelChange)="updateOption('headerTemplate', $event)"
+                    ></textarea>
+                </label>
+            </div>
+
+            <div class="queue-toolbar">
+                <button pButton type="button" size="small" label="Reset Header Template" severity="secondary" [outlined]="true" (click)="resetHeaderTemplate()"></button>
+            </div>
+        </article>
+    </section>
+
+    <section class="workspace-grid workspace-grid--preview">
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Merged Output</p>
+                    <h2>Preview</h2>
+                </div>
+                <span>{{ previewMetrics().lines }} lines | {{ previewMetrics().bytes }} bytes</span>
+            </header>
+            <textarea pTextarea [ngModel]="previewText()" rows="18" class="workspace-textarea" readonly></textarea>
+        </article>
+
+        <article class="workspace-panel">
+            <header class="panel-header">
+                <div>
+                    <p>Execution Notes</p>
+                    <h2>Warnings</h2>
+                </div>
+                <span>{{ mergeResult().warnings.length }} warnings</span>
+            </header>
+
+            @if (!mergeResult().warnings.length) {
+                <div class="drop-empty drop-empty--tight">
+                    <i class="pi pi-check"></i>
+                    <p>All queued files are ready for merge.</p>
+                </div>
+            } @else {
+                <div class="warning-list">
+                    @for (warning of mergeResult().warnings; track warning) {
+                        <div class="warning-list__item">{{ warning }}</div>
+                    }
+                </div>
+            }
+        </article>
+    </section>
+</app-tool-page-shell>
