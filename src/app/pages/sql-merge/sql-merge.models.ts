@@ -36,6 +36,14 @@ export interface SqlMergeManifestItem {
     fingerprint: string;
 }
 
+export interface SqlMergeBlockMarker {
+    name: string;
+    order: number;
+    startLine: number;
+    endLine: number;
+    toneIndex: number;
+}
+
 export interface SqlMergeResult {
     content: string;
     totalFiles: number;
@@ -43,6 +51,7 @@ export interface SqlMergeResult {
     skippedDuplicates: number;
     forcedGoCount: number;
     warnings: string[];
+    blocks: SqlMergeBlockMarker[];
     manifest: SqlMergeManifestItem[];
 }
 

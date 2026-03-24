@@ -1,18 +1,20 @@
 import { ChangeDetectionStrategy, Component, Signal, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { EditorComponent } from 'ngx-monaco-editor-v2';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
+import { LayoutService } from '@/app/layout/service/layout.service';
 import { ToolPageShell } from '@/app/shared/components/tool-page-shell/tool-page-shell';
 import { calculateTextMetrics } from '@/app/shared/utils/text-metrics';
 import { SqlMergeEngineService } from './sql-merge-engine.service';
 import { SqlMergeExportService } from './sql-merge-export.service';
 import { SqlMergeFileIntakeService } from './sql-merge-file-intake.service';
-import { SqlDuplicatePolicy, SqlGoSeparatorPolicy, SqlMergeFileItem, SqlMergeOptions, SqlMergeSampleDefinition, SqlNonSqlPolicy } from './sql-merge.models';
+import { SqlDuplicatePolicy, SqlGoSeparatorPolicy, SqlMergeBlockMarker, SqlMergeFileItem, SqlMergeOptions, SqlMergeSampleDefinition, SqlNonSqlPolicy } from './sql-merge.models';
 import { SQL_MERGE_DEFAULT_HEADER_TEMPLATE, SQL_MERGE_SAMPLES } from './sql-merge.samples';
 
 const DEFAULT_OPTIONS: SqlMergeOptions = {
@@ -31,7 +33,7 @@ const DEFAULT_OPTIONS: SqlMergeOptions = {
 @Component({
     selector: 'app-sql-merge',
     standalone: true,
-    imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, SelectModule, TextareaModule, ToastModule, ToolPageShell],
+    imports: [CommonModule, FormsModule, EditorComponent, ButtonModule, InputTextModule, SelectModule, TextareaModule, ToastModule, ToolPageShell],
     providers: [MessageService],
     templateUrl: './sql-merge.html',
     styleUrl: './sql-merge.scss',
@@ -63,22 +65,29 @@ export class SqlMerge {
     readonly draggedItemId = signal<string | null>(null);
     readonly lastGeneratedPreview = signal('');
     readonly editablePreview = signal('');
+    readonly activePreviewBlockOrder = signal<number | null>(null);
     readonly filteredItems: Signal<SqlMergeFileItem[]>;
     readonly selectedCount: Signal<number>;
     readonly totalSize: Signal<number>;
     readonly mergeResult: Signal<ReturnType<SqlMergeEngineService['merge']>>;
     readonly previewText: Signal<string>;
     readonly previewMetrics: Signal<ReturnType<typeof calculateTextMetrics>>;
+    readonly previewEditorOptions: Signal<Record<string, unknown>>;
+    readonly canShowPreviewBlocks: Signal<boolean>;
+    readonly previewBlocks: Signal<SqlMergeBlockMarker[]>;
     readonly shellStats: Signal<Array<{ icon: string; label: string }>>;
     readonly validationSummary: Signal<{ tone: 'warning' | 'ok'; text: string }>;
     readonly diagnostics: Signal<Array<{ tone: 'warn' | 'info'; text: string }>>;
     readonly hasDiagnostics: Signal<boolean>;
+    private previewEditorInstance: any;
+    private previewDecorations: string[] = [];
 
     constructor(
         private intakeService: SqlMergeFileIntakeService,
         private mergeEngine: SqlMergeEngineService,
         private exportService: SqlMergeExportService,
-        private messageService: MessageService
+        private messageService: MessageService,
+        private layoutService: LayoutService
     ) {
         this.filteredItems = computed(() => {
             const term = this.searchTerm().trim().toLowerCase();
@@ -93,6 +102,24 @@ export class SqlMerge {
         this.mergeResult = computed(() => this.mergeEngine.merge(this.items(), this.options(), this.skippedDuplicates()));
         this.previewText = computed(() => this.editablePreview());
         this.previewMetrics = computed(() => calculateTextMetrics(this.editablePreview()));
+        this.previewEditorOptions = computed(() => ({
+            theme: this.layoutService.isDarkTheme() ? 'vs-dark' : 'vs-light',
+            language: 'sql',
+            automaticLayout: true,
+            readOnly: !this.isPreviewEditing(),
+            fontSize: 14,
+            minimap: { enabled: true },
+            scrollBeyondLastLine: false,
+            glyphMargin: true,
+            lineDecorationsWidth: 12,
+            lineNumbersMinChars: 3,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            padding: { top: 12, bottom: 12 },
+            overviewRulerBorder: false
+        }));
+        this.canShowPreviewBlocks = computed(() => this.items().length > 0 && this.editablePreview() === this.lastGeneratedPreview() && this.mergeResult().blocks.length > 0);
+        this.previewBlocks = computed(() => this.canShowPreviewBlocks() ? this.mergeResult().blocks : []);
         this.shellStats = computed(() => [
             { icon: 'pi pi-database', label: `${this.items().length} files queued` },
             { icon: 'pi pi-file', label: `${this.totalSize()} input bytes` },
@@ -356,6 +383,7 @@ export class SqlMerge {
 
     togglePreviewEditing() {
         this.isPreviewEditing.update((value) => !value);
+        this.applyPreviewDecorations();
     }
 
     onPreviewTextChange(value: string) {
@@ -363,11 +391,35 @@ export class SqlMerge {
         if (value !== this.lastGeneratedPreview()) {
             this.isPreviewEditing.set(true);
         }
+        this.applyPreviewDecorations();
     }
 
     resetPreviewToGenerated() {
         this.editablePreview.set(this.lastGeneratedPreview());
         this.isPreviewEditing.set(false);
+        this.syncPreviewBlockState();
+        this.applyPreviewDecorations();
+    }
+
+    onPreviewEditorInit(editor: any) {
+        this.previewEditorInstance = editor;
+        editor.onDidChangeCursorPosition((event: { position: { lineNumber: number } }) => {
+            this.updateActivePreviewBlock(event.position.lineNumber);
+        });
+        this.syncPreviewBlockState();
+        this.applyPreviewDecorations();
+    }
+
+    focusPreviewBlock(block: SqlMergeBlockMarker) {
+        this.activePreviewBlockOrder.set(block.order);
+
+        if (!this.previewEditorInstance) {
+            return;
+        }
+
+        this.previewEditorInstance.focus();
+        this.previewEditorInstance.revealLineInCenter(block.startLine);
+        this.previewEditorInstance.setPosition({ lineNumber: block.startLine, column: 1 });
     }
 
     downloadSql() {
@@ -402,6 +454,14 @@ export class SqlMerge {
 
     trackBySample(_: number, sample: SqlMergeSampleDefinition) {
         return sample.label;
+    }
+
+    trackByPreviewBlock(_: number, block: SqlMergeBlockMarker) {
+        return `${block.order}-${block.name}`;
+    }
+
+    previewBlockToneClass(block: SqlMergeBlockMarker) {
+        return `preview-blocks__chip--tone-${block.toneIndex}`;
     }
 
     private reorderSelected(items: SqlMergeFileItem[], selectedIds: string[], direction: 'top' | 'up' | 'down' | 'bottom') {
@@ -448,5 +508,57 @@ export class SqlMerge {
         if (!currentEditable || currentEditable === previousGenerated || !this.isPreviewEditing()) {
             this.editablePreview.set(generated);
         }
+
+        this.syncPreviewBlockState();
+        this.applyPreviewDecorations();
+    }
+
+    private syncPreviewBlockState() {
+        const blocks = this.previewBlocks();
+        this.activePreviewBlockOrder.set(blocks[0]?.order ?? null);
+    }
+
+    private updateActivePreviewBlock(lineNumber: number) {
+        const active = this.previewBlocks().find((block) => lineNumber >= block.startLine && lineNumber <= block.endLine);
+        this.activePreviewBlockOrder.set(active?.order ?? null);
+    }
+
+    private applyPreviewDecorations() {
+        if (!this.previewEditorInstance) {
+            return;
+        }
+
+        const blocks = this.previewBlocks();
+        if (!blocks.length) {
+            this.previewDecorations = this.previewEditorInstance.deltaDecorations(this.previewDecorations, []);
+            return;
+        }
+
+        const decorations = blocks.map((block) => ({
+            range: {
+                startLineNumber: block.startLine,
+                startColumn: 1,
+                endLineNumber: block.endLine,
+                endColumn: 1
+            },
+            options: {
+                isWholeLine: true,
+                linesDecorationsClassName: `sql-preview-gutter--tone-${block.toneIndex}`,
+                className: `sql-preview-line--tone-${block.toneIndex}`,
+                stickiness: 1,
+                overviewRuler: {
+                    color: this.getToneColor(block.toneIndex),
+                    position: 2
+                },
+                glyphMarginClassName: 'sql-preview-glyph'
+            }
+        }));
+
+        this.previewDecorations = this.previewEditorInstance.deltaDecorations(this.previewDecorations, decorations);
+    }
+
+    private getToneColor(toneIndex: number) {
+        const tones = ['#2563eb', '#0f766e', '#4f46e5', '#0891b2', '#7c3aed', '#475569'];
+        return tones[toneIndex % tones.length];
     }
 }

@@ -265,6 +265,96 @@
     padding-bottom: 1.25rem;
 }
 
+.preview-editor-shell {
+    min-height: 42rem;
+    height: 42rem;
+    border: 1px solid var(--p-surface-200);
+    border-radius: 1rem;
+    overflow: hidden;
+    background: var(--p-surface-0);
+
+    :host-context(.app-dark) & {
+        background: #1e1e1e;
+        border-color: var(--p-surface-700);
+    }
+}
+
+.preview-editor {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.preview-blocks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 0.85rem;
+}
+
+.preview-blocks__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    border: 1px solid var(--p-surface-200);
+    background: var(--p-surface-50);
+    border-radius: 999px;
+    padding: 0.45rem 0.75rem;
+    cursor: pointer;
+    transition:
+        transform 0.15s ease,
+        border-color 0.15s ease,
+        background 0.15s ease;
+
+    :host-context(.app-dark) & {
+        background: var(--p-surface-950);
+        border-color: var(--p-surface-700);
+    }
+}
+
+.preview-blocks__chip:hover {
+    transform: translateY(-1px);
+}
+
+.preview-blocks__chip--active {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+}
+
+.preview-blocks__order,
+.preview-blocks__range {
+    font-size: 0.78rem;
+    color: var(--p-surface-500);
+}
+
+.preview-blocks__name {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.preview-blocks__chip--tone-0 {
+    border-color: rgba(37, 99, 235, 0.28);
+}
+
+.preview-blocks__chip--tone-1 {
+    border-color: rgba(15, 118, 110, 0.28);
+}
+
+.preview-blocks__chip--tone-2 {
+    border-color: rgba(147, 51, 234, 0.28);
+}
+
+.preview-blocks__chip--tone-3 {
+    border-color: rgba(8, 145, 178, 0.28);
+}
+
+.preview-blocks__chip--tone-4 {
+    border-color: rgba(124, 58, 237, 0.28);
+}
+
+.preview-blocks__chip--tone-5 {
+    border-color: rgba(71, 85, 105, 0.28);
+}
+
 .inline-diagnostics {
     margin-top: 0.9rem;
     border-top: 1px solid var(--p-surface-200);
@@ -331,6 +421,66 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+:host ::ng-deep .preview-editor .monaco-editor .margin-view-overlays .sql-preview-glyph {
+    width: 0.35rem !important;
+    border-radius: 999px;
+    background: transparent;
+}
+
+:host ::ng-deep .preview-editor .monaco-editor .lines-content .sql-preview-line--tone-0 {
+    border-left: 3px solid rgba(37, 99, 235, 0.8);
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.08), transparent 22%);
+}
+
+:host ::ng-deep .preview-editor .monaco-editor .lines-content .sql-preview-line--tone-1 {
+    border-left: 3px solid rgba(15, 118, 110, 0.8);
+    background: linear-gradient(90deg, rgba(15, 118, 110, 0.08), transparent 22%);
+}
+
+:host ::ng-deep .preview-editor .monaco-editor .lines-content .sql-preview-line--tone-2 {
+    border-left: 3px solid rgba(147, 51, 234, 0.8);
+    background: linear-gradient(90deg, rgba(147, 51, 234, 0.08), transparent 22%);
+}
+
+:host ::ng-deep .preview-editor .monaco-editor .lines-content .sql-preview-line--tone-3 {
+    border-left: 3px solid rgba(8, 145, 178, 0.8);
+    background: linear-gradient(90deg, rgba(8, 145, 178, 0.08), transparent 22%);
+}
+
+:host ::ng-deep .preview-editor .monaco-editor .lines-content .sql-preview-line--tone-4 {
+    border-left: 3px solid rgba(124, 58, 237, 0.8);
+    background: linear-gradient(90deg, rgba(124, 58, 237, 0.08), transparent 22%);
+}
+
+:host ::ng-deep .preview-editor .monaco-editor .lines-content .sql-preview-line--tone-5 {
+    border-left: 3px solid rgba(71, 85, 105, 0.8);
+    background: linear-gradient(90deg, rgba(71, 85, 105, 0.08), transparent 22%);
+}
+
+:host ::ng-deep .preview-editor .monaco-editor .margin-view-overlays .sql-preview-gutter--tone-0 {
+    border-left: 4px solid rgba(37, 99, 235, 0.9);
+}
+
+:host ::ng-deep .preview-editor .monaco-editor .margin-view-overlays .sql-preview-gutter--tone-1 {
+    border-left: 4px solid rgba(15, 118, 110, 0.9);
+}
+
+:host ::ng-deep .preview-editor .monaco-editor .margin-view-overlays .sql-preview-gutter--tone-2 {
+    border-left: 4px solid rgba(147, 51, 234, 0.9);
+}
+
+:host ::ng-deep .preview-editor .monaco-editor .margin-view-overlays .sql-preview-gutter--tone-3 {
+    border-left: 4px solid rgba(8, 145, 178, 0.9);
+}
+
+:host ::ng-deep .preview-editor .monaco-editor .margin-view-overlays .sql-preview-gutter--tone-4 {
+    border-left: 4px solid rgba(124, 58, 237, 0.9);
+}
+
+:host ::ng-deep .preview-editor .monaco-editor .margin-view-overlays .sql-preview-gutter--tone-5 {
+    border-left: 4px solid rgba(71, 85, 105, 0.9);
 }
 
 .file-button {

@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { SqlMergeFileItem, SqlMergeOptions, SqlMergeResult } from './sql-merge.models';
+import { SqlMergeBlockMarker, SqlMergeFileItem, SqlMergeOptions, SqlMergeResult } from './sql-merge.models';
 
 @Injectable({ providedIn: 'root' })
 export class SqlMergeEngineService {
     merge(items: SqlMergeFileItem[], options: SqlMergeOptions, skippedDuplicates = 0): SqlMergeResult {
         const warnings = items.flatMap((item) => item.issues.map((issue) => `${item.name}: ${issue}`));
         let forcedGoCount = 0;
-        const blocks = items.map((item, index) => {
+        const renderedBlocks = items.map((item, index) => {
             const block = this.buildFileBlock(item, index, options);
             if (options.includeGoSeparator === 'force-between-files' && this.shouldAppendGo(item.content, options)) {
                 forcedGoCount += 1;
@@ -14,8 +14,9 @@ export class SqlMergeEngineService {
             return block;
         });
         const separator = '\n'.repeat(Math.max(1, options.separatorLines));
-        const mergedContent = blocks.join(separator);
+        const mergedContent = renderedBlocks.join(separator);
         const content = options.ensureTrailingNewline ? this.ensureTrailingNewline(mergedContent) : mergedContent;
+        const blocks = this.buildBlockMarkers(items, renderedBlocks, separator);
 
         return {
             content,
@@ -24,6 +25,7 @@ export class SqlMergeEngineService {
             skippedDuplicates,
             forcedGoCount,
             warnings,
+            blocks,
             manifest: items.map((item, index) => ({
                 name: item.name,
                 size: item.size,
@@ -88,5 +90,35 @@ export class SqlMergeEngineService {
         }
 
         return content.endsWith('\n') ? content : `${content}\n`;
+    }
+
+    private buildBlockMarkers(items: SqlMergeFileItem[], renderedBlocks: string[], separator: string): SqlMergeBlockMarker[] {
+        let currentLine = 1;
+
+        return items.map((item, index) => {
+            const blockLineCount = this.countLines(renderedBlocks[index]);
+            const marker: SqlMergeBlockMarker = {
+                name: item.name,
+                order: index + 1,
+                startLine: currentLine,
+                endLine: currentLine + Math.max(0, blockLineCount - 1),
+                toneIndex: index % 6
+            };
+
+            currentLine = marker.endLine + this.countSeparatorLines(separator);
+            return marker;
+        });
+    }
+
+    private countLines(value: string): number {
+        if (!value) {
+            return 1;
+        }
+
+        return value.split('\n').length;
+    }
+
+    private countSeparatorLines(separator: string): number {
+        return separator.length || 1;
     }
 }

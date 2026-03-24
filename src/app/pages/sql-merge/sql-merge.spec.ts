@@ -8,6 +8,7 @@ describe('SqlMerge', () => {
     let component: SqlMerge;
     let messageService: jasmine.SpyObj<MessageService>;
     let exportService: jasmine.SpyObj<SqlMergeExportService>;
+    const layoutService = { isDarkTheme: () => false } as any;
 
     beforeEach(() => {
         messageService = jasmine.createSpyObj<MessageService>('MessageService', ['add']);
@@ -15,7 +16,7 @@ describe('SqlMerge', () => {
         exportService.exportSql.and.returnValue(true);
         exportService.exportManifest.and.returnValue(true);
 
-        component = new SqlMerge(new SqlMergeFileIntakeService(), new SqlMergeEngineService(), exportService, messageService);
+        component = new SqlMerge(new SqlMergeFileIntakeService(), new SqlMergeEngineService(), exportService, messageService, layoutService);
     });
 
     it('adds files from direct input', async () => {
@@ -116,9 +117,11 @@ describe('SqlMerge', () => {
     it('shows diagnostics only when there is something actionable or noteworthy', async () => {
         await component.addFiles([new File(['SELECT 1;'], 'a.sql')]);
         expect(component.hasDiagnostics()).toBeFalse();
+        expect(component.previewBlocks().length).toBe(1);
 
         component.onPreviewTextChange('SELECT 99;');
         expect(component.hasDiagnostics()).toBeTrue();
+        expect(component.previewBlocks().length).toBe(0);
         expect(component.diagnostics().some((item) => item.text.includes('manual edits'))).toBeTrue();
     });
 });

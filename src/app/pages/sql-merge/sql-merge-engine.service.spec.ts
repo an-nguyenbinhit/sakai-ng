@@ -61,6 +61,9 @@ describe('SqlMergeEngineService', () => {
 
         expect(result.content).toContain('SELECT 1;\nGO\n\n-- =============================================');
         expect(result.forcedGoCount).toBe(2);
+        expect(result.blocks.length).toBe(2);
+        expect(result.blocks[0].name).toBe('a.sql');
+        expect(result.blocks[1].startLine).toBeGreaterThan(result.blocks[0].endLine);
     });
 
     it('strips standalone GO lines when policy is off', () => {

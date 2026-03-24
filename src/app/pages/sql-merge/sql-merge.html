@@ -231,14 +231,32 @@
                     ></button>
                 </div>
             </div>
-            <textarea
-                pTextarea
-                [ngModel]="previewText()"
-                (ngModelChange)="onPreviewTextChange($event)"
-                rows="24"
-                class="workspace-textarea workspace-textarea--preview"
-                [readonly]="!isPreviewEditing()"
-            ></textarea>
+            @if (previewBlocks().length) {
+                <div class="preview-blocks">
+                    @for (block of previewBlocks(); track trackByPreviewBlock($index, block)) {
+                        <button
+                            type="button"
+                            class="preview-blocks__chip"
+                            [class.preview-blocks__chip--active]="activePreviewBlockOrder() === block.order"
+                            [ngClass]="previewBlockToneClass(block)"
+                            (click)="focusPreviewBlock(block)"
+                        >
+                            <span class="preview-blocks__order">#{{ block.order }}</span>
+                            <span class="preview-blocks__name">{{ block.name }}</span>
+                            <span class="preview-blocks__range">L{{ block.startLine }}-{{ block.endLine }}</span>
+                        </button>
+                    }
+                </div>
+            }
+            <div class="preview-editor-shell">
+                <ngx-monaco-editor
+                    class="preview-editor"
+                    [options]="previewEditorOptions()"
+                    [ngModel]="previewText()"
+                    (ngModelChange)="onPreviewTextChange($event)"
+                    (onInit)="onPreviewEditorInit($event)"
+                ></ngx-monaco-editor>
+            </div>
 
             @if (hasDiagnostics()) {
                 <div class="inline-diagnostics">
