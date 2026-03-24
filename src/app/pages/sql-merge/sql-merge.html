@@ -121,27 +121,38 @@
 
                 <label class="field">
                     <span>Duplicate policy</span>
-                    <select class="native-select" [ngModel]="options().duplicatePolicy" (ngModelChange)="updateOption('duplicatePolicy', $event)">
-                        <option value="skip">Skip duplicates</option>
-                        <option value="keep-both">Keep both</option>
-                    </select>
+                    <p-select
+                        [options]="duplicatePolicyOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        [ngModel]="options().duplicatePolicy"
+                        (ngModelChange)="updateOption('duplicatePolicy', $event)"
+                        styleClass="w-full rounded-xl"
+                    />
                 </label>
 
                 <label class="field">
                     <span>Non-SQL files</span>
-                    <select class="native-select" [ngModel]="options().nonSqlPolicy" (ngModelChange)="updateOption('nonSqlPolicy', $event)">
-                        <option value="warn-and-allow">Warn and allow</option>
-                        <option value="block">Block</option>
-                    </select>
+                    <p-select
+                        [options]="nonSqlPolicyOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        [ngModel]="options().nonSqlPolicy"
+                        (ngModelChange)="updateOption('nonSqlPolicy', $event)"
+                        styleClass="w-full rounded-xl"
+                    />
                 </label>
 
                 <label class="field">
                     <span>GO separator policy</span>
-                    <select class="native-select" [ngModel]="options().includeGoSeparator" (ngModelChange)="updateOption('includeGoSeparator', $event)">
-                        <option value="preserve">Preserve source GO</option>
-                        <option value="force-between-files">Force between files</option>
-                        <option value="off">Strip standalone GO</option>
-                    </select>
+                    <p-select
+                        [options]="goSeparatorOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        [ngModel]="options().includeGoSeparator"
+                        (ngModelChange)="updateOption('includeGoSeparator', $event)"
+                        styleClass="w-full rounded-xl"
+                    />
                 </label>
 
                 <div class="checkbox-grid">

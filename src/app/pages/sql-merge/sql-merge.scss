@@ -133,6 +133,7 @@
 .queue-toolbar {
     align-items: center;
     justify-content: space-between;
+    margin-top: 0.75rem;
     margin-bottom: 0.75rem;
 }
 
@@ -245,19 +246,30 @@
     min-height: 10rem;
 }
 
-.native-select {
-    min-height: 2.75rem;
-    border-radius: 0.75rem;
-    border: 1px solid var(--p-surface-300);
-    padding: 0.7rem 0.85rem;
-    background: var(--p-surface-0);
-    color: var(--p-surface-900);
+:host ::ng-deep .p-inputtext {
+    height: 2.75rem;
+    padding: 0 0.85rem;
+    box-sizing: border-box;
+}
 
-    :host-context(.app-dark) & {
-        background: var(--p-surface-950);
-        color: var(--p-surface-0);
-        border-color: var(--p-surface-700);
-    }
+:host ::ng-deep .p-select {
+    height: 2.75rem;
+    box-sizing: border-box;
+}
+
+:host ::ng-deep .p-select .p-select-label {
+    min-height: 2.75rem;
+    padding-top: 0;
+    padding-bottom: 0;
+    display: flex;
+    align-items: center;
+}
+
+:host ::ng-deep .p-select .p-select-dropdown {
+    width: 2.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .file-button {

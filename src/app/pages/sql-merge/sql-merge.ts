@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
+import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { ToolPageShell } from '@/app/shared/components/tool-page-shell/tool-page-shell';
@@ -11,7 +12,7 @@ import { calculateTextMetrics } from '@/app/shared/utils/text-metrics';
 import { SqlMergeEngineService } from './sql-merge-engine.service';
 import { SqlMergeExportService } from './sql-merge-export.service';
 import { SqlMergeFileIntakeService } from './sql-merge-file-intake.service';
-import { SqlMergeFileItem, SqlMergeOptions, SqlMergeSampleDefinition } from './sql-merge.models';
+import { SqlDuplicatePolicy, SqlGoSeparatorPolicy, SqlMergeFileItem, SqlMergeOptions, SqlMergeSampleDefinition, SqlNonSqlPolicy } from './sql-merge.models';
 import { SQL_MERGE_DEFAULT_HEADER_TEMPLATE, SQL_MERGE_SAMPLES } from './sql-merge.samples';
 
 const DEFAULT_OPTIONS: SqlMergeOptions = {
@@ -32,7 +33,7 @@ const PREVIEW_LIMIT = 200_000;
 @Component({
     selector: 'app-sql-merge',
     standalone: true,
-    imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, TextareaModule, ToastModule, ToolPageShell],
+    imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, SelectModule, TextareaModule, ToastModule, ToolPageShell],
     providers: [MessageService],
     templateUrl: './sql-merge.html',
     styleUrl: './sql-merge.scss',
@@ -40,6 +41,19 @@ const PREVIEW_LIMIT = 200_000;
 })
 export class SqlMerge {
     readonly samples = SQL_MERGE_SAMPLES;
+    readonly duplicatePolicyOptions: Array<{ label: string; value: SqlDuplicatePolicy }> = [
+        { label: 'Skip duplicates', value: 'skip' },
+        { label: 'Keep both', value: 'keep-both' }
+    ];
+    readonly nonSqlPolicyOptions: Array<{ label: string; value: SqlNonSqlPolicy }> = [
+        { label: 'Warn and allow', value: 'warn-and-allow' },
+        { label: 'Block', value: 'block' }
+    ];
+    readonly goSeparatorOptions: Array<{ label: string; value: SqlGoSeparatorPolicy }> = [
+        { label: 'Preserve source GO', value: 'preserve' },
+        { label: 'Force between files', value: 'force-between-files' },
+        { label: 'Strip standalone GO', value: 'off' }
+    ];
     readonly items = signal<SqlMergeFileItem[]>([]);
     readonly options = signal<SqlMergeOptions>({ ...DEFAULT_OPTIONS });
     readonly searchTerm = signal('');
