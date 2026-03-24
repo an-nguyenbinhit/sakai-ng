@@ -92,4 +92,33 @@ describe('SqlMerge', () => {
 
         expect(messageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ summary: 'Unavailable' }));
     });
+
+    it('downloads edited preview content instead of the generated baseline', async () => {
+        await component.addFiles([new File(['SELECT 1;'], 'a.sql')]);
+
+        component.onPreviewTextChange('SELECT 99;');
+        component.downloadSql();
+
+        expect(exportService.exportSql).toHaveBeenCalledWith('merged-output.sql', 'SELECT 99;');
+    });
+
+    it('resets edited preview back to generated content', async () => {
+        await component.addFiles([new File(['SELECT 1;'], 'a.sql')]);
+        const generated = component.previewText();
+
+        component.onPreviewTextChange('SELECT 99;');
+        component.resetPreviewToGenerated();
+
+        expect(component.previewText()).toBe(generated);
+        expect(component.isPreviewEditing()).toBeFalse();
+    });
+
+    it('shows diagnostics only when there is something actionable or noteworthy', async () => {
+        await component.addFiles([new File(['SELECT 1;'], 'a.sql')]);
+        expect(component.hasDiagnostics()).toBeFalse();
+
+        component.onPreviewTextChange('SELECT 99;');
+        expect(component.hasDiagnostics()).toBeTrue();
+        expect(component.diagnostics().some((item) => item.text.includes('manual edits'))).toBeTrue();
+    });
 });

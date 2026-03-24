@@ -41,6 +41,7 @@ export interface SqlMergeResult {
     totalFiles: number;
     mergedBytes: number;
     skippedDuplicates: number;
+    forcedGoCount: number;
     warnings: string[];
     manifest: SqlMergeManifestItem[];
 }

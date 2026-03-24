@@ -28,8 +28,6 @@ const DEFAULT_OPTIONS: SqlMergeOptions = {
     nonSqlPolicy: 'warn-and-allow'
 };
 
-const PREVIEW_LIMIT = 200_000;
-
 @Component({
     selector: 'app-sql-merge',
     standalone: true,
@@ -59,9 +57,12 @@ export class SqlMerge {
     readonly searchTerm = signal('');
     readonly isDragging = signal(false);
     readonly isProcessing = signal(false);
+    readonly isPreviewEditing = signal(false);
     readonly skippedDuplicates = signal(0);
     readonly lastActionMessage = signal('Drop SQL files here or use Add Files to start a merge job.');
     readonly draggedItemId = signal<string | null>(null);
+    readonly lastGeneratedPreview = signal('');
+    readonly editablePreview = signal('');
     readonly filteredItems: Signal<SqlMergeFileItem[]>;
     readonly selectedCount: Signal<number>;
     readonly totalSize: Signal<number>;
@@ -70,6 +71,8 @@ export class SqlMerge {
     readonly previewMetrics: Signal<ReturnType<typeof calculateTextMetrics>>;
     readonly shellStats: Signal<Array<{ icon: string; label: string }>>;
     readonly validationSummary: Signal<{ tone: 'warning' | 'ok'; text: string }>;
+    readonly diagnostics: Signal<Array<{ tone: 'warn' | 'info'; text: string }>>;
+    readonly hasDiagnostics: Signal<boolean>;
 
     constructor(
         private intakeService: SqlMergeFileIntakeService,
@@ -88,11 +91,8 @@ export class SqlMerge {
         this.selectedCount = computed(() => this.items().filter((item) => item.selected).length);
         this.totalSize = computed(() => this.items().reduce((sum, item) => sum + item.size, 0));
         this.mergeResult = computed(() => this.mergeEngine.merge(this.items(), this.options(), this.skippedDuplicates()));
-        this.previewText = computed(() => {
-            const full = this.mergeResult().content;
-            return full.length <= PREVIEW_LIMIT ? full : `${full.slice(0, PREVIEW_LIMIT)}\n\n-- Preview truncated at 200000 characters --\n`;
-        });
-        this.previewMetrics = computed(() => calculateTextMetrics(this.mergeResult().content));
+        this.previewText = computed(() => this.editablePreview());
+        this.previewMetrics = computed(() => calculateTextMetrics(this.editablePreview()));
         this.shellStats = computed(() => [
             { icon: 'pi pi-database', label: `${this.items().length} files queued` },
             { icon: 'pi pi-file', label: `${this.totalSize()} input bytes` },
@@ -102,17 +102,49 @@ export class SqlMerge {
             const warnings = this.mergeResult().warnings.length;
             const selected = this.selectedCount();
             const skipped = this.skippedDuplicates();
-            const previewTruncated = this.mergeResult().content.length > PREVIEW_LIMIT;
             return {
                 tone: warnings > 0 ? 'warning' : 'ok',
                 text: [
                     warnings > 0 ? `${warnings} warnings` : 'No validation warnings',
                     skipped > 0 ? `${skipped} duplicates skipped` : 'No duplicates skipped',
                     selected > 0 ? `${selected} selected for bulk actions` : 'Nothing selected',
-                    previewTruncated ? 'Preview truncated' : 'Full preview visible'
+                    this.isPreviewEditing() ? 'Manual edit mode enabled' : 'Generated preview in sync'
                 ].join(' | ')
             };
         });
+        this.diagnostics = computed(() => {
+            const items = this.items();
+            const result = this.mergeResult();
+            const diagnostics: Array<{ tone: 'warn' | 'info'; text: string }> = [];
+            const emptyFiles = items.filter((item) => item.issues.includes('File is empty.')).length;
+            const nonSqlFiles = items.filter((item) => item.issues.some((issue) => issue.startsWith('Non-standard extension'))).length;
+            const previewEdited = this.editablePreview() !== this.lastGeneratedPreview();
+
+            if (result.skippedDuplicates > 0) {
+                diagnostics.push({ tone: 'warn', text: `${result.skippedDuplicates} duplicate file(s) were skipped during intake.` });
+            }
+
+            if (emptyFiles > 0) {
+                diagnostics.push({ tone: 'warn', text: `${emptyFiles} empty file(s) are included in the current merge.` });
+            }
+
+            if (nonSqlFiles > 0) {
+                diagnostics.push({ tone: 'warn', text: `${nonSqlFiles} non-SQL file(s) were allowed into the queue.` });
+            }
+
+            if (result.forcedGoCount > 0) {
+                diagnostics.push({ tone: 'info', text: `${result.forcedGoCount} GO separator(s) were injected between files.` });
+            }
+
+            if (previewEdited) {
+                diagnostics.push({ tone: 'info', text: 'Preview has manual edits that differ from the generated merge output.' });
+            }
+
+            return diagnostics;
+        });
+        this.hasDiagnostics = computed(() => this.diagnostics().length > 0);
+
+        this.syncPreviewWithGenerated();
     }
 
     async onFileSelected(event: Event) {
@@ -196,6 +228,7 @@ export class SqlMerge {
                     detail: intake.rejected.map((item) => `${item.name}: ${item.reason}`).join(' | ')
                 });
             }
+            this.syncPreviewWithGenerated();
         } finally {
             this.isProcessing.set(false);
         }
@@ -231,6 +264,7 @@ export class SqlMerge {
 
         this.items.update((items) => items.filter((item) => !item.selected));
         this.lastActionMessage.set(`Removed ${selectedCount} selected file(s).`);
+        this.syncPreviewWithGenerated();
         this.messageService.add({
             severity: 'success',
             summary: 'Removed',
@@ -247,6 +281,7 @@ export class SqlMerge {
         this.searchTerm.set('');
         this.skippedDuplicates.set(0);
         this.lastActionMessage.set('Merge queue cleared.');
+        this.syncPreviewWithGenerated();
         this.messageService.add({
             severity: 'success',
             summary: 'Cleared',
@@ -264,6 +299,7 @@ export class SqlMerge {
         }
 
         this.items.update((items) => this.reorderSelected(items, selectedIds, direction));
+        this.syncPreviewWithGenerated();
     }
 
     startDrag(itemId: string) {
@@ -290,14 +326,24 @@ export class SqlMerge {
             next.splice(targetIndex, 0, moved);
             return next;
         });
+        this.syncPreviewWithGenerated();
     }
 
     cancelDrag() {
         this.draggedItemId.set(null);
     }
 
+    openFilePicker(fileInput: HTMLInputElement) {
+        if (this.isProcessing()) {
+            return;
+        }
+
+        fileInput.click();
+    }
+
     updateOption<K extends keyof SqlMergeOptions>(key: K, value: SqlMergeOptions[K]) {
         this.options.update((options) => ({ ...options, [key]: value }));
+        this.syncPreviewWithGenerated();
     }
 
     onOptionCheckboxChange<K extends keyof SqlMergeOptions>(key: K, event: Event) {
@@ -308,16 +354,32 @@ export class SqlMerge {
         this.updateOption('headerTemplate', SQL_MERGE_DEFAULT_HEADER_TEMPLATE);
     }
 
+    togglePreviewEditing() {
+        this.isPreviewEditing.update((value) => !value);
+    }
+
+    onPreviewTextChange(value: string) {
+        this.editablePreview.set(value);
+        if (value !== this.lastGeneratedPreview()) {
+            this.isPreviewEditing.set(true);
+        }
+    }
+
+    resetPreviewToGenerated() {
+        this.editablePreview.set(this.lastGeneratedPreview());
+        this.isPreviewEditing.set(false);
+    }
+
     downloadSql() {
         if (!this.items().length || this.isProcessing()) {
             return;
         }
 
-        const ok = this.exportService.exportSql(this.options().outputFileName, this.mergeResult().content);
+        const ok = this.exportService.exportSql(this.options().outputFileName, this.editablePreview());
         this.messageService.add({
             severity: ok ? 'success' : 'warn',
             summary: ok ? 'Downloaded' : 'Unavailable',
-            detail: ok ? 'Merged SQL file downloaded.' : 'File download is unavailable in this context.'
+            detail: ok ? 'Merged SQL file downloaded from the current preview.' : 'File download is unavailable in this context.'
         });
     }
 
@@ -374,5 +436,17 @@ export class SqlMerge {
         }
 
         return next;
+    }
+
+    private syncPreviewWithGenerated() {
+        const generated = this.mergeResult().content;
+        const previousGenerated = this.lastGeneratedPreview();
+        const currentEditable = this.editablePreview();
+
+        this.lastGeneratedPreview.set(generated);
+
+        if (!currentEditable || currentEditable === previousGenerated || !this.isPreviewEditing()) {
+            this.editablePreview.set(generated);
+        }
     }
 }

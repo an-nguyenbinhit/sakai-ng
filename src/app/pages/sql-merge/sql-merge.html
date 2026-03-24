@@ -10,7 +10,7 @@
     <div tool-actions class="workspace-toolbar">
         <div class="toolbar-group">
             <label class="file-button" [class.file-button--disabled]="isProcessing()">
-                <input type="file" accept=".sql,.txt,.ddl,.dml,.prc,.fn,.view" multiple [disabled]="isProcessing()" (change)="onFileSelected($event)" />
+                <input #filePicker type="file" accept=".sql,.txt,.ddl,.dml,.prc,.fn,.view" multiple [disabled]="isProcessing()" (change)="onFileSelected($event)" />
                 <span>Add Files</span>
             </label>
             <button pButton type="button" icon="pi pi-trash" label="Remove Selected" severity="danger" [disabled]="!selectedCount() || isProcessing()" (click)="removeSelected()"></button>
@@ -64,10 +64,10 @@
             </div>
 
             @if (!filteredItems().length) {
-                <div class="drop-empty">
+                <button type="button" class="drop-empty drop-empty--button" [disabled]="isProcessing()" (click)="openFilePicker(filePicker)">
                     <i class="pi pi-upload"></i>
                     <p>{{ items().length ? 'No files match the current search.' : lastActionMessage() }}</p>
-                </div>
+                </button>
             } @else {
                 <div class="file-list">
                     @for (item of filteredItems(); track item.id) {
@@ -192,8 +192,8 @@
         </article>
     </section>
 
-    <section class="workspace-grid workspace-grid--preview">
-        <article class="workspace-panel">
+    <section class="preview-stack">
+        <article class="workspace-panel workspace-panel--preview">
             <header class="panel-header">
                 <div>
                     <p>Merged Output</p>
@@ -201,28 +201,55 @@
                 </div>
                 <span>{{ previewMetrics().lines }} lines | {{ previewMetrics().bytes }} bytes</span>
             </header>
-            <textarea pTextarea [ngModel]="previewText()" rows="18" class="workspace-textarea" readonly></textarea>
-        </article>
-
-        <article class="workspace-panel">
-            <header class="panel-header">
-                <div>
-                    <p>Execution Notes</p>
-                    <h2>Warnings</h2>
+            <div class="queue-toolbar queue-toolbar--preview">
+                <div class="preview-mode">
+                    <span class="preview-mode__chip" [class.preview-mode__chip--editing]="isPreviewEditing()">
+                        {{ isPreviewEditing() ? 'Editing with auto-save' : 'Generated output' }}
+                    </span>
                 </div>
-                <span>{{ mergeResult().warnings.length }} warnings</span>
-            </header>
-
-            @if (!mergeResult().warnings.length) {
-                <div class="drop-empty drop-empty--tight">
-                    <i class="pi pi-check"></i>
-                    <p>All queued files are ready for merge.</p>
+                <div class="toolbar-group">
+                    <button
+                        pButton
+                        type="button"
+                        size="small"
+                        [label]="isPreviewEditing() ? 'Lock Preview' : 'Edit Preview'"
+                        [icon]="isPreviewEditing() ? 'pi pi-lock' : 'pi pi-pencil'"
+                        severity="secondary"
+                        [outlined]="true"
+                        (click)="togglePreviewEditing()"
+                    ></button>
+                    <button
+                        pButton
+                        type="button"
+                        size="small"
+                        label="Reset to Generated"
+                        icon="pi pi-refresh"
+                        severity="secondary"
+                        [outlined]="true"
+                        [disabled]="previewText() === lastGeneratedPreview()"
+                        (click)="resetPreviewToGenerated()"
+                    ></button>
                 </div>
-            } @else {
-                <div class="warning-list">
-                    @for (warning of mergeResult().warnings; track warning) {
-                        <div class="warning-list__item">{{ warning }}</div>
-                    }
+            </div>
+            <textarea
+                pTextarea
+                [ngModel]="previewText()"
+                (ngModelChange)="onPreviewTextChange($event)"
+                rows="24"
+                class="workspace-textarea workspace-textarea--preview"
+                [readonly]="!isPreviewEditing()"
+            ></textarea>
+
+            @if (hasDiagnostics()) {
+                <div class="inline-diagnostics">
+                    <p class="inline-diagnostics__title">Validation & Merge Diagnostics</p>
+                    <div class="inline-diagnostics__list">
+                        @for (diagnostic of diagnostics(); track diagnostic.text) {
+                            <div class="inline-diagnostics__item" [class.inline-diagnostics__item--warn]="diagnostic.tone === 'warn'">
+                                {{ diagnostic.text }}
+                            </div>
+                        }
+                    </div>
                 </div>
             }
         </article>

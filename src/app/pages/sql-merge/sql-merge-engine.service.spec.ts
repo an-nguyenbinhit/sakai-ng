@@ -60,6 +60,7 @@ describe('SqlMergeEngineService', () => {
         const result = service.merge([makeItem('a.sql', 'SELECT 1;'), makeItem('b.sql', 'SELECT 2;')], { ...options, includeGoSeparator: 'force-between-files' });
 
         expect(result.content).toContain('SELECT 1;\nGO\n\n-- =============================================');
+        expect(result.forcedGoCount).toBe(2);
     });
 
     it('strips standalone GO lines when policy is off', () => {

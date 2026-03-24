@@ -5,7 +5,14 @@ import { SqlMergeFileItem, SqlMergeOptions, SqlMergeResult } from './sql-merge.m
 export class SqlMergeEngineService {
     merge(items: SqlMergeFileItem[], options: SqlMergeOptions, skippedDuplicates = 0): SqlMergeResult {
         const warnings = items.flatMap((item) => item.issues.map((issue) => `${item.name}: ${issue}`));
-        const blocks = items.map((item, index) => this.buildFileBlock(item, index, options));
+        let forcedGoCount = 0;
+        const blocks = items.map((item, index) => {
+            const block = this.buildFileBlock(item, index, options);
+            if (options.includeGoSeparator === 'force-between-files' && this.shouldAppendGo(item.content, options)) {
+                forcedGoCount += 1;
+            }
+            return block;
+        });
         const separator = '\n'.repeat(Math.max(1, options.separatorLines));
         const mergedContent = blocks.join(separator);
         const content = options.ensureTrailingNewline ? this.ensureTrailingNewline(mergedContent) : mergedContent;
@@ -15,6 +22,7 @@ export class SqlMergeEngineService {
             totalFiles: items.length,
             mergedBytes: new Blob([content]).size,
             skippedDuplicates,
+            forcedGoCount,
             warnings,
             manifest: items.map((item, index) => ({
                 name: item.name,
@@ -35,11 +43,8 @@ export class SqlMergeEngineService {
 
         parts.push(content);
 
-        if (options.includeGoSeparator === 'force-between-files') {
-            const trimmed = content.trimEnd();
-            if (trimmed && !/\nGO\s*$/i.test(trimmed)) {
-                parts.push('GO');
-            }
+        if (options.includeGoSeparator === 'force-between-files' && this.shouldAppendGo(item.content, options)) {
+            parts.push('GO');
         }
 
         return parts.filter((part) => part.length > 0).join('\n');
@@ -57,6 +62,12 @@ export class SqlMergeEngineService {
         }
 
         return next.trimEnd();
+    }
+
+    private shouldAppendGo(content: string, options: SqlMergeOptions): boolean {
+        const prepared = this.prepareContent(content, options);
+        const trimmed = prepared.trimEnd();
+        return Boolean(trimmed && !/\nGO\s*$/i.test(trimmed));
     }
 
     private renderHeader(item: SqlMergeFileItem, index: number, options: SqlMergeOptions): string {
