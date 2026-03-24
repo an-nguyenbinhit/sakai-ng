@@ -310,13 +310,17 @@
                 </div>
             }
             <div class="preview-editor-shell">
-                <ngx-monaco-editor
-                    class="preview-editor"
-                    [options]="previewEditorOptions()"
-                    [ngModel]="previewText()"
-                    (ngModelChange)="onPreviewTextChange($event)"
-                    (onInit)="onPreviewEditorInit($event)"
-                ></ngx-monaco-editor>
+                @if (isBrowser && previewEditorComponent()) {
+                    <ng-container *ngComponentOutlet="previewEditorComponent(); inputs: previewEditorInputs()"></ng-container>
+                } @else {
+                    <textarea
+                        pTextarea
+                        [ngModel]="previewText()"
+                        rows="24"
+                        class="workspace-textarea workspace-textarea--preview"
+                        [readonly]="true"
+                    ></textarea>
+                }
             </div>
 
             @if (hasDiagnostics()) {

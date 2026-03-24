@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component, Signal, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, Type, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { EditorComponent } from 'ngx-monaco-editor-v2';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
@@ -37,7 +36,7 @@ const SQL_DARK_THEME = 'devworkspace-sql-dark';
 @Component({
     selector: 'app-sql-merge',
     standalone: true,
-    imports: [CommonModule, FormsModule, EditorComponent, ButtonModule, InputTextModule, SelectModule, TextareaModule, ToastModule, TooltipModule, ToolPageShell],
+    imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, SelectModule, TextareaModule, ToastModule, TooltipModule, ToolPageShell],
     providers: [MessageService],
     templateUrl: './sql-merge.html',
     styleUrl: './sql-merge.scss',
@@ -45,6 +44,7 @@ const SQL_DARK_THEME = 'devworkspace-sql-dark';
 })
 export class SqlMerge {
     private static sqlThemeRegistered = false;
+    readonly isBrowser = typeof window !== 'undefined';
     readonly samples = SQL_MERGE_SAMPLES;
     readonly duplicatePolicyOptions: Array<{ label: string; value: SqlDuplicatePolicy }> = [
         { label: 'Skip duplicates', value: 'skip' },
@@ -70,6 +70,7 @@ export class SqlMerge {
     readonly draggedItemId = signal<string | null>(null);
     readonly lastGeneratedPreview = signal('');
     readonly editablePreview = signal('');
+    readonly previewEditorComponent = signal<Type<unknown> | null>(null);
     readonly activePreviewBlockOrder = signal<number | null>(null);
     readonly filteredItems: Signal<SqlMergeFileItem[]>;
     readonly selectedCount: Signal<number>;
@@ -78,6 +79,7 @@ export class SqlMerge {
     readonly previewText: Signal<string>;
     readonly previewMetrics: Signal<ReturnType<typeof calculateTextMetrics>>;
     readonly previewEditorOptions: Signal<Record<string, unknown>>;
+    readonly previewEditorInputs: Signal<Record<string, unknown>>;
     readonly canShowPreviewBlocks: Signal<boolean>;
     readonly previewBlocks: Signal<SqlMergeBlockMarker[]>;
     readonly shellStats: Signal<Array<{ icon: string; label: string }>>;
@@ -122,6 +124,12 @@ export class SqlMerge {
             wrappingIndent: 'indent',
             padding: { top: 12, bottom: 12 },
             overviewRulerBorder: false
+        }));
+        this.previewEditorInputs = computed(() => ({
+            value: this.previewText(),
+            options: this.previewEditorOptions(),
+            onValueChange: (value: string) => this.onPreviewTextChange(value),
+            onEditorInit: (editor: any) => this.onPreviewEditorInit(editor)
         }));
         this.canShowPreviewBlocks = computed(() => this.items().length > 0 && this.editablePreview() === this.lastGeneratedPreview() && this.mergeResult().blocks.length > 0);
         this.previewBlocks = computed(() => this.canShowPreviewBlocks() ? this.mergeResult().blocks : []);
@@ -175,6 +183,10 @@ export class SqlMerge {
             return diagnostics;
         });
         this.hasDiagnostics = computed(() => this.diagnostics().length > 0);
+
+        if (this.isBrowser) {
+            void this.loadPreviewEditorComponent();
+        }
 
         this.syncPreviewWithGenerated();
     }
@@ -638,6 +650,11 @@ export class SqlMerge {
 
     private getMonacoApi(): any {
         return (globalThis as any).monaco;
+    }
+
+    private async loadPreviewEditorComponent() {
+        const module = await import('./sql-merge-preview-editor');
+        this.previewEditorComponent.set(module.SqlMergePreviewEditor);
     }
 
     private async writeToClipboard(content: string): Promise<boolean> {
