@@ -7,30 +7,6 @@
     [badges]="['Browser-local', 'SQL workflow']"
     [stats]="shellStats()"
 >
-    <div tool-actions class="workspace-toolbar">
-        <div class="toolbar-group">
-            <label class="file-button" [class.file-button--disabled]="isProcessing()">
-                <input #filePicker type="file" accept=".sql,.txt,.ddl,.dml,.prc,.fn,.view" multiple [disabled]="isProcessing()" (change)="onFileSelected($event)" />
-                <span>Add Files</span>
-            </label>
-            <button pButton type="button" icon="pi pi-trash" label="Remove Selected" severity="danger" [disabled]="!selectedCount() || isProcessing()" (click)="removeSelected()"></button>
-            <button pButton type="button" icon="pi pi-times" label="Clear All" severity="secondary" [outlined]="true" [disabled]="!items().length || isProcessing()" (click)="clearAll()"></button>
-            <button pButton type="button" icon="pi pi-download" label="Download SQL" [disabled]="!items().length || isProcessing()" (click)="downloadSql()"></button>
-            <button pButton type="button" icon="pi pi-file-export" label="Manifest JSON" severity="secondary" [outlined]="true" [disabled]="!items().length || isProcessing()" (click)="downloadManifest()"></button>
-        </div>
-
-        <div class="toolbar-group toolbar-group--samples">
-            @for (sample of samples; track sample.label) {
-                <button pButton type="button" size="small" severity="secondary" [outlined]="true" [label]="sample.label" (click)="loadSampleSet(sample)"></button>
-            }
-        </div>
-    </div>
-
-    <div class="status-banner" [class.status-banner--warning]="validationSummary().tone === 'warning'">
-        <i class="pi" [class.pi-check-circle]="validationSummary().tone === 'ok'" [class.pi-exclamation-triangle]="validationSummary().tone === 'warning'"></i>
-        <span>{{ validationSummary().text }}</span>
-    </div>
-
     <section class="workspace-grid">
         <article
             class="workspace-panel drop-panel"
@@ -48,11 +24,23 @@
                 <span>{{ items().length }} files | {{ totalSize() }} bytes</span>
             </header>
 
+            <div class="queue-toolbar queue-toolbar--primary">
+                <div class="toolbar-group">
+                    <label class="file-button" [class.file-button--disabled]="isProcessing()">
+                        <input #filePicker type="file" accept=".sql,.txt,.ddl,.dml,.prc,.fn,.view" multiple [disabled]="isProcessing()" (change)="onFileSelected($event)" />
+                        <span pTooltip="Add multiple SQL-like files from your machine. Processing stays local in the browser." tooltipPosition="bottom">Add Files</span>
+                    </label>
+                    <button pButton type="button" icon="pi pi-trash" label="Remove Selected" severity="danger" [disabled]="!selectedCount() || isProcessing()" pTooltip="Remove only checked files from the queue." tooltipPosition="bottom" (click)="removeSelected()"></button>
+                    <button pButton type="button" icon="pi pi-times" label="Clear All" severity="secondary" [outlined]="true" [disabled]="!items().length || isProcessing()" pTooltip="Reset the entire queue, duplicate count, and generated preview." tooltipPosition="bottom" (click)="clearAll()"></button>
+                    <button pButton type="button" icon="pi pi-download" label="Download SQL" [disabled]="!items().length || isProcessing()" pTooltip="Download exactly what is currently shown in Preview, including manual edits." tooltipPosition="bottom" (click)="downloadSql()"></button>
+                </div>
+            </div>
+
             <div class="queue-toolbar">
-                <input pInputText type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" placeholder="Search by file name" />
-                <label class="inline-checkbox">
+                <input pInputText type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" placeholder="Search by file name" pTooltip="Filter the visible queue by file name only." tooltipPosition="bottom" />
+                <label class="inline-checkbox" pTooltip="Bulk actions only affect the files currently visible in the filtered list." tooltipPosition="left">
                     <input type="checkbox" [checked]="areAllVisibleSelected()" (change)="onToggleSelectAll($event)" />
-                    <span>Select visible</span>
+                    <span>Select shown</span>
                 </label>
             </div>
 
@@ -108,19 +96,47 @@
                 <span>Preview updates automatically</span>
             </header>
 
+            <div class="queue-toolbar queue-toolbar--samples-inline">
+                <span class="queue-toolbar__label">Quick samples</span>
+                <div class="toolbar-group toolbar-group--samples">
+                    @for (sample of samples; track sample.label) {
+                        <button
+                            pButton
+                            type="button"
+                            size="small"
+                            severity="secondary"
+                            [outlined]="true"
+                            [label]="sample.label"
+                            [pTooltip]="sample.description"
+                            tooltipPosition="top"
+                            (click)="loadSampleSet(sample)"
+                        ></button>
+                    }
+                </div>
+            </div>
+
             <div class="option-grid">
                 <label class="field">
-                    <span>Output file name</span>
+                    <span class="field-label">
+                        <span>Output file name</span>
+                        <i class="pi pi-info-circle" pTooltip="Used for the downloaded SQL file name. The editor content is not renamed inside the script." tooltipPosition="top"></i>
+                    </span>
                     <input pInputText type="text" [ngModel]="options().outputFileName" (ngModelChange)="updateOption('outputFileName', $event)" />
                 </label>
 
                 <label class="field">
-                    <span>Separator lines</span>
+                    <span class="field-label">
+                        <span>Separator lines</span>
+                        <i class="pi pi-info-circle" pTooltip="Number of blank lines inserted between merged file blocks." tooltipPosition="top"></i>
+                    </span>
                     <input pInputText type="number" min="1" max="6" [ngModel]="options().separatorLines" (ngModelChange)="updateOption('separatorLines', +$event || 1)" />
                 </label>
 
                 <label class="field">
-                    <span>Duplicate policy</span>
+                    <span class="field-label">
+                        <span>Duplicate policy</span>
+                        <i class="pi pi-info-circle" pTooltip="Skip duplicates uses file metadata fingerprint. Keep both preserves repeated entries in the queue." tooltipPosition="top"></i>
+                    </span>
                     <p-select
                         [options]="duplicatePolicyOptions"
                         optionLabel="label"
@@ -132,7 +148,10 @@
                 </label>
 
                 <label class="field">
-                    <span>Non-SQL files</span>
+                    <span class="field-label">
+                        <span>Non-SQL files</span>
+                        <i class="pi pi-info-circle" pTooltip="Warn and allow keeps text-like files with non-standard extensions. Block rejects them during intake." tooltipPosition="top"></i>
+                    </span>
                     <p-select
                         [options]="nonSqlPolicyOptions"
                         optionLabel="label"
@@ -144,7 +163,10 @@
                 </label>
 
                 <label class="field">
-                    <span>GO separator policy</span>
+                    <span class="field-label">
+                        <span>GO separator policy</span>
+                        <i class="pi pi-info-circle" pTooltip="Preserve keeps existing GO. Force inserts GO between file blocks. Strip removes standalone GO lines." tooltipPosition="top"></i>
+                    </span>
                     <p-select
                         [options]="goSeparatorOptions"
                         optionLabel="label"
@@ -156,26 +178,29 @@
                 </label>
 
                 <div class="checkbox-grid">
-                    <label class="inline-checkbox">
+                    <label class="inline-checkbox" pTooltip="Insert a generated header before each merged file block." tooltipPosition="left">
                         <input type="checkbox" [checked]="options().includeHeaders" (change)="onOptionCheckboxChange('includeHeaders', $event)" />
                         <span>Include per-file headers</span>
                     </label>
-                    <label class="inline-checkbox">
+                    <label class="inline-checkbox" pTooltip="Show file size and modified timestamp inside the generated header." tooltipPosition="left">
                         <input type="checkbox" [checked]="options().includeFileStats" (change)="onOptionCheckboxChange('includeFileStats', $event)" />
                         <span>Include file stats in header</span>
                     </label>
-                    <label class="inline-checkbox">
+                    <label class="inline-checkbox" pTooltip="Remove trailing spaces and tabs at the end of each line before merge." tooltipPosition="left">
                         <input type="checkbox" [checked]="options().trimTrailingWhitespace" (change)="onOptionCheckboxChange('trimTrailingWhitespace', $event)" />
                         <span>Trim trailing whitespace</span>
                     </label>
-                    <label class="inline-checkbox">
+                    <label class="inline-checkbox" pTooltip="Ensure the final merged output ends with a newline." tooltipPosition="left">
                         <input type="checkbox" [checked]="options().ensureTrailingNewline" (change)="onOptionCheckboxChange('ensureTrailingNewline', $event)" />
                         <span>Ensure trailing newline</span>
                     </label>
                 </div>
 
                 <label class="field field--full">
-                    <span>Header template</span>
+                    <span class="field-label">
+                        <span>Header template</span>
+                        <i class="pi pi-info-circle" [pTooltip]="'Supported placeholders: {{index}}, {{fileName}}, {{sizeBytes}}, {{lastModifiedIso}}.'" tooltipPosition="top"></i>
+                    </span>
                     <textarea
                         pTextarea
                         rows="6"
@@ -187,7 +212,7 @@
             </div>
 
             <div class="queue-toolbar">
-                <button pButton type="button" size="small" label="Reset Header Template" severity="secondary" [outlined]="true" (click)="resetHeaderTemplate()"></button>
+                <button pButton type="button" size="small" label="Reset Header Template" severity="secondary" [outlined]="true" pTooltip="Restore the default generated header format." tooltipPosition="bottom" (click)="resetHeaderTemplate()"></button>
             </div>
         </article>
     </section>
@@ -201,6 +226,10 @@
                 </div>
                 <span>{{ previewMetrics().lines }} lines | {{ previewMetrics().bytes }} bytes</span>
             </header>
+            <div class="status-banner status-banner--inline" [class.status-banner--warning]="validationSummary().tone === 'warning'">
+                <i class="pi" [class.pi-check-circle]="validationSummary().tone === 'ok'" [class.pi-exclamation-triangle]="validationSummary().tone === 'warning'"></i>
+                <span>{{ validationSummary().text }}</span>
+            </div>
             <div class="queue-toolbar queue-toolbar--preview">
                 <div class="preview-mode">
                     <span class="preview-mode__chip" [class.preview-mode__chip--editing]="isPreviewEditing()">
@@ -212,10 +241,38 @@
                         pButton
                         type="button"
                         size="small"
+                        label="Manifest JSON"
+                        icon="pi pi-file-export"
+                        severity="secondary"
+                        [outlined]="true"
+                        [disabled]="!items().length || isProcessing()"
+                        pTooltip="Export file order, size, and fingerprints for audit or rerun comparisons."
+                        tooltipPosition="bottom"
+                        (click)="downloadManifest()"
+                    ></button>
+                    <button
+                        pButton
+                        type="button"
+                        size="small"
+                        label="Copy All"
+                        icon="pi pi-copy"
+                        severity="secondary"
+                        [outlined]="true"
+                        pTooltip="Copy the full editor content, including manual edits."
+                        tooltipPosition="bottom"
+                        [disabled]="!previewText()"
+                        (click)="copyPreview()"
+                    ></button>
+                    <button
+                        pButton
+                        type="button"
+                        size="small"
                         [label]="isPreviewEditing() ? 'Lock Preview' : 'Edit Preview'"
                         [icon]="isPreviewEditing() ? 'pi pi-lock' : 'pi pi-pencil'"
                         severity="secondary"
                         [outlined]="true"
+                        [pTooltip]="isPreviewEditing() ? 'Lock the editor and keep the current manual preview content.' : 'Unlock the editor to manually adjust the merged output before download.'"
+                        tooltipPosition="bottom"
                         (click)="togglePreviewEditing()"
                     ></button>
                     <button
@@ -227,6 +284,8 @@
                         severity="secondary"
                         [outlined]="true"
                         [disabled]="previewText() === lastGeneratedPreview()"
+                        pTooltip="Discard manual edits and restore the latest generated merge output."
+                        tooltipPosition="bottom"
                         (click)="resetPreviewToGenerated()"
                     ></button>
                 </div>
@@ -239,6 +298,8 @@
                             class="preview-blocks__chip"
                             [class.preview-blocks__chip--active]="activePreviewBlockOrder() === block.order"
                             [ngClass]="previewBlockToneClass(block)"
+                            pTooltip="Jump to this file block in the merged preview."
+                            tooltipPosition="top"
                             (click)="focusPreviewBlock(block)"
                         >
                             <span class="preview-blocks__order">#{{ block.order }}</span>
@@ -260,10 +321,10 @@
 
             @if (hasDiagnostics()) {
                 <div class="inline-diagnostics">
-                    <p class="inline-diagnostics__title">Validation & Merge Diagnostics</p>
+                    <p class="inline-diagnostics__title" pTooltip="Only shown when the current queue or preview has something worth calling out." tooltipPosition="top">Validation & Merge Diagnostics</p>
                     <div class="inline-diagnostics__list">
                         @for (diagnostic of diagnostics(); track diagnostic.text) {
-                            <div class="inline-diagnostics__item" [class.inline-diagnostics__item--warn]="diagnostic.tone === 'warn'">
+                            <div class="inline-diagnostics__item" [class.inline-diagnostics__item--warn]="diagnostic.tone === 'warn'" pTooltip="Merge diagnostics are informational unless a file was blocked during intake." tooltipPosition="top">
                                 {{ diagnostic.text }}
                             </div>
                         }

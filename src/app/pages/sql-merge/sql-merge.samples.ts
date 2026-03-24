@@ -7,7 +7,7 @@ export const SQL_MERGE_DEFAULT_HEADER_TEMPLATE = `-- ===========================
 
 export const SQL_MERGE_SAMPLES: SqlMergeSampleDefinition[] = [
     {
-        label: 'Ordered schema and seed',
+        label: 'Ordered seed',
         description: 'Basic merge order with schema before seed data.',
         files: [
             {
@@ -25,7 +25,7 @@ VALUES (1, N'An');`
         ]
     },
     {
-        label: 'Preserve GO batches',
+        label: 'Preserve GO',
         description: 'Existing GO separators inside source files.',
         files: [
             {
@@ -45,7 +45,7 @@ INSERT INTO dbo.Products (Id) VALUES (2);`
         ]
     },
     {
-        label: 'Warnings and mixed inputs',
+        label: 'Mixed inputs',
         description: 'Empty SQL file plus a .txt note that still contains executable SQL.',
         files: [
             {
@@ -61,7 +61,7 @@ UPDATE dbo.Users SET Name = N'Binh' WHERE Id = 1;`,
         ]
     },
     {
-        label: 'Procedure body and trailing spaces',
+        label: 'Proc + trim',
         description: 'Procedure script plus BOM/trailing whitespace cleanup case.',
         files: [
             {
@@ -77,5 +77,63 @@ END`
                 content: `\uFEFFSELECT 1;    `
             }
         ]
+    },
+    {
+        label: 'Duplicates',
+        description: 'Two identical files to validate duplicate skip versus keep-both behavior.',
+        files: [
+            {
+                name: '001_repeat.sql',
+                content: `SELECT N'duplicate';`
+            },
+            {
+                name: '001_repeat.sql',
+                content: `SELECT N'duplicate';`
+            }
+        ]
+    },
+    {
+        label: 'Force GO',
+        description: 'Statements without trailing GO to test forced batch separators between files.',
+        files: [
+            {
+                name: '001_tables.sql',
+                content: `CREATE TABLE dbo.BatchA (
+    Id INT PRIMARY KEY
+);`
+            },
+            {
+                name: '002_seed.sql',
+                content: `INSERT INTO dbo.BatchA (Id)
+VALUES (1);`
+            }
+        ]
+    },
+    {
+        label: 'Strip GO',
+        description: 'Files that include standalone GO lines for GO-off cleanup testing.',
+        files: [
+            {
+                name: '001_cleanup.sql',
+                content: `SELECT 1;
+GO
+SELECT 2;
+GO`
+            },
+            {
+                name: '002_post.sql',
+                content: `SELECT 3;`
+            }
+        ]
+    },
+    {
+        label: 'Large batch',
+        description: 'A compact multi-file batch to stress ordering, preview blocks, and scroll navigation.',
+        files: Array.from({ length: 8 }, (_, index) => ({
+            name: `${String(index + 1).padStart(3, '0')}_batch_${index + 1}.sql`,
+            content: `PRINT N'Batch ${index + 1}';
+INSERT INTO dbo.Logs (Message)
+VALUES (N'Row ${index + 1}');`
+        }))
     }
 ];

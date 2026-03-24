@@ -18,7 +18,7 @@
 }
 
 .toolbar-group--samples {
-    justify-content: flex-end;
+    justify-content: flex-start;
 }
 
 .workspace-grid {
@@ -91,6 +91,12 @@
     border-color: rgba(16, 185, 129, 0.18);
 }
 
+.status-banner--inline {
+    margin-top: 0;
+    margin-bottom: 0.85rem;
+    padding: 0.75rem 0.9rem;
+}
+
 .status-banner--warning {
     color: #b45309;
     background: rgba(245, 158, 11, 0.12);
@@ -160,8 +166,31 @@
     margin-bottom: 0.75rem;
 }
 
+.queue-toolbar--primary {
+    margin-top: 0;
+}
+
 .queue-toolbar--reorder {
     justify-content: flex-start;
+}
+
+.queue-toolbar--samples-inline {
+    display: grid;
+    gap: 0.55rem;
+    justify-content: stretch;
+}
+
+.queue-toolbar__label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--p-surface-500);
+    white-space: nowrap;
+}
+
+.queue-toolbar--samples-inline .toolbar-group--samples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
 }
 
 .file-list {
@@ -226,6 +255,12 @@
     gap: 0.45rem;
 }
 
+.field-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
 .field--full {
     grid-column: 1 / -1;
 }
@@ -233,6 +268,12 @@
 .field span {
     font-size: 0.9rem;
     font-weight: 600;
+}
+
+.field-label .pi-info-circle {
+    font-size: 0.82rem;
+    color: var(--p-surface-400);
+    cursor: help;
 }
 
 .checkbox-grid {
@@ -427,36 +468,6 @@
     width: 0.35rem !important;
     border-radius: 999px;
     background: transparent;
-}
-
-:host ::ng-deep .preview-editor .monaco-editor .lines-content .sql-preview-line--tone-0 {
-    border-left: 3px solid rgba(37, 99, 235, 0.8);
-    background: linear-gradient(90deg, rgba(37, 99, 235, 0.08), transparent 22%);
-}
-
-:host ::ng-deep .preview-editor .monaco-editor .lines-content .sql-preview-line--tone-1 {
-    border-left: 3px solid rgba(15, 118, 110, 0.8);
-    background: linear-gradient(90deg, rgba(15, 118, 110, 0.08), transparent 22%);
-}
-
-:host ::ng-deep .preview-editor .monaco-editor .lines-content .sql-preview-line--tone-2 {
-    border-left: 3px solid rgba(147, 51, 234, 0.8);
-    background: linear-gradient(90deg, rgba(147, 51, 234, 0.08), transparent 22%);
-}
-
-:host ::ng-deep .preview-editor .monaco-editor .lines-content .sql-preview-line--tone-3 {
-    border-left: 3px solid rgba(8, 145, 178, 0.8);
-    background: linear-gradient(90deg, rgba(8, 145, 178, 0.08), transparent 22%);
-}
-
-:host ::ng-deep .preview-editor .monaco-editor .lines-content .sql-preview-line--tone-4 {
-    border-left: 3px solid rgba(124, 58, 237, 0.8);
-    background: linear-gradient(90deg, rgba(124, 58, 237, 0.08), transparent 22%);
-}
-
-:host ::ng-deep .preview-editor .monaco-editor .lines-content .sql-preview-line--tone-5 {
-    border-left: 3px solid rgba(71, 85, 105, 0.8);
-    background: linear-gradient(90deg, rgba(71, 85, 105, 0.08), transparent 22%);
 }
 
 :host ::ng-deep .preview-editor .monaco-editor .margin-view-overlays .sql-preview-gutter--tone-0 {

@@ -8,6 +8,7 @@ import { MessageService } from 'primeng/api';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
 import { LayoutService } from '@/app/layout/service/layout.service';
 import { ToolPageShell } from '@/app/shared/components/tool-page-shell/tool-page-shell';
 import { calculateTextMetrics } from '@/app/shared/utils/text-metrics';
@@ -30,16 +31,20 @@ const DEFAULT_OPTIONS: SqlMergeOptions = {
     nonSqlPolicy: 'warn-and-allow'
 };
 
+const SQL_LIGHT_THEME = 'devworkspace-sql-light';
+const SQL_DARK_THEME = 'devworkspace-sql-dark';
+
 @Component({
     selector: 'app-sql-merge',
     standalone: true,
-    imports: [CommonModule, FormsModule, EditorComponent, ButtonModule, InputTextModule, SelectModule, TextareaModule, ToastModule, ToolPageShell],
+    imports: [CommonModule, FormsModule, EditorComponent, ButtonModule, InputTextModule, SelectModule, TextareaModule, ToastModule, TooltipModule, ToolPageShell],
     providers: [MessageService],
     templateUrl: './sql-merge.html',
     styleUrl: './sql-merge.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SqlMerge {
+    private static sqlThemeRegistered = false;
     readonly samples = SQL_MERGE_SAMPLES;
     readonly duplicatePolicyOptions: Array<{ label: string; value: SqlDuplicatePolicy }> = [
         { label: 'Skip duplicates', value: 'skip' },
@@ -103,7 +108,7 @@ export class SqlMerge {
         this.previewText = computed(() => this.editablePreview());
         this.previewMetrics = computed(() => calculateTextMetrics(this.editablePreview()));
         this.previewEditorOptions = computed(() => ({
-            theme: this.layoutService.isDarkTheme() ? 'vs-dark' : 'vs-light',
+            theme: this.layoutService.isDarkTheme() ? SQL_DARK_THEME : SQL_LIGHT_THEME,
             language: 'sql',
             automaticLayout: true,
             readOnly: !this.isPreviewEditing(),
@@ -402,7 +407,14 @@ export class SqlMerge {
     }
 
     onPreviewEditorInit(editor: any) {
+        this.ensureSqlThemes();
         this.previewEditorInstance = editor;
+        const monacoApi = this.getMonacoApi();
+        const model = editor.getModel?.();
+        if (monacoApi && model) {
+            monacoApi.editor.setModelLanguage(model, 'sql');
+            monacoApi.editor.setTheme(this.layoutService.isDarkTheme() ? SQL_DARK_THEME : SQL_LIGHT_THEME);
+        }
         editor.onDidChangeCursorPosition((event: { position: { lineNumber: number } }) => {
             this.updateActivePreviewBlock(event.position.lineNumber);
         });
@@ -448,6 +460,26 @@ export class SqlMerge {
             detail: ok ? 'Merge manifest downloaded.' : 'File download is unavailable in this context.'
         });
     }
+
+    async copyPreview() {
+        const content = this.editablePreview();
+        if (!content) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Nothing to copy',
+                detail: 'Preview is empty.'
+            });
+            return;
+        }
+
+        const ok = await this.writeToClipboard(content);
+        this.messageService.add({
+            severity: ok ? 'success' : 'warn',
+            summary: ok ? 'Copied' : 'Unavailable',
+            detail: ok ? 'Full preview content copied from the editor.' : 'Clipboard is unavailable in this context.'
+        });
+    }
+
     trackByItem(_: number, item: SqlMergeFileItem) {
         return item.id;
     }
@@ -544,7 +576,6 @@ export class SqlMerge {
             options: {
                 isWholeLine: true,
                 linesDecorationsClassName: `sql-preview-gutter--tone-${block.toneIndex}`,
-                className: `sql-preview-line--tone-${block.toneIndex}`,
                 stickiness: 1,
                 overviewRuler: {
                     color: this.getToneColor(block.toneIndex),
@@ -560,5 +591,82 @@ export class SqlMerge {
     private getToneColor(toneIndex: number) {
         const tones = ['#2563eb', '#0f766e', '#4f46e5', '#0891b2', '#7c3aed', '#475569'];
         return tones[toneIndex % tones.length];
+    }
+
+    private ensureSqlThemes() {
+        if (SqlMerge.sqlThemeRegistered) {
+            return;
+        }
+
+        const monacoApi = this.getMonacoApi();
+        if (!monacoApi?.editor) {
+            return;
+        }
+        monacoApi.editor.defineTheme(SQL_LIGHT_THEME, {
+            base: 'vs',
+            inherit: true,
+            rules: [
+                { token: 'string.sql', foreground: '0f766e' },
+                { token: 'string', foreground: '0f766e' },
+                { token: 'keyword.sql', foreground: '0f4c81', fontStyle: 'bold' },
+                { token: 'keyword', foreground: '0f4c81', fontStyle: 'bold' },
+                { token: 'comment.sql', foreground: '6b7280' },
+                { token: 'comment', foreground: '6b7280' },
+                { token: 'number.sql', foreground: '2563eb' },
+                { token: 'number', foreground: '2563eb' }
+            ],
+            colors: {}
+        });
+        monacoApi.editor.defineTheme(SQL_DARK_THEME, {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [
+                { token: 'string.sql', foreground: '6ee7b7' },
+                { token: 'string', foreground: '6ee7b7' },
+                { token: 'keyword.sql', foreground: '7dd3fc', fontStyle: 'bold' },
+                { token: 'keyword', foreground: '7dd3fc', fontStyle: 'bold' },
+                { token: 'comment.sql', foreground: '94a3b8' },
+                { token: 'comment', foreground: '94a3b8' },
+                { token: 'number.sql', foreground: '93c5fd' },
+                { token: 'number', foreground: '93c5fd' }
+            ],
+            colors: {}
+        });
+
+        SqlMerge.sqlThemeRegistered = true;
+    }
+
+    private getMonacoApi(): any {
+        return (globalThis as any).monaco;
+    }
+
+    private async writeToClipboard(content: string): Promise<boolean> {
+        if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+            try {
+                await navigator.clipboard.writeText(content);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        if (typeof document === 'undefined') {
+            return false;
+        }
+
+        const textarea = document.createElement('textarea');
+        textarea.value = content;
+        textarea.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        try {
+            return document.execCommand('copy');
+        } catch {
+            return false;
+        } finally {
+            document.body.removeChild(textarea);
+        }
     }
 }

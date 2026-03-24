@@ -114,6 +114,21 @@ describe('SqlMerge', () => {
         expect(component.isPreviewEditing()).toBeFalse();
     });
 
+    it('copies the current preview content', async () => {
+        await component.addFiles([new File(['SELECT 1;'], 'a.sql')]);
+        component.onPreviewTextChange('SELECT 99;');
+        const writeText = jasmine.createSpy('writeText').and.returnValue(Promise.resolve());
+        Object.defineProperty(globalThis.navigator, 'clipboard', {
+            configurable: true,
+            value: { writeText }
+        });
+
+        await component.copyPreview();
+
+        expect(writeText).toHaveBeenCalledWith('SELECT 99;');
+        expect(messageService.add).toHaveBeenCalledWith(jasmine.objectContaining({ summary: 'Copied' }));
+    });
+
     it('shows diagnostics only when there is something actionable or noteworthy', async () => {
         await component.addFiles([new File(['SELECT 1;'], 'a.sql')]);
         expect(component.hasDiagnostics()).toBeFalse();
